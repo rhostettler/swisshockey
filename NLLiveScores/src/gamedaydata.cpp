@@ -3,6 +3,7 @@
 #include <QDebug>
 
 GamedayData::GamedayData(QObject *parent) : QAbstractListModel(parent) {
+    // Initialize the different data roles
     QHash<int, QByteArray> roles;
     roles[HometeamRole] = "hometeam";
     roles[AwayteamRole] = "awayteam";
@@ -11,6 +12,22 @@ GamedayData::GamedayData(QObject *parent) : QAbstractListModel(parent) {
     roles[GameStatus] = "gamestatus";
     setRoleNames(roles);
 
+    // Initialize the game statuses
+    this->gameStatuses.insert(0, "Not Started");
+    this->gameStatuses.insert(1, "First Period");
+    this->gameStatuses.insert(2, "End of First");
+    this->gameStatuses.insert(3, "Second Period");
+    this->gameStatuses.insert(4, "End of Second");
+    this->gameStatuses.insert(5, "Third Period");
+    this->gameStatuses.insert(6, "End of Third");
+    this->gameStatuses.insert(7, "Extra");
+    this->gameStatuses.insert(8, "Shootout");
+    this->gameStatuses.insert(9, "Final (unofficial)");
+    this->gameStatuses.insert(10, "Final (unofficial, extra)");
+    this->gameStatuses.insert(11, "Final (unofficial, shootout)");
+    this->gameStatuses.insert(12, "Final Result");
+
+    // Set the date to <empty>
     this->date = "";
 }
 
@@ -96,7 +113,7 @@ QVariant GamedayData::data(const QModelIndex &index, int role) const {
             break;
 
         case GameStatus:
-            data = this->games[key]->getGameStatus();
+            data = this->gameStatuses[this->games[key]->getGameStatus()];
             break;
 
         default:

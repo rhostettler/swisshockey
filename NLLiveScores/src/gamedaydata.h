@@ -12,6 +12,7 @@ class GamedayData : public QAbstractListModel {
         QMap<int, GameData *> games;
         QList<int> gameIndices;
         QString date;
+        QList<QString> gameStatuses;
 
     public:
         enum GameRoles {

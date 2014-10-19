@@ -9,22 +9,6 @@ Page {
         id: gameDelegate
 
         Item{
-            property variant statuses: [
-                "Not Started",    // 0
-                "First Period",
-                "End of First",
-                "Second Period",
-                "End of Second",
-                "Third Period",   // 5
-                "End of Third",
-                "Unknown (7)",
-                "Unknown (8)",
-                "Unknown (9)",
-                "Unknown (10)",
-                "Unknown (11)",
-                "Unknown (12)"
-            ]
-
             width: gameList.width
             height: 128
 
@@ -34,7 +18,7 @@ Page {
 
                 anchors {
                     horizontalCenter: parent.horizontalCenter
-                    bottom: homeLogo.verticalCenter
+                    bottom: periodsScore.top
                 }
 
                 font {
@@ -50,8 +34,8 @@ Page {
                 id: periodsScore
 
                 anchors {
-                    horizontalCenter: totalScore.horizontalCenter
-                    top: homeLogo.verticalCenter
+                    horizontalCenter: parent.horizontalCenter
+                    verticalCenter: homeLogo.verticalCenter
                 }
 
                 font {
@@ -68,14 +52,15 @@ Page {
 
                 font {
                     family: "Nokia Pure Light"
+                    pointSize: 14
                 }
 
                 anchors {
-                    horizontalCenter: periodsScore.horizontalCenter
+                    horizontalCenter: parent.horizontalCenter
                     top: periodsScore.bottom
                 }
 
-                text: statuses[gamestatus]
+                text: gamestatus
             }
 
             // Hometeam logo: to the left
@@ -85,7 +70,7 @@ Page {
                 anchors {
                     verticalCenter: parent.verticalCenter
                     left: parent.left
-                    leftMargin: 5
+                    leftMargin: 10
                 }
 
                 height: 96
@@ -101,7 +86,7 @@ Page {
                 anchors {
                     verticalCenter: parent.verticalCenter
                     right: parent.right
-                    rightMargin: 5
+                    rightMargin: 10
                 }
 
                 height: 96

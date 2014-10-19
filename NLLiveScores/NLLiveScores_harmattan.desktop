@@ -3,7 +3,7 @@ Encoding=UTF-8
 Version=1.0
 Type=Application
 Terminal=false
-Name=NLLiveScores
+Name=Live Scores
 Exec=/usr/bin/invoker --type=d -s /opt/NLLiveScores/bin/NLLiveScores
 Icon=/usr/share/icons/hicolor/80x80/apps/NLLiveScores80.png
 X-Window-Icon=
