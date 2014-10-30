@@ -25,6 +25,7 @@ symbian:TARGET.CAPABILITY += NetworkServices
 
 # Speed up launching on MeeGo/Harmattan when using applauncherd daemon
 CONFIG += qdeclarative-boostable
+CONFIG += meegotouch
 
 # Add dependency to Symbian components
 # CONFIG += qt-components
@@ -34,7 +35,27 @@ SOURCES += main.cpp \
     src/totomat.cpp \
     src/json.cpp \
     src/gamedaydata.cpp \
-    src/gamedata.cpp
+    src/gamedata.cpp \
+    src/notifier.cpp
+
+# Files used for custom notifications
+notification_conf.files = livescores.score.update.conf
+notification_conf.path = /usr/share/meegotouch/notifications/eventtypes
+INSTALLS += notification_conf
+
+notification_icons.files = icons/icon-m-low-power-mode-livescores.png \
+    icons/icon-s-status-notifier-livescores.png
+notification_icons.path = /usr/share/themes/blanco/meegotouch/icons
+INSTALLS += notification_icons
+
+# Control Panel Applet
+cpapplet_desktop.files = cpapplet/NLLiveScores.desktop
+cpapplet_desktop.path = /usr/share/duicontrolpanel/desktops
+INSTALLS += cpapplet_desktop
+
+cpapplet_xml.files = cpapplet/NLLiveScores.xml
+cpapplet_xml.path = /usr/share/duicontrolpanel/uidescriptions
+INSTALLS += cpapplet_xml
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -47,13 +68,15 @@ OTHER_FILES += \
     qtc_packaging/debian_harmattan/copyright \
     qtc_packaging/debian_harmattan/control \
     qtc_packaging/debian_harmattan/compat \
-    qtc_packaging/debian_harmattan/changelog
+    qtc_packaging/debian_harmattan/changelog \
 
 HEADERS += \
     src/totomat.h \
     src/json.h \
     src/gamedaydata.h \
-    src/gamedata.h
+    src/gamedata.h \
+    src/notifier.h
 
 # Add Qt dependencies
 QT += core network script
+PKGCONFIG += gq-gconf

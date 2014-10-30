@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<settings>
+    <group title="NLA">
+        <boolean key="/apps/NLLiveScores/settings/hcap" title="Ambri-Piotta"></boolean>
+        <boolean key="/apps/NLLiveScores/settings/scb" title="SC Bern"></boolean>
+        <boolean key="/apps/NLLiveScores/settings/ehcb" title="EHC Biel"></boolean>
+        <boolean key="/apps/NLLiveScores/settings/hcd" title="HC Davos"></boolean>
+        <boolean key="/apps/NLLiveScores/settings/hcfg" title="HC Fribourg Gotteron"></boolean>
+        <boolean key="/apps/NLLiveScores/settings/hcgs" title="HC Geneve Servette"></boolean>
+        <boolean key="/apps/NLLiveScores/settings/ehck" title="Kloten Flyers"></boolean>
+        <boolean key="/apps/NLLiveScores/settings/scrj" title="Rapperswil-Jona Lakers"></boolean>
+        <boolean key="/apps/NLLiveScores/settings/lhc" title="Lausanne HC"></boolean>
+        <boolean key="/apps/NLLiveScores/settings/zsc" title="ZSC Lions"></boolean>
+        <boolean key="/apps/NLLiveScores/settings/hcl" title="HC Lugano"></boolean>
+        <boolean key="/apps/NLLiveScores/settings/evz" title="EV Zug"></boolean>
+    </group>
+<!--    <group title="Foo">
+        <text key="/apps/NLLiveScores/settings/Text1" title="Please specify a text:" >
+          something
+        </text>
+        <text key="/apps/NLLiveScores/settings/Text2" title="Please specify a text:" >
+          something
+        </text>
+        <selection key="/apps/NLLiveScores/settings/Enum1" title="baz">
+            <option title="first value" >1</option>
+            <option title="second value" >2</option>
+            <option title="third value" >3</option>
+            <option title="fourth value" >4</option>
+        </selection>
+    </group>
+    <group title="Bar">
+        <boolean key="/apps/NLLiveScores/settings/Bool1" title="Please switch me">
+        </boolean>
+        <integer key="/apps/NLLiveScores/settings/Integer1" title="Select a number" min="30" max="60">
+        </integer>
+    </group>-->
+</settings>

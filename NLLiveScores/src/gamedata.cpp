@@ -19,7 +19,8 @@ GameData::GameData(QVariantMap game, QObject *parent) : QObject(parent) {
     updateGame(game);
 
     // Reset the changed flag to prevent notifications on application startup
-    this->changed = false;
+    //this->changed = false;
+    this->changed = true;
 }
 
 QString GameData::parseTeam(QString team) {

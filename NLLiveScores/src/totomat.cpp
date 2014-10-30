@@ -19,6 +19,7 @@ Totomat::Totomat(QObject *parent) : QObject(parent) {
 
 // Set the data store
 void Totomat::setData(GamedayData *data){
+    // TODO: should we discard a possible old list first? better be safe...
     this->nlaData = data;
 }
 

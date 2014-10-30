@@ -69,7 +69,7 @@ void GamedayData::updateGames(QString date, QVariantList data) {
         // Check if game in list has changed, if so, emit signal
         if(this->games[key]->hasChanged()) {
             QModelIndex index = createIndex(this->gameIndices.indexOf(key), 0);
-            dataChanged(index, index);
+            emit dataChanged(index, index);
         }
     }
 }
