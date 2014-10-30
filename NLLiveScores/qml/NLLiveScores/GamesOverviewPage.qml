@@ -5,6 +5,18 @@ Page {
 //    orientationLock: Page.lockInPortrait
     //tools: commonTools
 
+
+    BusyIndicator {
+        anchors {
+            horizontalCenter: parent.horizontalCenter
+            verticalCenter: parent.verticalCenter
+        }
+
+        platformStyle: BusyIndicatorStyle { size: "large" }
+        running: gameList.count == 0
+        visible: gameList.count == 0
+    }
+
     Component {
         id: gameDelegate
 
