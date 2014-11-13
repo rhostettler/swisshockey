@@ -7,6 +7,7 @@
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="744.09448819"
@@ -15,11 +16,58 @@
    version="1.1"
    inkscape:version="0.48.4 r9939"
    sodipodi:docname="NLLiveScores.svg"
-   inkscape:export-filename="/home/roland/Projects/nl-live-scores/nl-live-scores/NLLiveScores/NLLiveScores64.png"
-   inkscape:export-xdpi="14.77"
-   inkscape:export-ydpi="14.77">
+   inkscape:export-filename="/home/roland/Projects/nl-live-scores/nl-live-scores/NLLiveScores80.png"
+   inkscape:export-xdpi="18.459999"
+   inkscape:export-ydpi="18.459999">
   <defs
-     id="defs4" />
+     id="defs4">
+    <linearGradient
+       id="linearGradient3795">
+      <stop
+         style="stop-color:#000019;stop-opacity:0.50340134;"
+         offset="0"
+         id="stop3797" />
+      <stop
+         id="stop3805"
+         offset="0.32584271"
+         style="stop-color:#000019;stop-opacity:0.25170067;" />
+      <stop
+         id="stop3803"
+         offset="1"
+         style="stop-color:#000019;stop-opacity:0;" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient3767">
+      <stop
+         id="stop3775"
+         offset="0"
+         style="stop-color:#000000;stop-opacity:0.49803922;" />
+      <stop
+         style="stop-color:#000000;stop-opacity:0;"
+         offset="1"
+         id="stop3771" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3767"
+       id="linearGradient3773"
+       x1="159.5"
+       y1="722.36218"
+       x2="560.5"
+       y2="722.36218"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-1082.3622,-362.36218)" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3795"
+       id="linearGradient3801"
+       x1="165"
+       y1="722.36218"
+       x2="555"
+       y2="722.36218"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-1082.3622,-362.36218)" />
+  </defs>
   <sodipodi:namedview
      id="base"
      pagecolor="#ffffff"
@@ -27,18 +75,19 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.4"
-     inkscape:cx="326.66956"
-     inkscape:cy="312.97552"
+     inkscape:zoom="1.979899"
+     inkscape:cx="368.93818"
+     inkscape:cy="327.8563"
      inkscape:document-units="px"
-     inkscape:current-layer="layer4"
+     inkscape:current-layer="layer6"
      showgrid="true"
      objecttolerance="20"
      inkscape:window-width="1920"
      inkscape:window-height="1041"
      inkscape:window-x="1366"
      inkscape:window-y="0"
-     inkscape:window-maximized="1">
+     inkscape:window-maximized="1"
+     inkscape:snap-bbox="true">
     <inkscape:grid
        type="xygrid"
        id="grid2985"
@@ -115,6 +164,22 @@
        y="527.36218"
        rx="148.34129"
        ry="148.34129" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer6"
+     inkscape:label="Shadow"
+     sodipodi:insensitive="true">
+    <rect
+       style="fill:url(#linearGradient3801);fill-opacity:1;stroke:none"
+       id="rect4039-3"
+       width="390"
+       height="390"
+       x="-917.36218"
+       y="165"
+       rx="148.34129"
+       ry="148.34129"
+       transform="matrix(0,-1,1,0,0,0)" />
   </g>
   <g
      inkscape:groupmode="layer"

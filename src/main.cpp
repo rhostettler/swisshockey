@@ -8,9 +8,9 @@
 #include <QTextStream>
 
 #include "qmlapplicationviewer.h"
-#include "src/totomat.h"
-#include "src/gamedaydata.h"
-#include "src/notifier.h"
+#include "totomat.h"
+#include "gamedaydata.h"
+#include "notifier.h"
 
 //Q_DECL_EXPORT int main(int argc, char *argv[])
 int main(int argc, char *argv[]) {

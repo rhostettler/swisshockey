@@ -3,7 +3,6 @@ NL Live Scores TODO
 
 General
 -------
-* Refractor the sourcecode and directory
 * Package and upload to openrepos
 * Make a webpage (toazter.ch)
 * Error handling on timeout?

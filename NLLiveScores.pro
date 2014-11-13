@@ -31,7 +31,7 @@ CONFIG += meegotouch
 # CONFIG += qt-components
 
 # The .cpp file which was generated for your project. Feel free to hack it.
-SOURCES += main.cpp \
+SOURCES += src/main.cpp \
     src/totomat.cpp \
     src/json.cpp \
     src/gamedaydata.cpp \
