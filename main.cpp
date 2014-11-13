@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
 
     // Create data lists and totomat object
     GamedayData *nla = new GamedayData();
-    Totomat *totomat = new Totomat();//(QApplication *)&app);
+    Totomat *totomat = new Totomat();
     totomat->setData(nla);
 
     // Connect the notifier
@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
     // QML Viewer
     QmlApplicationViewer viewer;
     viewer.setOrientation(QmlApplicationViewer::ScreenOrientationAuto);
-    viewer.setMainQmlFile(QLatin1String("qml/NLLiveScores/main.qml"));
+    viewer.setMainQmlFile(QLatin1String("qml/main.qml"));
     viewer.rootContext()->setContextProperty("listData", nla);
     viewer.showExpanded();
 
