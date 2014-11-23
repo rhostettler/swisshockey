@@ -56,8 +56,6 @@ void GameData::updateGame(QVariantMap game) {
         this->scoreChanged = true;
     }
 
-    this->scoreChanged = true; // just for debugging! need to remove this afterwards!
-
     // Check if the game status has changed and set the flag
     if(this->status != oldStatus) {
         this->statusChanged = true;

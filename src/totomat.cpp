@@ -1,3 +1,4 @@
+#include <QDateTime>
 #include "totomat.h"
 
 Totomat::Totomat(QObject *parent) : QObject(parent) {
@@ -5,13 +6,10 @@ Totomat::Totomat(QObject *parent) : QObject(parent) {
     this->nam = new QNetworkAccessManager(this);
     this->decoder = new Json(this);
 
-    // Create the game lists
-//    this->nlaData = new GamedayData(this);
-
     // Create a timer and set the update interval
     this->timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(update()));
-    timer->start(30000);
+    //timer->start(30000);
 
     // Send an initial query
     this->query();
@@ -48,19 +46,63 @@ void Totomat::query(void) {
 
 // Parse the response from the HTTP Request
 void Totomat::parseResponse() {
+    // Extract the essential part of the response and pass it to the data list
     QMap<QString, QVariant> data = this->decoder->decode(this->reply->readAll().data());
     QVariantMap content = data["content"].toMap();
     QVariantMap games = content["games"].toMap();
     QVariantMap dates = content["nav"].toMap();
     QVariantList nla = games["nla"].toList();
     this->nlaData->updateGames(dates["nla"].toString(), nla);
+
+    // Determine when we should update the next time and restart the timer
+    int nextUpdate = this->calculateUpdateInterval(dates["nla"].toString());
+    timer->start(nextUpdate);
+}
+
+// Calculate the query interval based on the game date such that we can have the
+// app open in the background without flooding the liveticker
+qint64 Totomat::calculateUpdateInterval(QString date) {
+    // Get the date and time now
+    QDateTime now = QDateTime::currentDateTime();
+
+    // Determine when to update the next time
+    QDateTime gameDateTime = QDateTime::fromString(date, "dd.MM.yyyy");
+    switch(gameDateTime.date().dayOfWeek()) {
+        // Tuesday, Thursday, Friday, Saturday: Game starts at 19.45 (normally),
+        // so we start updating 5 mins before
+        case 2:
+        case 4:
+        case 5:
+        case 6:
+            gameDateTime.setTime(QTime::fromString("19:40", "hh:mm"));
+            break;
+
+        // Sundays, the game starts at 16.00 so we start updating at 15.55
+        case 7:
+            gameDateTime.setTime(QTime::fromString("15:55", "hh:mm"));
+            break;
+
+        // In any other case, something is fishy. Nevertheless, we set it to the
+        // current time so that we'll update soon again
+        default:
+            gameDateTime.setTime(QTime::currentTime());
+            break;
+    }
+
+    // Determine the time until it's game time (or, if the game has started,
+    // set the interval to 30s)
+    qint64 interval = now.msecsTo(gameDateTime);
+    if(interval <= 0) {
+        interval = 30000;
+    }
+
+    return interval;
 }
 
 // Update the totomat when the timer times out
 void Totomat::update() {
-#if 0
-    qDebug() << "Timer fired, updating totomat.";
-#endif
+    // First, disable the timer
+    timer->stop();
 
     // Query the website and update
     this->query();

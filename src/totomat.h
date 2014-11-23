@@ -25,6 +25,7 @@ class Totomat : public QObject {
         void print(QString message = "");
         void query(void);
         void setData(GamedayData *data);
+        qint64 calculateUpdateInterval(QString date);
         Q_INVOKABLE GamedayData* getData();
 
     signals:

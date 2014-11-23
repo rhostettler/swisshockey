@@ -1,5 +1,4 @@
 #include "gamedaydata.h"
-#include <QTextStream>
 #include <QDebug>
 
 GamedayData::GamedayData(QObject *parent) : QAbstractListModel(parent) {
