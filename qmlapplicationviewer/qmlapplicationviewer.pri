@@ -80,7 +80,7 @@ symbian {
         icon.files = $${TARGET}64.png
         icon.path = /usr/share/icons/hicolor/64x64/apps
     } else:!isEmpty(MEEGO_VERSION_MAJOR) {
-        desktopfile.files = $${TARGET}.desktop
+        desktopfile.files = $${TARGET}_harmattan.desktop
         desktopfile.path = /usr/share/applications
         icon.files = $${TARGET}80.png
         icon.path = /usr/share/icons/hicolor/80x80/apps

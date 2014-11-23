@@ -12,6 +12,8 @@ class GameData : public QObject {
     Q_OBJECT
 
     private:
+        QString gameId;
+
         // Home- and away team
         QString hometeam;
         QString awayteam;
@@ -23,7 +25,8 @@ class GameData : public QObject {
         int status;
 
         // Flag that indicates whether the game has changed or not
-        bool changed;
+        bool scoreChanged;
+        bool statusChanged;
 
         // Method that parses the team name and removes special characters
         QString parseTeam(QString team);
@@ -32,6 +35,7 @@ class GameData : public QObject {
         explicit GameData(QVariantMap game, QObject *parent = 0);
         void updateGame(QVariantMap game);
         bool hasChanged(void);
+        bool hasChanged(QString type);
 
         QString getHometeam();
         QString getAwayteam();

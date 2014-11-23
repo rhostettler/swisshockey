@@ -9,8 +9,8 @@ class GamedayData : public QAbstractListModel {
     Q_OBJECT
 
     private:
-        QMap<int, GameData *> games;
-        QList<int> gameIndices;
+        QMap<qulonglong, GameData *> games;
+        QList<qulonglong> gameIndices;
         QString date;
         QList<QString> gameStatuses;
 
@@ -20,7 +20,8 @@ class GamedayData : public QAbstractListModel {
             AwayteamRole,
             TotalScoreRole,
             PeriodsScoreRole,
-            GameStatus
+            GameStatusRole,
+            GameIdRole
         };
 
         explicit GamedayData(QObject *parent = 0);

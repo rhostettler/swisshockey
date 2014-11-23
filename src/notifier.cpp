@@ -1,10 +1,9 @@
 #include "notifier.h"
 #include <MNotification>
-#include <QTextStream>
 #include <gconfitem.h>
 
 Notifier::Notifier(GamedayData *model, QWidget *parent) : QObject(parent) {
-    // Add all the teams to the teams -> GConf key map
+    // Add all the teams to the teams->GConf key map
     teams.insert("Ambri-Piotta", "hcap");
     teams.insert("SC Bern", "scb");
     teams.insert("EHC Biel", "ehcb");
@@ -22,35 +21,45 @@ Notifier::Notifier(GamedayData *model, QWidget *parent) : QObject(parent) {
     this->model = model;
     connect(this->model, SIGNAL(dataChanged(QModelIndex, QModelIndex)),
             this, SLOT(dataChanged(QModelIndex, QModelIndex)));
-
-    // Initialize the Notification group
-/*    this->notificationGroup = new MNotificationGroup("x-nokia.messaging.im",
-        "NL Live Scores", "");
-    this->notificationGroup->setImage("file:///usr/share/icons/hicolor/80x80/apps/NLLiveScores80.png");
-    this->notificationGroup->publish();*/
 }
 
 void Notifier::dataChanged(const QModelIndex & topLeft, const QModelIndex & bottomRight) {
-    // TODO: We'll just get the whole game and then extract the necessary information from there! (we manage the notifications ourselves afterwards and keep just one notification per game, max)
+    // BUG: As of now, this will also fire a notification when the game status is updated. I need to fix that somehow.
 
     // Get the necessary information for the notification and assemble the notification string
     QString hometeam = this->model->data(topLeft, GamedayData::HometeamRole).toString();
     QString awayteam = this->model->data(topLeft, GamedayData::AwayteamRole).toString();
     QString score = this->model->data(topLeft, GamedayData::TotalScoreRole).toString();
+    QString gameId = this->model->data(topLeft, GamedayData::GameIdRole).toString();
 
-    // TODO: Here, we shoul d implement a filter so that we only notify when a team of interest changes
+    // Check if notifications for the changed team are enabled and create/update
+    // a notification if so
     if(this->notificationEnabled(hometeam) || this->notificationEnabled(awayteam)) {
+        // Notification body
         QString body = hometeam.append(" - ").append(awayteam).append(" ").append(score);
 
-        // Send a notification
-        MNotification notification("livescores.score.update", "Live Scores", body);
-        //notification.setGroup(*(this->notificationGroup));
-        notification.publish();
+        // Try to find an existing notification for the game first in order to
+        // update that one
+        bool found = false;
+        MNotification *notification;
+        QList<MNotification *> notifications = MNotification::notifications();
+        QListIterator<MNotification *> iter(notifications);
+        while(iter.hasNext() && !found) {
+            notification = iter.next();
+            if(gameId.compare(notification->identifier()) == 0) {
+                found = true;
+                notification->setBody(body);
+            }
+        }
 
-        // Update the notification group
-    /*  this->notificationGroup->setCount(this->notificationGroup->count()+1);
-        this->notificationGroup->setBody(QString::number(this->notificationGroup->count()).append(" updates."));
-        this->notificationGroup->publish();*/
+        // If no existing notification was found, we'll create a new one
+        if(!found) {
+            notification = new MNotification("livescores.score.update", "Live Scores", body);
+            notification->setIdentifier(gameId);
+        }
+
+        // Publish / update the notification
+        notification->publish();
     }
 }
 

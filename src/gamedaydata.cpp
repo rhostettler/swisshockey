@@ -1,5 +1,5 @@
 #include "gamedaydata.h"
-
+#include <QTextStream>
 #include <QDebug>
 
 GamedayData::GamedayData(QObject *parent) : QAbstractListModel(parent) {
@@ -9,7 +9,8 @@ GamedayData::GamedayData(QObject *parent) : QAbstractListModel(parent) {
     roles[AwayteamRole] = "awayteam";
     roles[TotalScoreRole] = "totalscore";
     roles[PeriodsScoreRole] = "periodsscore";
-    roles[GameStatus] = "gamestatus";
+    roles[GameStatusRole] = "gamestatus";
+    roles[GameIdRole] = "gameid";
     setRoleNames(roles);
 
     // Initialize the game statuses
@@ -50,7 +51,7 @@ void GamedayData::updateGames(QString date, QVariantList data) {
     while(iter.hasNext()) {
         // Get the game...
         QVariantMap game = iter.next().toMap();
-        int key = game["gameid"].toInt();
+        qulonglong key = game["gameid"].toULongLong();
 
         if(this->games.contains(key)) {
             // The game is already in the list, hence, we simply update it with
@@ -89,7 +90,7 @@ QVariant GamedayData::data(const QModelIndex &index, int role) const {
 #endif
 
     // Find the requested item
-    int key = this->gameIndices[index.row()];
+    qulonglong key = this->gameIndices[index.row()];
 
     switch(role) {
         case HometeamRole:
@@ -112,8 +113,12 @@ QVariant GamedayData::data(const QModelIndex &index, int role) const {
                     );
             break;
 
-        case GameStatus:
+        case GameStatusRole:
             data = this->gameStatuses[this->games[key]->getGameStatus()];
+            break;
+
+        case GameIdRole:
+            data = QString::number(key);
             break;
 
         default:

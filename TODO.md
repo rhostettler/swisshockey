@@ -9,12 +9,13 @@ General
 * Smart updating when no gameday
 * Catch app close-event and only put to background, keeping updates "alive"
   (configurable)
-* Implement game-details
+* Implement game-details => MouseArea in the delegate, slots and signals should 
+  be easily handable
+* Fix bug regarding game state update (need to set the changed flag and do 
+  some filtering)
 
 Notifications
 -------------
-* Implement a notification manager that keeps track of the notifications and
-  updates them accordingly
 * Include the scorer in the notifications
 * Make notifications to fetch the complete game at once, not only the different
   fields

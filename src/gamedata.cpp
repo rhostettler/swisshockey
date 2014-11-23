@@ -4,6 +4,9 @@
 
 // Instantate and initialize the game
 GameData::GameData(QVariantMap game, QObject *parent) : QObject(parent) {
+    // Get the game ID
+    this->gameId = game["gameid"].toString();
+
     // Get the teams for this game
     QStringList teams = game["text"].toString().split(":");
     this->hometeam = parseTeam(teams[0].remove(teams[0].length()-1, 1));
@@ -19,7 +22,8 @@ GameData::GameData(QVariantMap game, QObject *parent) : QObject(parent) {
     updateGame(game);
 
     // Reset the changed flag to prevent notifications on application startup
-    this->changed = false;
+    this->scoreChanged = false;
+    this->statusChanged = false;
 }
 
 QString GameData::parseTeam(QString team) {
@@ -31,6 +35,7 @@ QString GameData::parseTeam(QString team) {
 void GameData::updateGame(QVariantMap game) {
     // Store the total score before the update
     QString oldScore = this->score["total"];
+    int oldStatus = this->status;
 
     // Get the score from the game map
     QVariantMap newScore = game["result"].toMap();
@@ -48,7 +53,14 @@ void GameData::updateGame(QVariantMap game) {
 
     // Check if the total score changed and set the flag
     if(this->score["total"].compare(oldScore)) {
-        this->changed = true;
+        this->scoreChanged = true;
+    }
+
+    this->scoreChanged = true; // just for debugging! need to remove this afterwards!
+
+    // Check if the game status has changed and set the flag
+    if(this->status != oldStatus) {
+        this->statusChanged = true;
     }
 
     // Debug info
@@ -61,10 +73,29 @@ void GameData::updateGame(QVariantMap game) {
 #endif
 }
 
-// Return the status of the game (changed/the same) since last read
+// Return the status of the game (changed/the same) since last read. Resets the
+// flags!
 bool GameData::hasChanged(void) {
-    bool changed = this->changed;
-    this->changed = false;
+    bool changed = this->scoreChanged || this->statusChanged;
+    this->scoreChanged = false;
+    this->statusChanged = false;
+    return changed;
+}
+
+// Check and reset whether the field "type" changed
+bool GameData::hasChanged(QString type) {
+    bool changed = false;
+
+    if(type.compare("score")) {
+        changed = this->scoreChanged;
+        this->scoreChanged = false;
+    }
+
+    if(type.compare("status")) {
+        changed = this->statusChanged;
+        this->statusChanged = false;
+    }
+
     return changed;
 }
 
