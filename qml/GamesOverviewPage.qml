@@ -2,8 +2,6 @@ import QtQuick 1.1
 import com.nokia.meego 1.0
 
 Page {
-    //id: overviewPage
-//    orientationLock: Page.lockInPortrait
     tools: mainToolbar
 
     // A spinning busy indicator shown while the data is loading upon
@@ -20,7 +18,7 @@ Page {
     }
 
     // The delegate that draws the different games
-    Component {
+   Component {
         id: gameDelegate
 
         Item{

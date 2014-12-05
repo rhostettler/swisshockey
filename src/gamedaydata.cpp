@@ -87,11 +87,6 @@ int GamedayData::rowCount(const QModelIndex &parent) const {
 QVariant GamedayData::data(const QModelIndex &index, int role) const {
     QVariant data;
 
-#if 0
-    qDebug() << "GamedayData::data() called. Index: " << index.row() << ", "
-             << index.column();
-#endif
-
     // Find the requested item
     qulonglong key = this->gameIndices[index.row()];
 
@@ -109,11 +104,7 @@ QVariant GamedayData::data(const QModelIndex &index, int role) const {
             break;
 
         case PeriodsScoreRole:
-            data = this->games[key]->getPeriodsScore(1).append(", ").append(
-                        this->games[key]->getPeriodsScore(2)
-                    ).append(", ").append(
-                        this->games[key]->getPeriodsScore(3)
-                    );
+            data = this->games[key]->getPeriodsScore();
             break;
 
         case GameStatusRole:

@@ -9,6 +9,12 @@ Page {
         id: gameSummary
         width: parent.width
         height: 128
+        z: 1
+
+        Rectangle {
+            anchors.fill: parent
+            color: "white"
+        }
 
         // Label containing the total score
         Text {
@@ -235,5 +241,6 @@ Page {
 
         model: gameEventsData
         delegate: eventsDelegate
+        header: eventsHeader
     }
 }

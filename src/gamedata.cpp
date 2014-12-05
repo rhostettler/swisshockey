@@ -106,10 +106,26 @@ void GameData::updatePlayerList(QVariantMap players) {
         quint32 playerId = player.value("pid").toUInt();
         QString playerFirstName = player.value("firstname").toString();
         playerFirstName = playerFirstName.remove(1, playerFirstName.length());
-        QString playerLastName = player.value("lastname").toString();
+        QString playerLastName = GameData::parsePlayerName(player.value("lastname").toString());
 
-        this->players.insert(playerId, playerFirstName.append(". ").append(playerLastName));
+        this->players.insert(playerId, playerFirstName + ". " + playerLastName);
     }
+}
+
+QString GameData::parsePlayerName(QString name) {
+    QMap<QString, QString> lookupTable = QMap<QString, QString>();
+    lookupTable.insert(QString::fromUtf8("Ã©"), QString::fromUtf8("é"));
+    lookupTable.insert(QString::fromUtf8("Ã´"), QString::fromUtf8("ô"));
+    lookupTable.insert(QString::fromUtf8("Ã¯"), QString::fromUtf8("ï"));
+    lookupTable.insert(QString::fromUtf8("Ã¼"), QString::fromUtf8("ü"));
+
+    QMapIterator<QString, QString> iterator(lookupTable);
+    while(iterator.hasNext()) {
+        QString key = iterator.next().key();
+        name.replace(key, lookupTable.value(key, ""));
+    }
+
+    return name;
 }
 
 // Parse the list of goals and add an event for each goal
@@ -124,12 +140,10 @@ void GameData::updateGoals(QVariantList goals) {
         QVariantMap goal = iterator.previous().toMap();
         QString time = goal.value("time").toString();
         QString player = this->players.value(goal.value("scorerlicencenr").toUInt());
-
-        //
         QString additionalInfo = this->players.value(goal.value("assist1licencenr").toUInt(), "");
         QString assist2 = this->players.value(goal.value("assist2licencenr").toUInt(), "");
         if(assist2.compare("") != 0) {
-            additionalInfo = additionalInfo.append(", ").append(assist2);
+            additionalInfo = additionalInfo + ", " + assist2;
         }
 
         if(goal.value("teamid").toLongLong() == this->hometeamId) {
@@ -153,8 +167,7 @@ void GameData::updateFouls(QVariantList fouls) {
         QString time = foul.value("time").toString();
         QString player = this->players.value(foul.value("licencenr").toUInt());
         QString additionalInfo = GameEvent::getPenaltyText(foul.value("foulid").toInt());
-        QString penalty = foul.value("minutes").toString().append("\"");
-
+        QString penalty = foul.value("minutes").toString() + "'";
         this->events.append(new GameEvent(time, player, additionalInfo, penalty));
     }
 }
@@ -215,7 +228,14 @@ QString GameData::getPeriodsScore(int period) {
             break;
     }
 
-    return this->score[key];
+    return this->score.value(key);
+}
+
+QString GameData::getPeriodsScore() {
+    QString score = this->score.value("first") + ", " +
+        this->score.value("second") + ", " + this->score.value("third");
+
+    return score;
 }
 
 int GameData::getGameStatus() {
@@ -235,6 +255,7 @@ QVariant GameData::data(const QModelIndex &index, int role) const {
 
     switch(role) {
         case TeamRole:
+            // needs to be implemented
             break;
 
         case TimeRole:

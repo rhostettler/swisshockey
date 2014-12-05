@@ -13,10 +13,7 @@ General
 * I could implement a roster function too but I'm not sure if I want that or
   not.
 * Implement game-details
-  => Implement the overall info as listview header instead so that the flow is
-     ok
   => Implement encoding (fix the broken)
-  => Add penalty names
-  => Add symbols for events?
+  => Add symbols for events? Team logos?
 * Implement a callback action for notifications
 

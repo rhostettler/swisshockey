@@ -29,11 +29,8 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
     // Set data sources and connect to signals
     viewer->rootContext()->setContextProperty("listData", nla);
     QObject *rootObject = viewer->rootObject();
-    //QObject *appWindow = viewer->findChild<QObject *>("appWindow");
-    //viewer->rootObject()->connect();
     connect(rootObject, SIGNAL(viewChanged(QString)), this, SLOT(updateView(QString)));
 }
-
 
 void LiveScores::updateView(QString id) {
     this->current = nla->getGame(id);
@@ -52,7 +49,7 @@ void LiveScores::updateView(QString id) {
         context->setContextProperty("detailstotalscore", this->current->getTotalScore());
         context->setContextProperty("detailshometeam", this->current->getHometeam());
         context->setContextProperty("detailsawayteam", this->current->getAwayteam());
-        //context->setContextProperty("detailssperiodscore", game->getPeriodsScore());
+        context->setContextProperty("detailsperiodsscore", this->current->getPeriodsScore());
         //context->setContextProperty("", );
         // TODO: Here we implement stuff like the game location, refs, spectators
 

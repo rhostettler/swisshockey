@@ -57,6 +57,7 @@ class GameData : public QAbstractListModel {
         QString getAwayteam();
         QString getTotalScore();
         QString getPeriodsScore(int period);
+        QString getPeriodsScore();
         int getGameStatus();
 
         // implementations of interface QAbstractListModel
@@ -71,6 +72,8 @@ class GameData : public QAbstractListModel {
         int rowCount(const QModelIndex & parent = QModelIndex()) const;
         QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
         QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+
+        static QString parsePlayerName(QString name);
 
     signals:
 
