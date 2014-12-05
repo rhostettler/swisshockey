@@ -4,17 +4,19 @@ NL Live Scores TODO
 General
 -------
 * Package and upload to openrepos
-* Make a webpage (toazter.ch)?
+* Make a webpage (toazter.ch or just github)?
 * Error handling on timeout
-* Implement functionality for NLB
+* Implement functionality for NLB (should really be straight-forward once all
+  NLA stuff is implemented)
 * Catch app close-event and only put to background, keeping updates "alive"
   (configurable)?
+* I could implement a roster function too but I'm not sure if I want that or
+  not.
 * Implement game-details
-  => MouseArea in the delegate, slots and signals should be easily handable
-  => the basic strucutre is in place in the delegate. Now i need to make a 
-     sensible controller in c++ that listens to the onViewChanged signal from 
-     the overviewPage, sets the data source of the detailsPage and updates it.
-  => Note: I should make it possible that when in details view, the events are 
-     also updated
+  => Implement the overall info as listview header instead so that the flow is
+     ok
+  => Implement encoding (fix the broken)
+  => Add penalty names
+  => Add symbols for events?
 * Implement a callback action for notifications
 

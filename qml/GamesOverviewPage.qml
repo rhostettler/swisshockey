@@ -2,10 +2,12 @@ import QtQuick 1.1
 import com.nokia.meego 1.0
 
 Page {
+    //id: overviewPage
 //    orientationLock: Page.lockInPortrait
-    //tools: commonTools
+    tools: mainToolbar
 
-
+    // A spinning busy indicator shown while the data is loading upon
+    // application start
     BusyIndicator {
         anchors {
             horizontalCenter: parent.horizontalCenter
@@ -17,12 +19,21 @@ Page {
         visible: gameList.count == 0
     }
 
+    // The delegate that draws the different games
     Component {
         id: gameDelegate
 
         Item{
             width: gameList.width
             height: 128
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    appWindow.viewChanged(gameid)
+                    pageStack.push(detailsPage);
+                }
+            }
 
             // Label containing the total score
             Text {
@@ -113,6 +124,7 @@ Page {
                 anchors {
                     left: parent.left
                     right: parent.right
+                    bottom: parent.bottom
                 }
 
                 source: "image://theme/meegotouch-groupheader-background"

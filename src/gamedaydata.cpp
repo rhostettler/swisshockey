@@ -74,6 +74,10 @@ void GamedayData::updateGames(QString date, QVariantList data) {
     }
 }
 
+GameData * GamedayData::getGame(QString id) {
+    return this->games[id.toLongLong()];
+}
+
 // Returns the number of rows in the list
 int GamedayData::rowCount(const QModelIndex &parent) const {
     return this->games.count();

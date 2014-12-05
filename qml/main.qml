@@ -1,17 +1,26 @@
 import QtQuick 1.1
 import com.nokia.meego 1.0
+import com.nokia.extras 1.1 // for InfoBanner
 
 PageStackWindow {
     id: appWindow
 
     initialPage: overviewPage
 
+    // Emitted when one of the games is selected for details view
+    signal viewChanged(string gameId)
+
+    // Define the pages
     GamesOverviewPage {
         id: overviewPage
     }
 
-    /*ToolBarLayout {
-        id: commonTools
+    GameDetailsPage {
+        id: detailsPage
+    }
+
+    ToolBarLayout {
+        id: mainToolbar
         visible: true
 
         ToolIcon {
@@ -23,18 +32,42 @@ PageStackWindow {
             }
         }
 
-        /*ToolIcon {
-            platformIconId: "toolbar-view-menu"
-            anchors.right: (parent === undefined) ? undefined : parent.right
-            onClicked: (myMenu.status === DialogStatus.Closed) ? myMenu.open() : myMenu.close()
+        // List icon: Will be used in the details view and shows the game events
+/*        ToolIcon {
+            iconId: "toolbar-list"
+            visible: (pageStack.depth !== 1)
         }*/
-    //}
 
-    /*Menu {
-        id: myMenu
+        // Silhouette icon: Will be used to switch to the roster (future thing)
+/*        ToolIcon {
+            iconId: "toolbar-contact"
+            visible: (pageStack.depth !== 1)
+        }*/
+
+        ToolIcon {
+            platformIconId: "toolbar-view-menu"
+            //visible: (pageStack.depth === 1)
+            visible: false
+            anchors.right: (parent === undefined) ? undefined : parent.right
+            onClicked: (mainMenu.status === DialogStatus.Closed) ? mainMenu.open() : mainMenu.close()
+        }
+    }
+
+    Menu {
+        id: mainMenu
         visualParent: pageStack
         MenuLayout {
-            MenuItem { text: qsTr("Sample menu item") }
+            MenuItem {
+                text: "NLA"
+            }
+
+            MenuItem {
+                text: "NLB"
+            }
+
+/*            MenuItem {
+                text: qsTr("About")
+            }*/
         }
-    }*/
+    }
 }

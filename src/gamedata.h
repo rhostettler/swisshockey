@@ -6,9 +6,13 @@
 #include <QList>
 #include <QVariantMap>
 #include <QMap>
-#include "gamedata.h"
+#include <QAbstractListModel>
 
-class GameData : public QObject {
+#include "gamedata.h"
+#include "gameevent.h"
+
+//class GameData : public QObject {
+class GameData : public QAbstractListModel {
     Q_OBJECT
 
     private:
@@ -16,10 +20,18 @@ class GameData : public QObject {
 
         // Home- and away team
         QString hometeam;
+        qulonglong hometeamId;
         QString awayteam;
+        qulonglong awayteamId;
 
         // Score
         QMap<QString, QString> score;
+
+        // List of events
+        QList<GameEvent *> events;
+
+        // List of players
+        QMap<qint32, QString> players;
 
         // Status
         int status;
@@ -34,6 +46,10 @@ class GameData : public QObject {
     public:
         explicit GameData(QVariantMap game, QObject *parent = 0);
         void updateGame(QVariantMap game);
+        void updateEvents(QVariantMap gameInfo, QVariantList goals, QVariantList fouls, QVariantMap players);
+        void updatePlayerList(QVariantMap players);
+        void updateGoals(QVariantList goals);
+        void updateFouls(QVariantList fouls);
         bool hasChanged(void);
         bool hasChanged(QString type);
 
@@ -42,6 +58,19 @@ class GameData : public QObject {
         QString getTotalScore();
         QString getPeriodsScore(int period);
         int getGameStatus();
+
+        // implementations of interface QAbstractListModel
+        enum EventRoles {
+            TeamRole = Qt::UserRole + 1,
+            TimeRole,
+            PlayerRole,
+            AdditionalInfoRole,
+            EventRole
+        };
+
+        int rowCount(const QModelIndex & parent = QModelIndex()) const;
+        QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
+        QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 
     signals:
 

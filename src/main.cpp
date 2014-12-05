@@ -1,16 +1,6 @@
 #include <QtGui/QApplication>
-#include <QDeclarativeView>
-#include <QDeclarativeContext>
-#include <QString>
 #include <MComponentData>
-#include <MNotification>
-
-#include <QTextStream>
-
-#include "qmlapplicationviewer.h"
-#include "totomat.h"
-#include "gamedaydata.h"
-#include "notifier.h"
+#include "livescores.h"
 
 //Q_DECL_EXPORT int main(int argc, char *argv[])
 int main(int argc, char *argv[]) {
@@ -20,20 +10,10 @@ int main(int argc, char *argv[]) {
     // Set the application name
     app->setApplicationName("Live Scores");
 
-    // Create data lists and totomat object
-    GamedayData *nla = new GamedayData();
-    Totomat *totomat = new Totomat();
-    totomat->setData(nla);
+    // Create a mediator that generates the UI and connects all the necessary
+    // signals, etc.
+    LiveScores *livescores = new LiveScores();
 
-    // Connect the notifier
-    Notifier *notifier = new Notifier(nla);
-
-    // QML Viewer
-    QmlApplicationViewer viewer;
-    viewer.setOrientation(QmlApplicationViewer::ScreenOrientationAuto);
-    viewer.setMainQmlFile(QLatin1String("qml/main.qml"));
-    viewer.rootContext()->setContextProperty("listData", nla);
-    viewer.showExpanded();
-
+    // Run the app
     return app->exec();
 }

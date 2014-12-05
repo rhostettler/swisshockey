@@ -1,9 +1,9 @@
 #include <QStringList>
-#include <QDebug>
+#include <QTextStream>
 #include "gamedata.h"
 
 // Instantate and initialize the game
-GameData::GameData(QVariantMap game, QObject *parent) : QObject(parent) {
+GameData::GameData(QVariantMap game, QObject *parent) : QAbstractListModel(parent) {
     // Get the game ID
     this->gameId = game["gameid"].toString();
 
@@ -24,6 +24,15 @@ GameData::GameData(QVariantMap game, QObject *parent) : QObject(parent) {
     // Reset the changed flag to prevent notifications on application startup
     this->scoreChanged = false;
     this->statusChanged = false;
+
+    // Set the data roles
+    QHash<int, QByteArray> roles;
+    roles[TeamRole] = "eventteam";
+    roles[TimeRole] = "eventtime";
+    roles[PlayerRole] = "eventplayer";
+    roles[AdditionalInfoRole] = "eventinfo";
+    roles[EventRole] = "eventtext";
+    setRoleNames(roles);
 }
 
 QString GameData::parseTeam(QString team) {
@@ -60,15 +69,94 @@ void GameData::updateGame(QVariantMap game) {
     if(this->status != oldStatus) {
         this->statusChanged = true;
     }
+}
 
-    // Debug info
-#if 0
-    qDebug() << "Game updated:";
-    qDebug() << this->hometeam << " - " << this->awayteam;
-    qDebug() << this->score["total"] << "(" << this->score["first"] << ", "
-             << this->score["second"] << ", " << this->score["third"] << ")";
-    qDebug() << "Status: " << game["status"].toInt();
-#endif
+void GameData::updateEvents(QVariantMap gameInfo, QVariantList goals, QVariantList fouls, QVariantMap players) {
+    // Store general data
+    this->hometeamId = gameInfo.value("hometeamid").toLongLong();
+    this->awayteamId = gameInfo.value("awayteamid").toLongLong();
+
+    // begin insert/remove rows
+    beginResetModel();
+    this->events.clear();
+    endResetModel();
+
+    if(goals.count() + fouls.count() > 0) {
+        beginInsertRows(QModelIndex(), rowCount(), rowCount());
+        // Parse the players, goals, and fouls
+        this->updatePlayerList(players);
+        this->updateGoals(goals);
+        this->updateFouls(fouls);
+
+        // Sort the events
+        qSort(this->events.begin(), this->events.end(), GameEvent::greaterThan);
+
+        // End insert/remove rows
+        this->endInsertRows();
+    }
+}
+
+// Parses the player list and adds them to the local list of players where we
+// have a player license <=> player name map
+void GameData::updatePlayerList(QVariantMap players) {
+    QMapIterator<QString, QVariant> iterator(players);
+
+    while(iterator.hasNext()) {
+        QVariantMap player = iterator.next().value().toMap();
+        quint32 playerId = player.value("pid").toUInt();
+        QString playerFirstName = player.value("firstname").toString();
+        playerFirstName = playerFirstName.remove(1, playerFirstName.length());
+        QString playerLastName = player.value("lastname").toString();
+
+        this->players.insert(playerId, playerFirstName.append(". ").append(playerLastName));
+    }
+}
+
+// Parse the list of goals and add an event for each goal
+void GameData::updateGoals(QVariantList goals) {
+    QListIterator<QVariant> iterator(goals);
+    int cumulativeHomeScore = 0;
+    int cumulativeAwayScore = 0;
+
+    // Iterate through the goals list backwards since the newest is the first
+    iterator.toBack();
+    while(iterator.hasPrevious()) {
+        QVariantMap goal = iterator.previous().toMap();
+        QString time = goal.value("time").toString();
+        QString player = this->players.value(goal.value("scorerlicencenr").toUInt());
+
+        //
+        QString additionalInfo = this->players.value(goal.value("assist1licencenr").toUInt(), "");
+        QString assist2 = this->players.value(goal.value("assist2licencenr").toUInt(), "");
+        if(assist2.compare("") != 0) {
+            additionalInfo = additionalInfo.append(", ").append(assist2);
+        }
+
+        if(goal.value("teamid").toLongLong() == this->hometeamId) {
+            cumulativeHomeScore += 1;
+        } else {
+            cumulativeAwayScore += 1;
+        }
+        QString score = QString::number(cumulativeHomeScore).append(":").append(QString::number(cumulativeAwayScore));
+
+        // Finally, add the goal as a new event
+        this->events.append(new GameEvent(time, player, additionalInfo, score));
+    }
+}
+
+// Parse the list of fouls and add an event for each foul
+void GameData::updateFouls(QVariantList fouls) {
+    QListIterator<QVariant> iterator(fouls);
+
+    while(iterator.hasNext()) {
+        QVariantMap foul = iterator.next().toMap();
+        QString time = foul.value("time").toString();
+        QString player = this->players.value(foul.value("licencenr").toUInt());
+        QString additionalInfo = GameEvent::getPenaltyText(foul.value("foulid").toInt());
+        QString penalty = foul.value("minutes").toString().append("\"");
+
+        this->events.append(new GameEvent(time, player, additionalInfo, penalty));
+    }
 }
 
 // Return the status of the game (changed/the same) since last read. Resets the
@@ -132,4 +220,47 @@ QString GameData::getPeriodsScore(int period) {
 
 int GameData::getGameStatus() {
     return this->status;
+}
+
+// implementation of the listmodel
+// Returns the number of rows in the list
+int GameData::rowCount(const QModelIndex &parent) const {
+    return this->events.count();
+}
+
+// Returns the data requested by the view
+QVariant GameData::data(const QModelIndex &index, int role) const {
+    QVariant data;
+    int key = index.row();
+
+    switch(role) {
+        case TeamRole:
+            break;
+
+        case TimeRole:
+            data = this->events[key]->getTime();
+            break;
+
+        case PlayerRole:
+            data = this->events[key]->getPlayer();
+            break;
+
+        case AdditionalInfoRole:
+            data = this->events[key]->getAdditionalInfo();
+            break;
+
+        case EventRole:
+            data = this->events[key]->getEvent();
+            break;
+
+        default:
+            break;
+    }
+
+    return data;
+}
+
+// Returns the header
+QVariant GameData::headerData(int section, Qt::Orientation orientation, int role) const {
+    return QVariant();
 }

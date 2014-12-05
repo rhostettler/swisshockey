@@ -36,7 +36,9 @@ SOURCES += src/main.cpp \
     src/json.cpp \
     src/gamedaydata.cpp \
     src/gamedata.cpp \
-    src/notifier.cpp
+    src/notifier.cpp \
+    src/livescores.cpp \
+    src/gameevent.cpp
 
 # Files used for custom notifications
 notification_conf.files = livescores.score.update.conf
@@ -75,7 +77,9 @@ HEADERS += \
     src/json.h \
     src/gamedaydata.h \
     src/gamedata.h \
-    src/notifier.h
+    src/notifier.h \
+    src/livescores.h \
+    src/gameevent.h
 
 # Add Qt dependencies
 QT += core network script

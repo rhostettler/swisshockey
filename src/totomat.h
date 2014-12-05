@@ -15,15 +15,19 @@ class Totomat : public QObject {
 
     private:
         QNetworkAccessManager *nam;
-        QNetworkReply *reply;
+        QNetworkReply *totomatReply;
+        QNetworkReply *statsReply;
         Json *decoder;
         GamedayData *nlaData;
         QTimer *timer;
+        QString gameId;
 
     public:
         explicit Totomat(QObject *parent = 0);
+        void setGameId(QString gameId);
         void print(QString message = "");
-        void query(void);
+        void queryTotomat(void);
+        void queryStats(void);
         void setData(GamedayData *data);
         qint64 calculateUpdateInterval(QString date);
         Q_INVOKABLE GamedayData* getData();
@@ -31,7 +35,8 @@ class Totomat : public QObject {
     signals:
 
     public slots:
-        void parseResponse();
+        void parseTotomatResponse();
+        void parseStatsResponse();
         void update();
 };
 
