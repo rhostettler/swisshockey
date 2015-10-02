@@ -15,8 +15,9 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
     this->totomat = new Totomat(this);
     this->totomat->setData(nla);
 
-    // Connect the notifier
+    // Create the notifier
     this->notifier = new Notifier(nla);
+    this->notifier->disableNotifications();
 
     // QML Viewer
     this->viewer = new QmlApplicationViewer();
@@ -55,6 +56,20 @@ void LiveScores::updateView(QString id) {
 
         // Here we set the correct data source, then that's it
         context->setContextProperty("gameEventsData", this->current);
+    }
+}
+
+// Observe the focus state of the app (foreground / background) and set the
+// internal state accordingly
+void LiveScores::toggleFocus(QWidget *old, QWidget *now) {
+    // If old is NULL we came to focus
+    if(old == NULL) {
+        this->notifier->disableNotifications();
+    }
+
+    // If now is NULL, the app went to the background
+    else if(now == NULL) {
+        this->notifier->enableNotifications();
     }
 }
 

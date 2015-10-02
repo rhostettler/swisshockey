@@ -37,6 +37,7 @@ class Totomat : public QObject {
     public slots:
         void parseTotomatResponse();
         void parseStatsResponse();
+        void handleNetworkError(QNetworkReply::NetworkError error);
         void update();
 };
 

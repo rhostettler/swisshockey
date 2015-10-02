@@ -14,6 +14,7 @@ class Notifier : public QObject {
     Q_OBJECT
 
     private:
+        bool enabled;
         GamedayData *model;
 //        QList<QString> teams
 //        MNotificationGroup *notificationGroup;
@@ -21,6 +22,8 @@ class Notifier : public QObject {
 
     public:
         explicit Notifier(GamedayData *model, QWidget *parent = 0);
+        void enableNotifications(void);
+        void disableNotifications(void);
         bool notificationEnabled(QString team);
 
     signals:

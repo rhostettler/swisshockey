@@ -27,6 +27,7 @@ class LiveScores : public QObject {
 
     public slots:
         void updateView(QString view);
+        void toggleFocus(QWidget * old, QWidget * now);
 };
 
 #endif // LIVESCORES_H

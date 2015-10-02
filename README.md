@@ -5,13 +5,19 @@ national ice hockey leagues, National League A and B.
 
 Known Issues
 ------------
+Issues marked as "OK" are in testing state.
+
 General:
-* Timeout of the server is not handled, both initially and on update requests.
+* [OK] Timeout of the server is not handled, both initially and on update
+  requests.
 * NLB is not implemented yet.
 * UTF8-parsing of player names is not complete yet.
 
 Notifications:
-* Notifications are sent out even when the application is in the foreground.
+* [OK] Notifications are sent out even when the application is in the 
+  foreground.
+* Instead of completely disabling notifications when in foreground, I should 
+  consider just beeping without homescreen notification.
 * Notifications are not cleared on application shutdown
 * Use notification groups (?).
 * Tapping the notification doesn't open the app.
@@ -22,4 +28,6 @@ Game details view:
   more easily (Consider implementing event icons and logos).
 * Game roaster is not implemented.
 * Game summary at the top doesn't update score.
+* Times < 1min are not parsed correctly
+
 

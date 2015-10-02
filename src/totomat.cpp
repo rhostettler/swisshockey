@@ -47,6 +47,7 @@ void Totomat::queryTotomat(void) {
     // Send the request and connect the finished() signal of the reply to parser
     this->totomatReply = this->nam->post(request, parameters);
     connect(totomatReply, SIGNAL(finished()), this, SLOT(parseTotomatResponse()));
+    connect(totomatReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(handleNetworkError()));
 }
 
 // Parse the response from the HTTP Request
@@ -83,7 +84,15 @@ void Totomat::queryStats(void) {
         // Send the request and connect the finished() signal of the reply to parser
         this->statsReply = this->nam->post(request, parameters);
         connect(statsReply, SIGNAL(finished()), this, SLOT(parseStatsResponse()));
+        connect(statsReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(handleNetworkError()));
     }
+}
+
+// Handle possible errors when querying the totomat
+void Totomat::handleNetworkError(QNetworkReply::NetworkError error) {
+    // Set the timer to try again in 10 seconds
+    this->timer->stop();
+    this->timer->start(10000);
 }
 
 void Totomat::parseStatsResponse(void) {

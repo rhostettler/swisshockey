@@ -13,6 +13,7 @@ int main(int argc, char *argv[]) {
     // Create a mediator that generates the UI and connects all the necessary
     // signals, etc.
     LiveScores *livescores = new LiveScores();
+    app->connect(app.data(), SIGNAL(focusChanged()), livescores, SLOT(toggleFocus(QWidget *, QWidget *)));
 
     // Run the app
     return app->exec();

@@ -17,10 +17,22 @@ Notifier::Notifier(GamedayData *model, QWidget *parent) : QObject(parent) {
     teams.insert("HC Lugano", "hcl");
     teams.insert("EV Zug", "evz");
 
+    // Disable the notifier by default (assuming that we go to FG directly upon
+    // start)
+    this->enabled = false;
+
     // Set the model and connect the observer
     this->model = model;
     connect(this->model, SIGNAL(dataChanged(QModelIndex, QModelIndex)),
             this, SLOT(dataChanged(QModelIndex, QModelIndex)));
+}
+
+void Notifier::enableNotifications(void) {
+    this->enabled = true;
+}
+
+void Notifier::disableNotifications(void) {
+    this->enabled = false;
 }
 
 void Notifier::dataChanged(const QModelIndex & topLeft, const QModelIndex & bottomRight) {
@@ -34,7 +46,7 @@ void Notifier::dataChanged(const QModelIndex & topLeft, const QModelIndex & bott
 
     // Check if notifications for the changed team are enabled and create/update
     // a notification if so
-    if(this->notificationEnabled(hometeam) || this->notificationEnabled(awayteam)) {
+    if((this->notificationEnabled(hometeam) || this->notificationEnabled(awayteam)) && this->enabled) {
         // Notification body
         QString body = hometeam.append(" - ").append(awayteam).append(" ").append(score);
 
