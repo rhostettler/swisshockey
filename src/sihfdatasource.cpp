@@ -1,57 +1,53 @@
 #include <QDateTime>
-#include "totomat.h"
+#include "sihfdatasource.h"
 
-Totomat::Totomat(QObject *parent) : QObject(parent) {
+SIHFDataSource::SIHFDataSource(QObject *parent) : DataSource(parent) {
     // Create the network access objects
     this->nam = new QNetworkAccessManager(this);
     this->decoder = new Json(this);
 
-    // Create a timer and set the update interval
-    this->timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(update()));
-    //timer->start(30000);
-
     // Send an initial query
     //this->gameId = NULL;
-    this->queryTotomat();
+    this->queryScores();
 }
 
 // Set the data store
-void Totomat::setData(GamedayData *data){
+void SIHFDataSource::setData(GamedayData *data){
     // TODO: should we discard a possible old list first? better be safe...
     this->nlaData = data;
 }
 
 // Return the data store
-GamedayData* Totomat::getData() {
+GamedayData* SIHFDataSource::getData() {
     return this->nlaData;
 }
 
-void Totomat::setGameId(QString gameId) {
+void SIHFDataSource::setGameId(QString gameId) {
     this->gameId = gameId;
 }
 
 // Send a query to the National League Server
-void Totomat::queryTotomat(void) {
+void SIHFDataSource::queryScores(void) {
     // Request URL / Headers
-    QString url = "http://www.swiss-icehockey.ch/liveticker/totomat.php";
+    QString url = "http://data.sihf.ch/Statistic/api/cms/table?alias=today&searchQuery=1&filterQuery=1&orderBy=gameLeague&orderByDescending=false&take=20&filterBy=League&size=today";
+
     QNetworkRequest request;
     request.setUrl(QUrl(url));
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
-    request.setHeader(QNetworkRequest::ContentLengthHeader, 0);
-    request.setRawHeader("Connection", "Close");
+    request.setRawHeader("Accept-Encoding", "deflate");
+    request.setRawHeader("Connection", "keep-alive");
+    request.setRawHeader("Referer", "http://www.sihf.ch/de/game-center/");
 
     // Request parameters: None
     QByteArray parameters;
 
     // Send the request and connect the finished() signal of the reply to parser
     this->totomatReply = this->nam->post(request, parameters);
-    connect(totomatReply, SIGNAL(finished()), this, SLOT(parseTotomatResponse()));
+    connect(totomatReply, SIGNAL(finished()), this, SLOT(parseSIHFDataSourceResponse()));
     connect(totomatReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(handleNetworkError()));
 }
 
 // Parse the response from the HTTP Request
-void Totomat::parseTotomatResponse() {
+void SIHFDataSource::parseScoresResponse() {
     // Extract the essential part of the response and pass it to the data list
     QVariantMap data = this->decoder->decode(this->totomatReply->readAll().data());
     QVariantMap content = data["content"].toMap();
@@ -61,12 +57,12 @@ void Totomat::parseTotomatResponse() {
     this->nlaData->updateGames(dates["nla"].toString(), nla);
 
     // Determine when we should update the next time and restart the timer
-    int nextUpdate = this->calculateUpdateInterval(dates["nla"].toString());
-    timer->start(nextUpdate);
+    //int nextUpdate = this->calculateUpdateInterval(dates["nla"].toString());
+    //timer->start(nextUpdate);
 }
 
 // Query the NL servers for the game stats
-void Totomat::queryStats(void) {
+void SIHFDataSource::queryStats(void) {
     if(this->gameId != NULL) {
         // Request URL / Headers
         QString url = "http://www.swiss-icehockey.ch/liveticker/stats.php";
@@ -88,14 +84,14 @@ void Totomat::queryStats(void) {
     }
 }
 
-// Handle possible errors when querying the totomat
-void Totomat::handleNetworkError(QNetworkReply::NetworkError error) {
+// Handle possible errors when querying the SIHFDataSource
+void SIHFDataSource::handleNetworkError(QNetworkReply::NetworkError error) {
     // Set the timer to try again in 10 seconds
-    this->timer->stop();
-    this->timer->start(10000);
+    /*this->timer->stop();
+    this->timer->start(10000);*/
 }
 
-void Totomat::parseStatsResponse(void) {
+void SIHFDataSource::parseStatsResponse(void) {
     QVariantMap data = this->decoder->decode(this->statsReply->readAll().data());
     QVariantMap content = data["content"].toMap();
 
@@ -111,7 +107,7 @@ void Totomat::parseStatsResponse(void) {
 
 // Calculate the query interval based on the game date such that we can have the
 // app open in the background without flooding the liveticker
-qint64 Totomat::calculateUpdateInterval(QString date) {
+qint64 SIHFDataSource::calculateUpdateInterval(QString date) {
     // Get the date and time now
     QDateTime now = QDateTime::currentDateTime();
 
@@ -149,12 +145,12 @@ qint64 Totomat::calculateUpdateInterval(QString date) {
     return interval;
 }
 
-// Update the totomat when the timer times out
-void Totomat::update() {
+// Update the SIHFDataSource when the timer times out
+void SIHFDataSource::update() {
     // First, disable the timer
-    timer->stop();
+    //timer->stop();
 
     // Query the website and update
-    this->queryTotomat();
-    this->queryStats();
+    this->queryScores();
+    //this->queryStats();  % Disabled until re-implemented
 }

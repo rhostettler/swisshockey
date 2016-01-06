@@ -32,13 +32,14 @@ CONFIG += meegotouch
 
 # The .cpp file which was generated for your project. Feel free to hack it.
 SOURCES += src/main.cpp \
-    src/totomat.cpp \
     src/json.cpp \
     src/gamedaydata.cpp \
     src/gamedata.cpp \
     src/notifier.cpp \
     src/livescores.cpp \
-    src/gameevent.cpp
+    src/gameevent.cpp \
+    src/datasource.cpp \
+    src/sihfdatasource.cpp
 
 # Files used for custom notifications
 notification_conf.files = livescores.score.update.conf
@@ -73,13 +74,14 @@ OTHER_FILES += \
     qtc_packaging/debian_harmattan/changelog \
 
 HEADERS += \
-    src/totomat.h \
     src/json.h \
     src/gamedaydata.h \
     src/gamedata.h \
     src/notifier.h \
     src/livescores.h \
-    src/gameevent.h
+    src/gameevent.h \
+    src/datasource.h \
+    src/sihfdatasource.h
 
 # Add Qt dependencies
 QT += core network script

@@ -10,11 +10,18 @@ Issues marked as "OK" are in testing state.
 General:
 * [OK] Timeout of the server is not handled, both initially and on update
   requests.
+* Make architecture more generic -> implement data sources that do all the 
+  parsing while local data structures are used for storing the data. Also, 
+  filtering should be done on a presentation level.
+* Implement a calendar-view
+* Adapt to the new API
 * NLB is not implemented yet.
 * UTF8-parsing of player names is not complete yet.
+* Use pull-down gesture for manual update.
+* The settings applet is kind of a mess
 
 Notifications:
-* [OK] Notifications are sent out even when the application is in the 
+* Notifications are sent out even when the application is in the 
   foreground.
 * Instead of completely disabling notifications when in foreground, I should 
   consider just beeping without homescreen notification.
