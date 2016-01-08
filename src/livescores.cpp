@@ -10,15 +10,11 @@
 #include "gamedata.h"
 
 LiveScores::LiveScores(QObject *parent) : QObject(parent) {
-    // Create data lists and totomat object
+    // Create data lists and setup the data source, then run an initial query
     this->nla = new GamedayData(this);
     this->dataSource = new SIHFDataSource(this);
     this->dataSource->setData(nla);
-
-    // Create a timer and set the update interval to 5 mins
-    this->timer = new QTimer(this);
-    connect(this->timer, SIGNAL(timeout()), this, SLOT(updateData()));
-    this->timer->start(30000);
+    this->dataSource->update();
 
     // Create the notifier
     this->notifier = new Notifier(nla);
@@ -36,6 +32,13 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
     this->viewer->rootContext()->setContextProperty("listData", nla);
     QObject *rootObject = viewer->rootObject();
     connect(rootObject, SIGNAL(viewChanged(QString)), this, SLOT(updateView(QString)));
+
+    // Create a timer and set the update interval to 5 mins
+#if 0
+    this->timer = new QTimer(this);
+    connect(this->timer, SIGNAL(timeout()), this, SLOT(updateData()));
+    this->timer->start(30000);
+#endif
 }
 
 void LiveScores::updateView(QString id) {

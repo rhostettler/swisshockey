@@ -44,8 +44,8 @@ class GameData : public QAbstractListModel {
         QString parseTeam(QString team);
 
     public:
-        explicit GameData(QVariantMap game, QObject *parent = 0);
-        void updateGame(QVariantMap game);
+        explicit GameData(QVariantMap data, QObject *parent = 0);
+        void updateGame(QVariantMap data);
         void updateEvents(QVariantMap gameInfo, QVariantList goals, QVariantList fouls, QVariantMap players);
         void updatePlayerList(QVariantMap players);
         void updateGoals(QVariantList goals);
