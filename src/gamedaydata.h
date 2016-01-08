@@ -25,7 +25,9 @@ class GamedayData : public QAbstractListModel {
         // implementations of interface QAbstractListModel
         enum GameRoles {
             HometeamRole = Qt::UserRole + 1,
+            HometeamIdRole,
             AwayteamRole,
+            AwayteamIdRole,
             TotalScoreRole,
             PeriodsScoreRole,
             GameStatusRole,

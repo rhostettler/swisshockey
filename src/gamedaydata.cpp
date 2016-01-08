@@ -5,11 +5,14 @@ GamedayData::GamedayData(QObject *parent) : QAbstractListModel(parent) {
     // Initialize the different data roles
     QHash<int, QByteArray> roles;
     roles[HometeamRole] = "hometeam";
+    roles[HometeamIdRole] = "hometeamId";
     roles[AwayteamRole] = "awayteam";
+    roles[AwayteamIdRole] = "awayteamId";
     roles[TotalScoreRole] = "totalscore";
     roles[PeriodsScoreRole] = "periodsscore";
     roles[GameStatusRole] = "gamestatus";
     roles[GameIdRole] = "gameid";
+
     setRoleNames(roles);
 
     // Initialize the game statuses
@@ -104,8 +107,16 @@ QVariant GamedayData::data(const QModelIndex &index, int role) const {
             data = this->games[key]->getHometeam();
             break;
 
+        case HometeamIdRole:
+            data = this->games[key]->getHometeamId();
+            break;
+
         case AwayteamRole:
             data = this->games[key]->getAwayteam();
+            break;
+
+        case AwayteamIdRole:
+            data = this->games[key]->getAwayteamId();
             break;
 
         case TotalScoreRole:

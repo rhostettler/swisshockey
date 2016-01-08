@@ -1,6 +1,7 @@
 #include <QStringList>
 #include <QTextStream>
 #include "gamedata.h"
+#include "logger.h"
 
 // Instantate and initialize the game
 GameData::GameData(QVariantMap data, QObject *parent) : QAbstractListModel(parent) {
@@ -9,7 +10,12 @@ GameData::GameData(QVariantMap data, QObject *parent) : QAbstractListModel(paren
 
     // Get the teams for this game
     this->hometeam = data["hometeam"].toString(); // parseTeam(teams[0].remove(teams[0].length()-1, 1));
+    this->hometeamId = data["hometeamId"].toLongLong();
     this->awayteam = data["awayteam"].toString(); //parseTeam(teams[1].remove(0, 1));
+    this->awayteamId = data["awayteamId"].toLongLong();
+
+    Logger& logger = Logger::getInstance();
+    logger.log(Logger::DEBUG, QString::number(this->hometeamId));
 
     // Initialize the score
     this->score["total"] = QString("0:0");
@@ -37,6 +43,7 @@ GameData::GameData(QVariantMap data, QObject *parent) : QAbstractListModel(paren
 // TODO: May be removed?
 QString GameData::parseTeam(QString team) {
     team.replace("&egrave;", "e");
+    team.replace("", "e");
     return team;
 }
 
@@ -208,8 +215,16 @@ QString GameData::getHometeam() {
     return this->hometeam;
 }
 
+QString GameData::getHometeamId() {
+    return QString::number(this->hometeamId);
+}
+
 QString GameData::getAwayteam() {
     return this->awayteam;
+}
+
+QString GameData::getAwayteamId() {
+    return QString::number(this->awayteamId);
 }
 
 QString GameData::getTotalScore() {

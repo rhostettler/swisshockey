@@ -122,6 +122,7 @@ QVariantMap SIHFDataSource::parseGameSummary(QVariantList indata) {
         QVariantMap awayteam = indata[3].toMap();
         QVariantMap score = indata[4].toMap();
         QVariantMap periodsScore = indata[5].toMap();
+        // 6 is OT / PS indicator!
         QVariantMap meta = indata[7].toMap();
         QVariantMap details = indata[8].toMap();
 
@@ -135,9 +136,9 @@ QVariantMap SIHFDataSource::parseGameSummary(QVariantList indata) {
 
         // Add the team info
         data.insert("hometeam", hometeam.value("name"));
-        data.insert("homeId", hometeam.value("id"));
+        data.insert("hometeamId", hometeam.value("id"));
         data.insert("awayteam", awayteam.value("name"));
-        data.insert("awayId", awayteam.value("id"));
+        data.insert("awayteamId", awayteam.value("id"));
 
         // Put together the score
         QVariantMap scoreArray;
@@ -150,6 +151,9 @@ QVariantMap SIHFDataSource::parseGameSummary(QVariantList indata) {
 
         // Additional info
         // progress, etc.
+        // 17 - 1. period
+        // 33 - 1. break
+        // etc.
 
 /*        logger.log(Logger::DEBUG, data[0].toString());
         logger.log(Logger::DEBUG, data[1].toString());

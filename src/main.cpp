@@ -1,5 +1,6 @@
 #include <QtGui/QApplication>
 #include <MComponentData>
+#include <QTextCodec>
 
 #include "livescores.h"
 #include "logger.h"
@@ -10,6 +11,9 @@ int main(int argc, char *argv[]) {
     QScopedPointer<QApplication> app(createApplication(argc, argv));
     MComponentData::createInstance(argc, argv);
     app->setApplicationName("Live Scores");
+
+    // Make sure UTF-8 is used internally
+    QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
 
     // Initialize the logger
     Logger& logger = Logger::getInstance();

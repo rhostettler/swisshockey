@@ -54,7 +54,9 @@ class GameData : public QAbstractListModel {
         bool hasChanged(QString type);
 
         QString getHometeam();
+        QString getHometeamId();
         QString getAwayteam();
+        QString getAwayteamId();
         QString getTotalScore();
         QString getPeriodsScore(int period);
         QString getPeriodsScore();
