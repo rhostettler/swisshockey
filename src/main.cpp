@@ -1,20 +1,31 @@
 #include <QtGui/QApplication>
 #include <MComponentData>
+
 #include "livescores.h"
+#include "logger.h"
 
 //Q_DECL_EXPORT int main(int argc, char *argv[])
 int main(int argc, char *argv[]) {
+    // Initialize the application
     QScopedPointer<QApplication> app(createApplication(argc, argv));
     MComponentData::createInstance(argc, argv);
-
-    // Set the application name
     app->setApplicationName("Live Scores");
 
-    // Create a mediator that generates the UI and connects all the necessary
+    // Initialize the logger
+    Logger& logger = Logger::getInstance();
+    logger.setLogfile("/home/user/nl-live-scores.log");
+    logger.setLevel(Logger::DEBUG);
+
+    // Create a controller that generates the UI and connects all the necessary
     // signals, etc.
     LiveScores *livescores = new LiveScores();
-    app->connect(app.data(), SIGNAL(focusChanged()), livescores, SLOT(toggleFocus(QWidget *, QWidget *)));
+    //app->connect(app.data(), SIGNAL(focusChanged()), livescores, SLOT(toggleFocus(QWidget *, QWidget *)));
 
     // Run the app
-    return app->exec();
+    int exitcode = app->exec();
+
+    // Close the log
+    logger.close();
+
+    return exitcode;
 }
