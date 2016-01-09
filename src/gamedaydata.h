@@ -18,14 +18,16 @@ class GamedayData : public QAbstractListModel {
         explicit GamedayData(QObject *parent = 0);
 
         // date: date of the gameday, data: the list of games
-        void updateGames(QString date, QVariantList data);
+        void updateGames(QString date, QVariantMap data);
 
         GameData * getGame(QString id);
 
         // implementations of interface QAbstractListModel
         enum GameRoles {
             HometeamRole = Qt::UserRole + 1,
+            HometeamIdRole,
             AwayteamRole,
+            AwayteamIdRole,
             TotalScoreRole,
             PeriodsScoreRole,
             GameStatusRole,
@@ -39,6 +41,7 @@ class GamedayData : public QAbstractListModel {
     signals:
 
     public slots:
+        void updateData(QVariantMap data);
     
 };
 

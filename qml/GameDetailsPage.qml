@@ -80,7 +80,7 @@ Page {
             height: 96
             width: 96
             fillMode: Image.PreserveAspectFit
-            source: "icons/" + detailshometeam + ".gif"
+            source: "icons/" + detailshometeamId + ".png"
         }
 
         // Awayteam logo: to the right
@@ -96,7 +96,7 @@ Page {
             height: 96
             width: 96
             fillMode: Image.PreserveAspectFit
-            source: "icons/" + detailsawayteam + ".gif"
+            source: "icons/" + detailsawayteamId + ".png"
         }
 
         // Separator between the entries

@@ -3,9 +3,10 @@
 
 #include <QObject>
 #include <QString>
+#include <QTimer>
 
 #include "qmlapplicationviewer.h"
-#include "totomat.h"
+#include "sihfdatasource.h"
 #include "gamedaydata.h"
 #include "notifier.h"
 
@@ -16,8 +17,9 @@ class LiveScores : public QObject {
         Notifier *notifier;
         GamedayData *nla;
         GameData *current;
-        Totomat *totomat;
+        SIHFDataSource *dataSource;
         QmlApplicationViewer *viewer;
+        QTimer *timer;
 
     public:
         explicit LiveScores(QObject *parent = 0);
@@ -26,6 +28,7 @@ class LiveScores : public QObject {
     signals:
 
     public slots:
+        void updateData();
         void updateView(QString view);
         void toggleFocus(QWidget * old, QWidget * now);
 };

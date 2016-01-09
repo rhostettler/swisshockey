@@ -1,25 +1,21 @@
 #include <QStringList>
 #include <QTextStream>
 #include "gamedata.h"
+#include "logger.h"
 
 // Instantate and initialize the game
-GameData::GameData(QVariantMap game, QObject *parent) : QAbstractListModel(parent) {
+GameData::GameData(QVariantMap data, QObject *parent) : QAbstractListModel(parent) {
     // Get the game ID
-    this->gameId = game["gameid"].toString();
+    this->gameId = data["gameId"].toString();
 
-    // Get the teams for this game
-    QStringList teams = game["text"].toString().split(":");
-    this->hometeam = parseTeam(teams[0].remove(teams[0].length()-1, 1));
-    this->awayteam = parseTeam(teams[1].remove(0, 1));
+    // Set the teams for this game
+    this->hometeam = data["hometeam"].toString(); // parseTeam(teams[0].remove(teams[0].length()-1, 1));
+    this->hometeamId = data["hometeamId"].toLongLong();
+    this->awayteam = data["awayteam"].toString(); //parseTeam(teams[1].remove(0, 1));
+    this->awayteamId = data["awayteamId"].toLongLong();
 
-    // Initialize the score
-    this->score["total"] = QString("0:0");
-    this->score["first"] = QString("0:0");
-    this->score["second"] = QString("0:0");
-    this->score["third"] = QString("0:0");
-
-    // Forward the game and update the result
-    updateGame(game);
+    // Forward the rest and update the result
+    updateSummary(data);
 
     // Reset the changed flag to prevent notifications on application startup
     this->scoreChanged = false;
@@ -35,30 +31,35 @@ GameData::GameData(QVariantMap game, QObject *parent) : QAbstractListModel(paren
     setRoleNames(roles);
 }
 
+#if 0
+// TODO: May be removed?
 QString GameData::parseTeam(QString team) {
     team.replace("&egrave;", "e");
+    team.replace("", "e");
     return team;
 }
+#endif
 
 // Update the game score
-void GameData::updateGame(QVariantMap game) {
+void GameData::updateSummary(QVariantMap data) {
     // Store the total score before the update
     QString oldScore = this->score["total"];
     int oldStatus = this->status;
 
     // Get the score from the game map
-    QVariantMap newScore = game["result"].toMap();
+    QVariantMap newScore = data["score"].toMap();
 
     // Update score per period
-    QMapIterator<QString, QVariant> iter(newScore);
-    while(iter.hasNext()) {
-        iter.next();
-        QVariantMap tmp = iter.value().toMap();
-        this->score[iter.key()] = tmp["goals"].toString();
+    this->score["first"] = newScore.value("first", "-:-").toString();
+    this->score["second"] = newScore.value("second", "-:-").toString();
+    this->score["third"] =  newScore.value("third", "-:-").toString();
+    if(newScore.contains("overtime")) {
+        this->score["overtime"] =  newScore.value("overtime", "-:-").toString();
     }
+    this->score["total"] = newScore["total"].toString();
 
     // Update game status
-    this->status = game["status"].toInt();
+    this->status = data["status"].toInt();
 
     // Check if the total score changed and set the flag
     if(this->score["total"].compare(oldScore)) {
@@ -112,6 +113,7 @@ void GameData::updatePlayerList(QVariantMap players) {
     }
 }
 
+// TODO: That should be obsolete now that we have proper UTF-8 parsing
 QString GameData::parsePlayerName(QString name) {
     QMap<QString, QString> lookupTable = QMap<QString, QString>();
     lookupTable.insert(QString::fromUtf8("Ã©"), QString::fromUtf8("é"));
@@ -202,14 +204,23 @@ QString GameData::getHometeam() {
     return this->hometeam;
 }
 
+QString GameData::getHometeamId() {
+    return QString::number(this->hometeamId);
+}
+
 QString GameData::getAwayteam() {
     return this->awayteam;
+}
+
+QString GameData::getAwayteamId() {
+    return QString::number(this->awayteamId);
 }
 
 QString GameData::getTotalScore() {
     return this->score["total"];
 }
 
+#if 0
 QString GameData::getPeriodsScore(int period) {
     QString key;
 
@@ -230,10 +241,15 @@ QString GameData::getPeriodsScore(int period) {
 
     return this->score.value(key);
 }
+#endif
 
 QString GameData::getPeriodsScore() {
     QString score = this->score.value("first") + ", " +
         this->score.value("second") + ", " + this->score.value("third");
+
+    if(this->score.contains("overtime")) {
+        score.append(", " + this->score.value("overtime"));
+    }
 
     return score;
 }

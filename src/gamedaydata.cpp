@@ -5,11 +5,14 @@ GamedayData::GamedayData(QObject *parent) : QAbstractListModel(parent) {
     // Initialize the different data roles
     QHash<int, QByteArray> roles;
     roles[HometeamRole] = "hometeam";
+    roles[HometeamIdRole] = "hometeamId";
     roles[AwayteamRole] = "awayteam";
+    roles[AwayteamIdRole] = "awayteamId";
     roles[TotalScoreRole] = "totalscore";
     roles[PeriodsScoreRole] = "periodsscore";
     roles[GameStatusRole] = "gamestatus";
     roles[GameIdRole] = "gameid";
+
     setRoleNames(roles);
 
     // Initialize the game statuses
@@ -31,7 +34,8 @@ GamedayData::GamedayData(QObject *parent) : QAbstractListModel(parent) {
     this->date = "";
 }
 
-void GamedayData::updateGames(QString date, QVariantList data) {
+void GamedayData::updateGames(QString date, QVariantMap data) {
+#if 0 // TODO: This code will be re-enabled later on I think
     // Check if the we're updating the current game day or if we're given the
     // data for a new day
     if(this->date.compare(date)) {
@@ -44,24 +48,30 @@ void GamedayData::updateGames(QString date, QVariantList data) {
     } else {
         // NOP.
     }
+#endif
 
+#if 0
     // Add or update each game in the list
     QListIterator<QVariant> iter(data);
     while(iter.hasNext()) {
         // Get the game...
         QVariantMap game = iter.next().toMap();
-        qulonglong key = game["gameid"].toULongLong();
+#endif
+
+        ////////
+
+        qulonglong key = data["gameId"].toULongLong();
 
         if(this->games.contains(key)) {
             // The game is already in the list, hence, we simply update it with
             // the new data
-            this->games[key]->updateGame(game);
+            this->games[key]->updateSummary(data);
         } else {
             // The game couldn't be found in the list so we simply add a new one
             // For that, we need to call beginInsertRows() and endInsertRows()
             // so that the ListView gets notified about the new content.
             beginInsertRows(QModelIndex(), rowCount(), rowCount());
-            this->games.insert(key, new GameData(game, this));
+            this->games.insert(key, new GameData(data, this));
             this->gameIndices.append(key);
             endInsertRows();
         }
@@ -71,7 +81,14 @@ void GamedayData::updateGames(QString date, QVariantList data) {
             QModelIndex index = createIndex(this->gameIndices.indexOf(key), 0);
             emit dataChanged(index, index);
         }
+#if 0
     }
+#endif
+}
+
+// A re-implementation of the updateGames (?). Simply forward the request for now.
+void GamedayData::updateData(QVariantMap data) {
+    this->updateGames("", data);
 }
 
 GameData * GamedayData::getGame(QString id) {
@@ -95,8 +112,16 @@ QVariant GamedayData::data(const QModelIndex &index, int role) const {
             data = this->games[key]->getHometeam();
             break;
 
+        case HometeamIdRole:
+            data = this->games[key]->getHometeamId();
+            break;
+
         case AwayteamRole:
             data = this->games[key]->getAwayteam();
+            break;
+
+        case AwayteamIdRole:
+            data = this->games[key]->getAwayteamId();
             break;
 
         case TotalScoreRole:
