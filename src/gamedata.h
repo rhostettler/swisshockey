@@ -41,11 +41,13 @@ class GameData : public QAbstractListModel {
         bool statusChanged;
 
         // Method that parses the team name and removes special characters
+#if 0
         QString parseTeam(QString team);
+#endif
 
     public:
         explicit GameData(QVariantMap data, QObject *parent = 0);
-        void updateGame(QVariantMap data);
+        void updateSummary(QVariantMap data);
         void updateEvents(QVariantMap gameInfo, QVariantList goals, QVariantList fouls, QVariantMap players);
         void updatePlayerList(QVariantMap players);
         void updateGoals(QVariantList goals);
@@ -58,7 +60,9 @@ class GameData : public QAbstractListModel {
         QString getAwayteam();
         QString getAwayteamId();
         QString getTotalScore();
+#if 0
         QString getPeriodsScore(int period);
+#endif
         QString getPeriodsScore();
         int getGameStatus();
 

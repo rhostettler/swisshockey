@@ -65,7 +65,7 @@ void GamedayData::updateGames(QString date, QVariantMap data) {
         if(this->games.contains(key)) {
             // The game is already in the list, hence, we simply update it with
             // the new data
-            this->games[key]->updateGame(data);
+            this->games[key]->updateSummary(data);
         } else {
             // The game couldn't be found in the list so we simply add a new one
             // For that, we need to call beginInsertRows() and endInsertRows()

@@ -1,4 +1,5 @@
 #include <QDateTime>
+#include <cmath>
 
 #include "sihfdatasource.h"
 #include "logger.h"
@@ -96,7 +97,7 @@ QVariantMap SIHFDataSource::parseGameSummary(QVariantList indata) {
         QVariantMap awayteam = indata[3].toMap();
         QVariantMap score = indata[4].toMap();
         QVariantMap periodsScore = indata[5].toMap();
-        // 6 is OT / PS indicator!
+        QString otIndicator = indata[6].toString();
         QVariantMap meta = indata[7].toMap();
         QVariantMap details = indata[8].toMap();
 
@@ -120,18 +121,37 @@ QVariantMap SIHFDataSource::parseGameSummary(QVariantList indata) {
 
             // Put together the score
             QVariantMap scoreArray;
-            /*score.insert("first");
-            score.insert("second");
-            score.insert("third");
-            score.insert("overtime");*/
+            score.insert("first", "-:-");
+            score.insert("second", "-:-");
+            score.insert("third", "-:-");
+            QList<QString> keys;
+            keys.append("first");
+            keys.append("second");
+            keys.append("third");
+            QVariantList homePeriodsScore = periodsScore.value("homeTeam").toList();
+            QVariantList awayPeriodsScore = periodsScore.value("awayTeam").toList();
+            for(int i = 0; i < homePeriodsScore.size(); i++) {
+                score[keys[i]] = homePeriodsScore[i].toString() + ":" + awayPeriodsScore[i].toString();
+            }
+            if(!QString::compare(otIndicator, "OT") || !QString::compare(otIndicator, "PS")) {
+                score.insert("overtime", homePeriodsScore[4].toString() + ":" + awayPeriodsScore[4].toString());
+            }
             scoreArray.insert("total", QString(score.value("homeTeam").toString() + ":" + score.value("awayTeam").toString()));
             data.insert("score", scoreArray);
 
             // Additional info
+            // TODO: doesn't take OT/SO into account just yet
             // progress, etc.
+            // 0 - Not started
             // 17 - 1. period
             // 33 - 1. break
-            // etc.
+            // 50 - 2. Period
+            // 67 - 2. break
+            // 84 - 3. Period
+            // 100 - Finished
+            // Roughly corresponds to the following formula: progress/100*6 = "old status code"
+            data.insert("status", round(meta.value("percent").toDouble()/100*6));
+            logger.log(Logger::DEBUG, "SIHFDataSource::parseGameSummary(): Game status calculated to be " + data.value("status").toString());
         } else {
             logger.log(Logger::DEBUG, "SIHFDataSource::parseGameSummary(): Not NLA or Cup, data discarded.");
         }

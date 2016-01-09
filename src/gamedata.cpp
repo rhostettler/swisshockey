@@ -8,23 +8,14 @@ GameData::GameData(QVariantMap data, QObject *parent) : QAbstractListModel(paren
     // Get the game ID
     this->gameId = data["gameId"].toString();
 
-    // Get the teams for this game
+    // Set the teams for this game
     this->hometeam = data["hometeam"].toString(); // parseTeam(teams[0].remove(teams[0].length()-1, 1));
     this->hometeamId = data["hometeamId"].toLongLong();
     this->awayteam = data["awayteam"].toString(); //parseTeam(teams[1].remove(0, 1));
     this->awayteamId = data["awayteamId"].toLongLong();
 
-    Logger& logger = Logger::getInstance();
-    logger.log(Logger::DEBUG, QString::number(this->hometeamId));
-
-    // Initialize the score
-    this->score["total"] = QString("0:0");
-    this->score["first"] = QString("0:0");
-    this->score["second"] = QString("0:0");
-    this->score["third"] = QString("0:0");
-
-    // Forward the game and update the result
-    updateGame(data);
+    // Forward the rest and update the result
+    updateSummary(data);
 
     // Reset the changed flag to prevent notifications on application startup
     this->scoreChanged = false;
@@ -40,15 +31,17 @@ GameData::GameData(QVariantMap data, QObject *parent) : QAbstractListModel(paren
     setRoleNames(roles);
 }
 
+#if 0
 // TODO: May be removed?
 QString GameData::parseTeam(QString team) {
     team.replace("&egrave;", "e");
     team.replace("", "e");
     return team;
 }
+#endif
 
 // Update the game score
-void GameData::updateGame(QVariantMap data) {
+void GameData::updateSummary(QVariantMap data) {
     // Store the total score before the update
     QString oldScore = this->score["total"];
     int oldStatus = this->status;
@@ -57,21 +50,16 @@ void GameData::updateGame(QVariantMap data) {
     QVariantMap newScore = data["score"].toMap();
 
     // Update score per period
-#if 0 // TODO: Needs to be re-implemented, only a rough workaround right now
-    QMapIterator<QString, QVariant> iter(newScore);
-    while(iter.hasNext()) {
-        iter.next();
-        QVariantMap tmp = iter.value().toMap();
-        this->score[iter.key()] = tmp["goals"].toString();
+    this->score["first"] = newScore.value("first", "-:-").toString();
+    this->score["second"] = newScore.value("second", "-:-").toString();
+    this->score["third"] =  newScore.value("third", "-:-").toString();
+    if(newScore.contains("overtime")) {
+        this->score["overtime"] =  newScore.value("overtime", "-:-").toString();
     }
-#endif
     this->score["total"] = newScore["total"].toString();
 
     // Update game status
-#if 0
-    this->status = game["status"].toInt();
-#endif
-    this->status = 1;
+    this->status = data["status"].toInt();
 
     // Check if the total score changed and set the flag
     if(this->score["total"].compare(oldScore)) {
@@ -125,6 +113,7 @@ void GameData::updatePlayerList(QVariantMap players) {
     }
 }
 
+// TODO: That should be obsolete now that we have proper UTF-8 parsing
 QString GameData::parsePlayerName(QString name) {
     QMap<QString, QString> lookupTable = QMap<QString, QString>();
     lookupTable.insert(QString::fromUtf8("Ã©"), QString::fromUtf8("é"));
@@ -231,6 +220,7 @@ QString GameData::getTotalScore() {
     return this->score["total"];
 }
 
+#if 0
 QString GameData::getPeriodsScore(int period) {
     QString key;
 
@@ -251,10 +241,15 @@ QString GameData::getPeriodsScore(int period) {
 
     return this->score.value(key);
 }
+#endif
 
 QString GameData::getPeriodsScore() {
     QString score = this->score.value("first") + ", " +
         this->score.value("second") + ", " + this->score.value("third");
+
+    if(this->score.contains("overtime")) {
+        score.append(", " + this->score.value("overtime"));
+    }
 
     return score;
 }
