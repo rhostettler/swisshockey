@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QString>
 #include <QTimer>
+#include <QEvent>
 
 #include "qmlapplicationviewer.h"
 #include "sihfdatasource.h"
@@ -23,6 +24,7 @@ class LiveScores : public QObject {
 
     public:
         explicit LiveScores(QObject *parent = 0);
+        bool eventFilter(QObject *, QEvent *);
         ~LiveScores(void);
 
     signals:
@@ -30,7 +32,6 @@ class LiveScores : public QObject {
     public slots:
         void updateData();
         void updateView(QString view);
-        void toggleFocus(QWidget * old, QWidget * now);
 };
 
 #endif // LIVESCORES_H

@@ -20,11 +20,11 @@ int main(int argc, char *argv[]) {
     Logger& logger = Logger::getInstance();
     logger.setLogfile("/home/user/nl-live-scores.log");
     logger.setLevel(Logger::DEBUG);
+    //logger.setLevel(Logger::ERROR);
 
     // Create a controller that generates the UI and connects all the necessary
     // signals, etc.
     LiveScores *livescores = new LiveScores();
-    //app->connect(app.data(), SIGNAL(focusChanged()), livescores, SLOT(toggleFocus(QWidget *, QWidget *)));  // This doesn't work currently!
 
     // Run the app
     int exitcode = app->exec();

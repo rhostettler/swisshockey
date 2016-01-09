@@ -20,7 +20,7 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
 
     // Create the notifier
     this->notifier = new Notifier(nla);
-    //this->notifier->disableNotifications();  // TODO: Since the FG/BG switching doesn't work, I'll keep the notifier enabled for now.
+    this->notifier->disableNotifications();
 
     // QML Viewer
     this->viewer = new QmlApplicationViewer();
@@ -30,10 +30,12 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
     // Show the view
     this->viewer->showExpanded();
 
-    // Set data sources and connect to signals
+    // Set data sources, connect to signals, and add an event filter to catch
+    // switches between foreground and background.
     this->viewer->rootContext()->setContextProperty("listData", nla);
     QObject *rootObject = viewer->rootObject();
     connect(rootObject, SIGNAL(viewChanged(QString)), this, SLOT(updateView(QString)));
+    rootObject->installEventFilter(this);
 
     // Create a timer that periodically fires to update the data. Update
     // interval is set to 5 mins (5*60*1000 ms).
@@ -70,24 +72,27 @@ void LiveScores::updateView(QString id) {
     }
 }
 
-// TODO: Re-implement / rework when notifications is reworked
 // Observe the focus state of the app (foreground / background) and set the
 // internal state accordingly
-void LiveScores::toggleFocus(QWidget *old, QWidget *now) {
+bool LiveScores::eventFilter(QObject* obj, QEvent* event) {
     Logger& logger = Logger::getInstance();
-    logger.log(Logger::DEBUG, "LiveScores::toggleFocus(): Called.");
+    switch(event->type()) {
+        case QEvent::WindowActivate:
+            this->notifier->disableNotifications();
+            logger.log(Logger::DEBUG, "LiveScores::eventFilter(): Switched to foreground, notifications disabled.");
+            break;
 
-    if(old == NULL) {
-        // If old is NULL we came to focus
-        logger.log(Logger::DEBUG, "LiveScores::toggleFocus(): App came to foreground.");
-        this->notifier->disableNotifications();
-    } else if(now == NULL) {
-        // If now is NULL, the app went to the background
-        logger.log(Logger::DEBUG, "LiveScores::toggleFocus(): App went to background.");
-        this->notifier->enableNotifications();
-    } else {
-        logger.log(Logger::DEBUG, "LiveScores::toggleFocus(): Something is wrong.");
+        case QEvent::WindowDeactivate:
+            this->notifier->enableNotifications();
+            logger.log(Logger::DEBUG, "LiveScores::eventFilter(): Switched to background, notifications enabled.");
+            break;
+
+        default:
+            break;
     }
+
+    // We don't mind other event handlers handling the events, so return false.
+    return false;
 }
 
 // Updates the data when the timer fires
