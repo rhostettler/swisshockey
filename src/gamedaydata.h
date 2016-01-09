@@ -41,6 +41,7 @@ class GamedayData : public QAbstractListModel {
     signals:
 
     public slots:
+        void updateData(QVariantMap data);
     
 };
 

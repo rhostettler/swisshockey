@@ -18,7 +18,6 @@ class SIHFDataSource : public DataSource {
         QNetworkReply *totomatReply;  // TODO: Rename
         QNetworkReply *statsReply;    // TODO: Rename
         Json *decoder;
-        GamedayData *nlaData;         // TODO: Remove, will communicate through signals
         QString gameId;               // TODO: Hmmm?
 
         QVariantMap parseGameSummary(QVariantList indata);
@@ -29,8 +28,6 @@ class SIHFDataSource : public DataSource {
         void setGameId(QString gameId);
         void queryScores(void);
         void queryStats(void);            // TODO: Rename
-        void setData(GamedayData *data);  // TODO: Hmmm?
-        Q_INVOKABLE GamedayData* getData();  // TODO: Hmmm?
 
     signals:
 

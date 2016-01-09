@@ -9,19 +9,6 @@ SIHFDataSource::SIHFDataSource(QObject *parent) : DataSource(parent) {
     this->decoder = new Json(this);
 }
 
-// Set the data store
-// TODO: will be removed once the signals mechanism is in place (?)
-void SIHFDataSource::setData(GamedayData *data){
-    // TODO: should we discard a possible old list first? better be safe...
-    this->nlaData = data;
-}
-
-// Return the data store
-// TODO: Where is this used?
-GamedayData* SIHFDataSource::getData() {
-    return this->nlaData;
-}
-
 // TODO: The updateGameDetails() should take an argument which should make this
 // unnecessary. The data would be passed to the data store in the same way as the
 // game summaries.
@@ -73,6 +60,7 @@ void SIHFDataSource::parseScoresResponse() {
     }
 #endif
 
+    // If the 'data'-field exists, we try to parse it
     if(parsedRawdata.contains("data")) {
         logger.log(Logger::DEBUG, "SIHFDataSource::parseScoresResponse(): Parsing data...");
         QVariantList data = parsedRawdata.value("data").toList();
@@ -80,9 +68,9 @@ void SIHFDataSource::parseScoresResponse() {
         while(iter.hasNext()) {
             QVariantMap gamedata = this->parseGameSummary(iter.next().toList());
 
-            // TODO: Update the GameDayData according to the old scheme, here, we'll fire a signal instead in the future.
             if(gamedata.size() > 0) {
-                this->nlaData->updateGames("", gamedata);
+                // Signal that we have new data to consider
+                emit gameSummaryUpdated(gamedata);
             } else {
                 // NOP?
             }
@@ -183,6 +171,7 @@ void SIHFDataSource::queryStats(void) {
 
 // TODO: Re-implement completely
 void SIHFDataSource::parseStatsResponse(void) {
+#if 0
     QVariantMap data = this->decoder->decode(this->statsReply->readAll().data());
     QVariantMap content = data["content"].toMap();
 
@@ -194,6 +183,7 @@ void SIHFDataSource::parseStatsResponse(void) {
                            content["fouls"].toList(),
                            content["players"].toMap());
     }
+#endif
 }
 
 // Update the data from this source

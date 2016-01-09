@@ -12,17 +12,15 @@
 
 LiveScores::LiveScores(QObject *parent) : QObject(parent) {
     // Create data lists and setup the data source, then run an initial query
-    // TODO: Instead of passing the GamedayData object to the data source, we
-    // should connect to the DataSource using a signal to decouple the two. The connectionw ill be done here.
     // N.B.: I could maybe use the insert/update facility of the QAbstractItemModel but then the data source would have to know about the model again. We'll se how we'll handle this.
     this->nla = new GamedayData(this);
     this->dataSource = new SIHFDataSource(this);
-    this->dataSource->setData(nla);
+    connect(this->dataSource, SIGNAL(gameSummaryUpdated(QVariantMap)), this->nla, SLOT(updateData(QVariantMap)));
     this->dataSource->update();
 
     // Create the notifier
     this->notifier = new Notifier(nla);
-    this->notifier->disableNotifications();
+    //this->notifier->disableNotifications();  // TODO: Since the FG/BG switching doesn't work, I'll keep the notifier enabled for now.
 
     // QML Viewer
     this->viewer = new QmlApplicationViewer();
@@ -76,14 +74,19 @@ void LiveScores::updateView(QString id) {
 // Observe the focus state of the app (foreground / background) and set the
 // internal state accordingly
 void LiveScores::toggleFocus(QWidget *old, QWidget *now) {
-    // If old is NULL we came to focus
-    if(old == NULL) {
-        this->notifier->disableNotifications();
-    }
+    Logger& logger = Logger::getInstance();
+    logger.log(Logger::DEBUG, "LiveScores::toggleFocus(): Called.");
 
-    // If now is NULL, the app went to the background
-    else if(now == NULL) {
+    if(old == NULL) {
+        // If old is NULL we came to focus
+        logger.log(Logger::DEBUG, "LiveScores::toggleFocus(): App came to foreground.");
+        this->notifier->disableNotifications();
+    } else if(now == NULL) {
+        // If now is NULL, the app went to the background
+        logger.log(Logger::DEBUG, "LiveScores::toggleFocus(): App went to background.");
         this->notifier->enableNotifications();
+    } else {
+        logger.log(Logger::DEBUG, "LiveScores::toggleFocus(): Something is wrong.");
     }
 }
 

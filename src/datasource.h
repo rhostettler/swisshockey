@@ -2,6 +2,7 @@
 #define DATASOURCE_H
 
 #include <QObject>
+#include <QVariantMap>
 
 class DataSource : public QObject {
     Q_OBJECT
@@ -12,8 +13,8 @@ class DataSource : public QObject {
         virtual void update() = 0;
 
     signals:
-        void scoresParsed();
-        void gamedetailsParsed();
+        void gameSummaryUpdated(QVariantMap data);
+        void gameDetailsUpdated();
 
     public slots:
     

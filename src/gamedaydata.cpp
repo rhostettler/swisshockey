@@ -86,6 +86,11 @@ void GamedayData::updateGames(QString date, QVariantMap data) {
 #endif
 }
 
+// A re-implementation of the updateGames (?). Simply forward the request for now.
+void GamedayData::updateData(QVariantMap data) {
+    this->updateGames("", data);
+}
+
 GameData * GamedayData::getGame(QString id) {
     return this->games[id.toLongLong()];
 }
