@@ -2,19 +2,27 @@
 #include <MNotification>
 #include <gconfitem.h>
 
+// TODO: Instead of havin a map from team-name to team abbreviation and looking
+// things up that way, I should preferrably use the team id as gconf keys and
+// check if the notifications are enabled in that way. This will make the
+// 'teams'-list unnecessary and everything much more generic.
+// TODO: In accordance with the above, I might want to write my own CP applet
+// that allows for better configuration as well as a Config signleton that can
+// be used throughout the app for easy access to the config values.
 Notifier::Notifier(GamedayData *model, QWidget *parent) : QObject(parent) {
     // Add all the teams to the teams->GConf key map
-    teams.insert("Ambri-Piotta", "hcap");
+    teams.insert("HC Ambri-Piotta", "hcap");
     teams.insert("SC Bern", "scb");
     teams.insert("EHC Biel", "ehcb");
     teams.insert("HC Davos", "hcd");
-    teams.insert("Fribourg", "hcfg");
-    teams.insert("Geneve", "hcgs");
-    teams.insert("Kloten Flyers", "ehck");
-    teams.insert("Lakers", "scrj");
+    teams.insert("Fribourg-Gottéron", "hcfg");
+    teams.insert("Genève-Servette HC", "hcgs");
+    teams.insert("Kloten Flyers", "ehck"); // TODO: Name in data needs to be verified
+//    teams.insert("Lakers", "scrj");
     teams.insert("Lausanne HC", "lhc");
-    teams.insert("ZSC Lions", "zsc");
+    teams.insert("ZSC Lions", "zsc");      // TODO: Name in data needs to be verified
     teams.insert("HC Lugano", "hcl");
+    teams.insert("SCL Tigers", "scl");
     teams.insert("EV Zug", "evz");
 
     // Disable the notifier by default (assuming that we go to FG directly upon
@@ -23,8 +31,7 @@ Notifier::Notifier(GamedayData *model, QWidget *parent) : QObject(parent) {
 
     // Set the model and connect the observer
     this->model = model;
-    connect(this->model, SIGNAL(dataChanged(QModelIndex, QModelIndex)),
-            this, SLOT(dataChanged(QModelIndex, QModelIndex)));
+    connect(this->model, SIGNAL(dataChanged(QModelIndex, QModelIndex)), this, SLOT(dataChanged(QModelIndex, QModelIndex)));
 }
 
 void Notifier::enableNotifications(void) {
