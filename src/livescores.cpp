@@ -8,9 +8,13 @@
 #include <QObjectList>
 
 #include "gamedata.h"
+#include "logger.h"
 
 LiveScores::LiveScores(QObject *parent) : QObject(parent) {
     // Create data lists and setup the data source, then run an initial query
+    // TODO: Instead of passing the GamedayData object to the data source, we
+    // should connect to the DataSource using a signal to decouple the two. The connectionw ill be done here.
+    // N.B.: I could maybe use the insert/update facility of the QAbstractItemModel but then the data source would have to know about the model again. We'll se how we'll handle this.
     this->nla = new GamedayData(this);
     this->dataSource = new SIHFDataSource(this);
     this->dataSource->setData(nla);
@@ -33,14 +37,15 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
     QObject *rootObject = viewer->rootObject();
     connect(rootObject, SIGNAL(viewChanged(QString)), this, SLOT(updateView(QString)));
 
-    // Create a timer and set the update interval to 5 mins
-#if 0
+    // Create a timer that periodically fires to update the data. Update
+    // interval is set to 5 mins (5*60*1000 ms).
     this->timer = new QTimer(this);
+    this->timer->setSingleShot(false);
     connect(this->timer, SIGNAL(timeout()), this, SLOT(updateData()));
     this->timer->start(30000);
-#endif
 }
 
+// TODO: Re-implement / rework when details view is reworked
 void LiveScores::updateView(QString id) {
     this->current = nla->getGame(id);
 
@@ -56,8 +61,8 @@ void LiveScores::updateView(QString id) {
 
         // Set the info for the page top
         context->setContextProperty("detailstotalscore", this->current->getTotalScore());
-        context->setContextProperty("detailshometeam", this->current->getHometeam());
-        context->setContextProperty("detailsawayteam", this->current->getAwayteam());
+        context->setContextProperty("detailshometeamId", this->current->getHometeamId());
+        context->setContextProperty("detailsawayteamId", this->current->getAwayteamId());
         context->setContextProperty("detailsperiodsscore", this->current->getPeriodsScore());
         //context->setContextProperty("", );
         // TODO: Here we implement stuff like the game location, refs, spectators
@@ -67,6 +72,7 @@ void LiveScores::updateView(QString id) {
     }
 }
 
+// TODO: Re-implement / rework when notifications is reworked
 // Observe the focus state of the app (foreground / background) and set the
 // internal state accordingly
 void LiveScores::toggleFocus(QWidget *old, QWidget *now) {
@@ -81,12 +87,14 @@ void LiveScores::toggleFocus(QWidget *old, QWidget *now) {
     }
 }
 
-// Update the data when the timer fires
+// Updates the data when the timer fires
 void LiveScores::updateData() {
-    // First, disable the timer
-    this->timer->stop();
+    Logger& logger = Logger::getInstance();
+    logger.log(Logger::DEBUG, "LiveScores::updateData() called for a data update.");
 
     // Query the website and update
+    // TODO: I think I want to split this into updateSummaries() and updateDetails() ? I have to think about what's the most generic way?
+    // Maybe provide an overloaded update() function that takes an argument and if the argument is set, the update is for a specific game?
     this->dataSource->update();
     //this->queryStats();  % Disabled until re-implemented
 }

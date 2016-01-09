@@ -7,23 +7,24 @@ SIHFDataSource::SIHFDataSource(QObject *parent) : DataSource(parent) {
     // Create the network access objects
     this->nam = new QNetworkAccessManager(this);
     this->decoder = new Json(this);
-
-    // Send an initial query
-    //this->gameId = NULL;
-    //this->queryScores();
 }
 
 // Set the data store
+// TODO: will be removed once the signals mechanism is in place (?)
 void SIHFDataSource::setData(GamedayData *data){
     // TODO: should we discard a possible old list first? better be safe...
     this->nlaData = data;
 }
 
 // Return the data store
+// TODO: Where is this used?
 GamedayData* SIHFDataSource::getData() {
     return this->nlaData;
 }
 
+// TODO: The updateGameDetails() should take an argument which should make this
+// unnecessary. The data would be passed to the data store in the same way as the
+// game summaries.
 void SIHFDataSource::setGameId(QString gameId) {
     this->gameId = gameId;
 }
@@ -49,7 +50,7 @@ void SIHFDataSource::queryScores(void) {
 
     // Log the request
     Logger& logger = Logger::getInstance();
-    logger.log(Logger::INFO, "Score query sent to server.");
+    logger.log(Logger::INFO, "SIHFDataSource::queryScores(): Query sent to server.");
 }
 
 // Parse the response from the HTTP Request
@@ -59,7 +60,7 @@ void SIHFDataSource::parseScoresResponse() {
 
     // Log the raw data for debugging
     Logger& logger = Logger::getInstance();
-    logger.log(Logger::DEBUG, "Score query response received, data is:");
+    logger.log(Logger::DEBUG, "SIHFDataSource::parseScoresResponse(): Received the following raw data:");
     logger.log(Logger::DEBUG, rawdata);
 
     // Parse the response
@@ -73,6 +74,7 @@ void SIHFDataSource::parseScoresResponse() {
 #endif
 
     if(parsedRawdata.contains("data")) {
+        logger.log(Logger::DEBUG, "SIHFDataSource::parseScoresResponse(): Parsing data...");
         QVariantList data = parsedRawdata.value("data").toList();
         QListIterator<QVariant> iter(data);
         while(iter.hasNext()) {
@@ -81,34 +83,18 @@ void SIHFDataSource::parseScoresResponse() {
             // TODO: Update the GameDayData according to the old scheme, here, we'll fire a signal instead in the future.
             if(gamedata.size() > 0) {
                 this->nlaData->updateGames("", gamedata);
-                logger.log(Logger::DEBUG, "Now, there are " + QString(this->nlaData->rowCount()) + " items in the list.");
             } else {
                 // NOP?
             }
         }
-     }
-
-#if 0
-    QMapIterator<QString, QVariant> iter(parsedRawdata);
-    while(iter.hasNext()) {
-        iter.next();
-        logger.log(Logger::DEBUG, iter.key());
+    } else {
+        logger.log(Logger::ERROR, "SIHFDataSource::parseScoresResponse(): No 'data' field in the response from the server.");
     }
-
-
-    QVariantMap data = this->decoder->decode(this->totomatReply->readAll().data());
-    QVariantMap content = data["content"].toMap();
-    QVariantMap games = content["games"].toMap();
-    QVariantMap dates = content["nav"].toMap();
-    QVariantList nla = games["nla"].toList();
-    this->nlaData->updateGames(dates["nla"].toString(), nla);
-
-    // Determine when we should update the next time and restart the timer
-    //int nextUpdate = this->calculateUpdateInterval(dates["nla"].toString());
-    //timer->start(nextUpdate);
-#endif
 }
 
+// Parse the per-game JSON array from the response and put everything in an
+// associative array with predefined fields for internal data exchange between
+// data sources and data stores.
 QVariantMap SIHFDataSource::parseGameSummary(QVariantList indata) {
     QVariantMap data;
 
@@ -126,64 +112,53 @@ QVariantMap SIHFDataSource::parseGameSummary(QVariantList indata) {
         QVariantMap meta = indata[7].toMap();
         QVariantMap details = indata[8].toMap();
 
-        // Put everything into a QVariantMap that we'll use as the common
-        // internal raw data representation
-        //QVariantMap data;
-        // Add the basic game info
-        data.insert("league", league);
-        data.insert("gameId", details.value("gameId"));
-        //data.insert("");
+        // TODO: This is just a quick & dirty workaround right now to only
+        // fetch the NLA data, this must be handled properly using a filter in
+        // the presentation layer in the future
+        if(!QString::compare(league, "NL A") || !QString::compare(league, "Cup")) {
+            // Put everything into a QVariantMap that we'll use as the common
+            // internal raw data representation
+            //QVariantMap data;
+            // Add the basic game info
+            data.insert("league", league);
+            data.insert("gameId", details.value("gameId"));
+            //data.insert("");
 
-        // Add the team info
-        data.insert("hometeam", hometeam.value("name"));
-        data.insert("hometeamId", hometeam.value("id"));
-        data.insert("awayteam", awayteam.value("name"));
-        data.insert("awayteamId", awayteam.value("id"));
+            // Add the team info
+            data.insert("hometeam", hometeam.value("name"));
+            data.insert("hometeamId", hometeam.value("id"));
+            data.insert("awayteam", awayteam.value("name"));
+            data.insert("awayteamId", awayteam.value("id"));
 
-        // Put together the score
-        QVariantMap scoreArray;
-        /*score.insert("first");
-        score.insert("second");
-        score.insert("third");
-        score.insert("overtime");*/
-        scoreArray.insert("total", QString(score.value("homeTeam").toString() + ":" + score.value("awayTeam").toString()));
-        data.insert("score", scoreArray);
+            // Put together the score
+            QVariantMap scoreArray;
+            /*score.insert("first");
+            score.insert("second");
+            score.insert("third");
+            score.insert("overtime");*/
+            scoreArray.insert("total", QString(score.value("homeTeam").toString() + ":" + score.value("awayTeam").toString()));
+            data.insert("score", scoreArray);
 
-        // Additional info
-        // progress, etc.
-        // 17 - 1. period
-        // 33 - 1. break
-        // etc.
-
-/*        logger.log(Logger::DEBUG, data[0].toString());
-        logger.log(Logger::DEBUG, data[1].toString());
-        // Iterate over all fields (?)
-        QListIterator<QVariant> iter(data);
-        while(iter.hasNext()) {
-            QVariant item = iter.next();
-            logger.log(Logger::DEBUG, item.typeName());
-
-            //////// dump the rest.
-            if(QString::compare(item.typeName(), "QString")) {
-                logger.log(Logger::DEBUG, "  - " + item.toString());
-
-            } else if(QString::compare(item.typeName(), "QVariantMap")) {
-                QMapIterator<QString, QVariant> iter2(item.toMap());
-
-                while(iter2.hasNext()) {
-                    iter2.next();
-                    logger.log(Logger::DEBUG, "  - " + iter2.key() + " : " + iter2.value().toString());
-                }
-            }
-        }*/
+            // Additional info
+            // progress, etc.
+            // 17 - 1. period
+            // 33 - 1. break
+            // etc.
+        } else {
+            logger.log(Logger::DEBUG, "SIHFDataSource::parseGameSummary(): Not NLA or Cup, data discarded.");
+        }
+    } else if(indata.size() == 1) {
+        logger.log(Logger::DEBUG, "SIHFDataSource::parseGameSummary(): It appears that the supplied data doesn't contain any game info (no games today?).");
+        // TODO: here, we should somehow signal that there are no games today? Or maybe that's to be done somewhere else instead?
     } else {
-        logger.log(Logger::DEBUG, "It appears that the supplied data doesn't contain any game info.");
+        logger.log(Logger::ERROR, "SIHFDataSource::parseGameSummary(): Something is wrong with the game summary data, maybe a change in the data format?");
     }
 
     return data;
 }
 
 // Query the NL servers for the game stats
+// TODO: Re-implement completely!
 void SIHFDataSource::queryStats(void) {
     if(this->gameId != NULL) {
         // Request URL / Headers
@@ -206,16 +181,10 @@ void SIHFDataSource::queryStats(void) {
     }
 }
 
-// Handle possible errors when querying the SIHFDataSource
-void SIHFDataSource::handleNetworkError(QNetworkReply::NetworkError error) {
-    // Set the timer to try again in 10 seconds
-    /*this->timer->stop();
-    this->timer->start(10000);*/
-}
-
+// TODO: Re-implement completely
 void SIHFDataSource::parseStatsResponse(void) {
     QVariantMap data = this->decoder->decode(this->statsReply->readAll().data());
-/*    QVariantMap content = data["content"].toMap();
+    QVariantMap content = data["content"].toMap();
 
     // If a game for the details was set, update it too
     if(this->gameId != NULL) {
@@ -224,52 +193,19 @@ void SIHFDataSource::parseStatsResponse(void) {
                            content["goals"].toList(),
                            content["fouls"].toList(),
                            content["players"].toMap());
-    }*/
+    }
 }
 
-// Calculate the query interval based on the game date such that we can have the
-// app open in the background without flooding the liveticker
-qint64 SIHFDataSource::calculateUpdateInterval(QString date) {
-    // Get the date and time now
-    QDateTime now = QDateTime::currentDateTime();
-
-    // Determine when to update the next time
-    QDateTime gameDateTime = QDateTime::fromString(date, "dd.MM.yyyy");
-    switch(gameDateTime.date().dayOfWeek()) {
-        // Tuesday, Thursday, Friday, Saturday: Game starts at 19.45 (normally),
-        // so we start updating 5 mins before
-        case 2:
-        case 4:
-        case 5:
-        case 6:
-            gameDateTime.setTime(QTime::fromString("19:40", "hh:mm"));
-            break;
-
-        // Sundays, the game starts at 16.00 so we start updating at 15.55
-        case 7:
-            gameDateTime.setTime(QTime::fromString("15:55", "hh:mm"));
-            break;
-
-        // In any other case, something is fishy. Nevertheless, we set it to the
-        // current time so that we'll update soon again
-        default:
-            gameDateTime.setTime(QTime::currentTime());
-            break;
-    }
-
-    // Determine the time until it's game time (or, if the game has started,
-    // set the interval to 30s)
-    qint64 interval = now.msecsTo(gameDateTime);
-    if(interval <= 0) {
-        interval = 30000;
-    }
-
-    return interval;
-}
-
-// Update the SIHFDataSource when the timer times out
+// Update the data from this source
+// TODO: Implement so that we either can update the summaries or the details
 void SIHFDataSource::update() {
     // Query the website and update
     this->queryScores();
     //this->queryStats();  % Disabled until re-implemented
+}
+
+// Handle possible errors when sending queries over the network
+void SIHFDataSource::handleNetworkError(QNetworkReply::NetworkError error) {
+    Logger& logger = Logger::getInstance();
+    logger.log(Logger::ERROR, "SIHFDataSource::handleNetworkError(): Network error occured.");
 }

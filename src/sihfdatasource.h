@@ -30,7 +30,6 @@ class SIHFDataSource : public DataSource {
         void queryScores(void);
         void queryStats(void);            // TODO: Rename
         void setData(GamedayData *data);  // TODO: Hmmm?
-        qint64 calculateUpdateInterval(QString date);  // TODO: Remove?
         Q_INVOKABLE GamedayData* getData();  // TODO: Hmmm?
 
     signals:

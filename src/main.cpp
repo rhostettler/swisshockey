@@ -16,6 +16,7 @@ int main(int argc, char *argv[]) {
     QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
 
     // Initialize the logger
+    // TODO: Maybe we coult move this into the LiveScores object?
     Logger& logger = Logger::getInstance();
     logger.setLogfile("/home/user/nl-live-scores.log");
     logger.setLevel(Logger::DEBUG);
