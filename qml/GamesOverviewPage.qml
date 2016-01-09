@@ -4,6 +4,78 @@ import com.nokia.meego 1.0
 Page {
     tools: mainToolbar
 
+    // The header
+    Rectangle {
+        id: header
+        anchors {
+            top: parent.top
+            left: parent.left
+        }
+        width: parent.width
+        height: 72
+        z: 1
+        color: "#FF0000"
+
+        Text {
+            id: leagueLabel
+            anchors {
+                verticalCenter: parent.verticalCenter
+                left: parent.left
+                leftMargin: 16
+            }
+            horizontalAlignment: Text.AlignLeft
+            verticalAlignment: Text.AlignVCenter
+            font {
+                pixelSize: 28
+            }
+            color: "#FFFFFF"
+            text: "NL A"
+            smooth: true
+        }
+
+        // Selector Icon
+        Image {
+            id: selectorIcon
+            source: "icons/icon-m-toolbar-updown.png"
+            anchors {
+                verticalCenter: parent.verticalCenter
+                right: parent.right
+                rightMargin: 32
+            }
+            width: 13
+            height: 24
+            smooth: true
+        }
+
+        // Make it clickable using a MouseArea
+        MouseArea {
+            anchors.fill: parent
+            onPressed: {
+                header.color = "#800000";
+            }
+            onReleased: {
+                header.color = "#FF0000";
+            }
+            onClicked: {
+                leagueSelectionDialog.open();
+            }
+        }
+    }
+
+    // The selection dialog for choosing the filter
+    // TODO: Here we need to implement all the action that should happen once a new selection is made.
+    SelectionDialog {
+         id: leagueSelectionDialog
+         titleText: "Select League"
+         selectedIndex: 0
+
+         model: ListModel {
+             ListElement { name: "NL A" }
+             ListElement { name: "NL B" }
+             ListElement { name: "Cup" }
+         }
+     }
+
     // A spinning busy indicator shown while the data is loading upon
     // application start
     BusyIndicator {
@@ -132,7 +204,14 @@ Page {
 
     ListView {
         id: gameList
-        anchors.fill: parent
+//        anchors.fill: parent
+        width: parent.width
+        anchors {
+            top: header.bottom
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
+        }
 
         model: listData
         delegate: gameDelegate
