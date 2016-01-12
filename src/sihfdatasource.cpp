@@ -95,7 +95,7 @@ QVariantMap SIHFDataSource::parseGameSummary(QVariantList indata) {
         QString time = indata[1].toString();
         QVariantMap hometeam = indata[2].toMap();
         QVariantMap awayteam = indata[3].toMap();
-        QVariantMap score = indata[4].toMap();
+        QVariantMap totalScore = indata[4].toMap();
         QVariantMap periodsScore = indata[5].toMap();
         QString otIndicator = indata[6].toString();
         QVariantMap meta = indata[7].toMap();
@@ -120,24 +120,17 @@ QVariantMap SIHFDataSource::parseGameSummary(QVariantList indata) {
             data.insert("awayteamId", awayteam.value("id"));
 
             // Put together the score
-            QVariantMap scoreArray;
-            score.insert("first", "-:-");
-            score.insert("second", "-:-");
-            score.insert("third", "-:-");
-            QList<QString> keys;
-            keys.append("first");
-            keys.append("second");
-            keys.append("third");
             QVariantList homePeriodsScore = periodsScore.value("homeTeam").toList();
             QVariantList awayPeriodsScore = periodsScore.value("awayTeam").toList();
-            for(int i = 0; i < homePeriodsScore.size(); i++) {
-                score[keys[i]] = homePeriodsScore[i].toString() + ":" + awayPeriodsScore[i].toString();
-            }
+            QVariantMap score;
+            score["first"] = homePeriodsScore.value(0, "-").toString() + ":" + awayPeriodsScore.value(0, "-").toString();
+            score["second"] = homePeriodsScore.value(1, "-").toString() + ":" + awayPeriodsScore.value(1, "-").toString();
+            score["third"] = homePeriodsScore.value(2, "-").toString() + ":" + awayPeriodsScore.value(2, "-").toString();
             if(!QString::compare(otIndicator, "OT") || !QString::compare(otIndicator, "PS")) {
-                score.insert("overtime", homePeriodsScore[4].toString() + ":" + awayPeriodsScore[4].toString());
+                score.insert("overtime", homePeriodsScore[3].toString() + ":" + awayPeriodsScore[3].toString());
             }
-            scoreArray.insert("total", QString(score.value("homeTeam").toString() + ":" + score.value("awayTeam").toString()));
-            data.insert("score", scoreArray);
+            score["total"] = totalScore.value("homeTeam").toString() + ":" + totalScore.value("awayTeam").toString();
+            data.insert("score", score);
 
             // Additional info
             // TODO: doesn't take OT/SO into account just yet
@@ -147,7 +140,8 @@ QVariantMap SIHFDataSource::parseGameSummary(QVariantList indata) {
             // 33 - 1. break
             // 50 - 2. Period
             // 67 - 2. break
-            // 84 - 3. Period
+            // 83 - 3. Period
+            // 88 - Overtime or something ?
             // 100 - Finished
             // Roughly corresponds to the following formula: progress/100*6 = "old status code"
             data.insert("status", round(meta.value("percent").toDouble()/100*6));
