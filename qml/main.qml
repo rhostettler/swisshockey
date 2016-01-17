@@ -4,11 +4,22 @@ import com.nokia.extras 1.1 // for InfoBanner
 
 PageStackWindow {
     id: appWindow
-
     initialPage: overviewPage
 
     // Emitted when one of the games is selected for details view
     signal viewChanged(string gameId)
+
+    // Create an info banner with no icon
+    InfoBanner {
+        topMargin: 40
+        id: infoBanner
+        text: ""
+    }
+
+    function showInfo(message) {
+        infoBanner.text = message;
+        infoBanner.show();
+    }
 
     // Define the pages
     GamesOverviewPage {

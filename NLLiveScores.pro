@@ -40,7 +40,8 @@ SOURCES += src/main.cpp \
     src/gameevent.cpp \
     src/datasource.cpp \
     src/sihfdatasource.cpp \
-    src/logger.cpp
+    src/logger.cpp \
+    src/config.cpp
 
 # Files used for custom notifications
 notification_conf.files = livescores.score.update.conf
@@ -83,7 +84,8 @@ HEADERS += \
     src/gameevent.h \
     src/datasource.h \
     src/sihfdatasource.h \
-    src/logger.h
+    src/logger.h \
+    src/config.h
 
 # Add Qt dependencies
 QT += core network script

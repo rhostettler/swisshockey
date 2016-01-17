@@ -11,7 +11,7 @@ class Logger {
     public:
         // Log-level definition
         enum LOGLEVEL {
-            ERROR,
+            ERROR = 1,
             INFO,
             WARN,
             DEBUG

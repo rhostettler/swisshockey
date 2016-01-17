@@ -9,6 +9,7 @@
 
 #include "gamedata.h"
 #include "logger.h"
+#include "config.h"
 
 LiveScores::LiveScores(QObject *parent) : QObject(parent) {
     // Create data lists and setup the data source, then run an initial query
@@ -41,12 +42,13 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
 /*    QVariant msg = "Hello from C++";
     QMetaObject::invokeMethod(rootObject, "showInfo", Q_ARG(QVariant, msg));*/
 
-    // Create a timer that periodically fires to update the data. Update
-    // interval is set to 5 mins (5*60*1000 ms).
+    // Create a timer that periodically fires to update the data, defaults to 5
+    Config& config = Config::getInstance();
+    int updateInterval = config.getValue("updateInterval", 5).toInt();
     this->timer = new QTimer(this);
     this->timer->setSingleShot(false);
     connect(this->timer, SIGNAL(timeout()), this, SLOT(updateData()));
-    this->timer->start(30000);
+    this->timer->start(updateInterval*60*1000);
 }
 
 // TODO: Re-implement / rework when details view is reworked

@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <settings>
-    <group title="NL A">
+    <group title="Notifications">
         <boolean key="/apps/NLLiveScores/settings/hcap" title="Ambri-Piotta"></boolean>
         <boolean key="/apps/NLLiveScores/settings/scb" title="SC Bern"></boolean>
         <boolean key="/apps/NLLiveScores/settings/ehcb" title="EHC Biel"></boolean>
@@ -14,6 +14,15 @@
         <boolean key="/apps/NLLiveScores/settings/hcl" title="HC Lugano"></boolean>
         <boolean key="/apps/NLLiveScores/settings/scl" title="SCL Tigers"></boolean>
         <boolean key="/apps/NLLiveScores/settings/evz" title="EV Zug"></boolean>
+    </group>
+    <group title="App Settings">
+        <integer key="/apps/NLLiveScores/settings/updateInterval" title="Update Interval (mins)" min="1" max="10"></integer>
+        <selection key="/apps/NLLiveScores/settings/loglevel" title="Log Level">
+            <option title="Error">1</option>
+            <option title="Info">2</option>
+            <option title="Warning">3</option>
+            <option title="Debug">4</option>
+        </selection>
     </group>
 <!--    <group title="Foo">
         <text key="/apps/NLLiveScores/settings/Text1" title="Please specify a text:" >

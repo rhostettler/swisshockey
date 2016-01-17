@@ -26,6 +26,7 @@ Page {
             horizontalAlignment: Text.AlignLeft
             verticalAlignment: Text.AlignVCenter
             font {
+                family: "Nokia Pure Light"
                 pixelSize: 28
             }
             color: "#FFFFFF"
@@ -71,14 +72,15 @@ Page {
 
          model: ListModel {
              ListElement { name: "NL A" }
-             ListElement { name: "NL B" }
-             ListElement { name: "Cup" }
+/*             ListElement { name: "NL B" }
+             ListElement { name: "Cup" }*/
          }
      }
 
     // A spinning busy indicator shown while the data is loading upon
     // application start
-    BusyIndicator {
+/*    BusyIndicator {
+        id: spinningIndicator
         anchors {
             horizontalCenter: parent.horizontalCenter
             verticalCenter: parent.verticalCenter
@@ -86,6 +88,23 @@ Page {
 
         platformStyle: BusyIndicatorStyle { size: "large" }
         running: gameList.count == 0
+        visible: gameList.count == 0
+    }*/
+    Text {
+        id: statusLabel
+        anchors {
+            horizontalCenter: parent.horizontalCenter
+            verticalCenter: parent.verticalCenter
+        }
+        horizontalAlignment: Text.AlignLeft
+        verticalAlignment: Text.AlignVCenter
+        font {
+            family: "Nokia Pure Light"
+            pointSize: 18
+        }
+        color: "#000000"
+        text: "No games today."
+        smooth: true
         visible: gameList.count == 0
     }
 
@@ -97,13 +116,15 @@ Page {
             width: gameList.width
             height: 128
 
+            /* TODO: Disabled since game details are not implemented yet*/
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
-                    appWindow.viewChanged(gameid)
-                    pageStack.push(detailsPage);
+                /*    appWindow.viewChanged(gameid);
+                    pageStack.push(detailsPage);*/
                 }
             }
+
 
             // Label containing the total score
             Text {
@@ -204,7 +225,6 @@ Page {
 
     ListView {
         id: gameList
-//        anchors.fill: parent
         width: parent.width
         anchors {
             top: header.bottom

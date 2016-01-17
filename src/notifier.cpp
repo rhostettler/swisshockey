@@ -1,6 +1,8 @@
 #include "notifier.h"
 #include <MNotification>
-#include <gconfitem.h>
+//#include <gconfitem.h>
+
+#include "config.h"
 
 // TODO: Instead of havin a map from team-name to team abbreviation and looking
 // things up that way, I should preferrably use the team id as gconf keys and
@@ -135,8 +137,10 @@ void Notifier::dataChanged(const QModelIndex & topLeft, const QModelIndex & bott
     }
 }
 
+// TODO: Move to Config-singleton
 bool Notifier::notificationEnabled(QString team) {
     QString key = teams[team];
+#if 0
     QString gconfPath = "/apps/NLLiveScores/settings/";
     QString gconfKey = gconfPath.append(key);
 
@@ -144,4 +148,8 @@ bool Notifier::notificationEnabled(QString team) {
     bool status = item.value(false).toBool();
 
     return status;
+#endif
+
+    Config& config = Config::getInstance();
+    return config.getValue(key, false).toBool();
 }

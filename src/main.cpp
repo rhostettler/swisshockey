@@ -4,6 +4,7 @@
 
 #include "livescores.h"
 #include "logger.h"
+#include "config.h"
 
 //Q_DECL_EXPORT int main(int argc, char *argv[])
 int main(int argc, char *argv[]) {
@@ -17,9 +18,11 @@ int main(int argc, char *argv[]) {
 
     // Initialize the logger
     // TODO: Maybe we coult move this into the LiveScores object?
+    Config& config = Config::getInstance();
     Logger& logger = Logger::getInstance();
     logger.setLogfile("/home/user/nl-live-scores.log");
-    logger.setLevel(Logger::DEBUG);
+    logger.setLevel(config.getValue("loglevel", Logger::ERROR).toInt());
+    //logger.setLevel(Logger::DEBUG);
     //logger.setLevel(Logger::ERROR);
 
     // Create a controller that generates the UI and connects all the necessary

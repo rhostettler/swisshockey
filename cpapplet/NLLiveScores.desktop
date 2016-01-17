@@ -12,6 +12,7 @@ X-Maemo-Fixed-Args=Live Scores
 X-DUIApplet-Applet=libdeclarative.so
 
 [DCP]
-Category=Notifications & Events
+Category=Applications
+#Category=Notifications & Events
 Order=100
 Part=NLLiveScores.xml
