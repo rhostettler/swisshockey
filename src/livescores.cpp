@@ -37,6 +37,10 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
     connect(rootObject, SIGNAL(viewChanged(QString)), this, SLOT(updateView(QString)));
     rootObject->installEventFilter(this);
 
+    // TODO: Use this code to show info in the info banner.
+/*    QVariant msg = "Hello from C++";
+    QMetaObject::invokeMethod(rootObject, "showInfo", Q_ARG(QVariant, msg));*/
+
     // Create a timer that periodically fires to update the data. Update
     // interval is set to 5 mins (5*60*1000 ms).
     this->timer = new QTimer(this);
@@ -79,6 +83,7 @@ bool LiveScores::eventFilter(QObject* obj, QEvent* event) {
     switch(event->type()) {
         case QEvent::WindowActivate:
             this->notifier->disableNotifications();
+            this->notifier->clearNotifications();
             logger.log(Logger::DEBUG, "LiveScores::eventFilter(): Switched to foreground, notifications disabled.");
             break;
 

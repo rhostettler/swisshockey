@@ -23,12 +23,12 @@ GamedayData::GamedayData(QObject *parent) : QAbstractListModel(parent) {
     this->gameStatuses.insert(4, "End of Second");
     this->gameStatuses.insert(5, "Third Period");
     this->gameStatuses.insert(6, "End of Third");
-    this->gameStatuses.insert(7, "Extra");
+    this->gameStatuses.insert(7, "Overtime");
     this->gameStatuses.insert(8, "Shootout");
     this->gameStatuses.insert(9, "Final (unofficial)");
-    this->gameStatuses.insert(10, "Final (unofficial, extra)");
+    this->gameStatuses.insert(10, "Final (unofficial, overtime)");
     this->gameStatuses.insert(11, "Final (unofficial, shootout)");
-    this->gameStatuses.insert(12, "Final Result");
+    this->gameStatuses.insert(12, "Final");
 
     // Set the date to <empty>
     this->date = "";

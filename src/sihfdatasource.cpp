@@ -24,7 +24,7 @@ void SIHFDataSource::setGameId(QString gameId) {
 */
 void SIHFDataSource::queryScores(void) {
     // Request URL / Headers
-    QString url = "http://data.sihf.ch/Statistic/api/cms/table?alias=today&size=today&searchQuery=1,2,8,10,11//1,2,90&filterQuery=&orderBy=gameLeague&orderByDescending=false&take=20&filterBy=League&skip=0&language=de";
+    QString url = "http://data.sihf.ch/Statistic/api/cms/table?alias=today&size=today&searchQuery=1,2,8,10,11//1,2,81,90&filterQuery=&orderBy=gameLeague&orderByDescending=false&take=20&filterBy=League&skip=0&language=de";
     QNetworkRequest request;
     request.setUrl(QUrl(url));
     request.setRawHeader("Accept-Encoding", "deflate");
@@ -104,7 +104,7 @@ QVariantMap SIHFDataSource::parseGameSummary(QVariantList indata) {
         // TODO: This is just a quick & dirty workaround right now to only
         // fetch the NLA data, this must be handled properly using a filter in
         // the presentation layer in the future
-        if(!QString::compare(league, "NL A") || !QString::compare(league, "Cup")) {
+        if(!QString::compare(league, "NL A") || !QString::compare(league, "Cup") || !QString::compare(league, "CHL")) {
             // Put everything into a QVariantMap that we'll use as the common
             // internal raw data representation
             //QVariantMap data;
@@ -126,28 +126,57 @@ QVariantMap SIHFDataSource::parseGameSummary(QVariantList indata) {
             score["first"] = homePeriodsScore.value(0, "-").toString() + ":" + awayPeriodsScore.value(0, "-").toString();
             score["second"] = homePeriodsScore.value(1, "-").toString() + ":" + awayPeriodsScore.value(1, "-").toString();
             score["third"] = homePeriodsScore.value(2, "-").toString() + ":" + awayPeriodsScore.value(2, "-").toString();
-            if(!QString::compare(otIndicator, "OT") || !QString::compare(otIndicator, "PS")) {
+            if(homePeriodsScore.size() == 4) {
                 score.insert("overtime", homePeriodsScore[3].toString() + ":" + awayPeriodsScore[3].toString());
             }
             score["total"] = totalScore.value("homeTeam").toString() + ":" + totalScore.value("awayTeam").toString();
             data.insert("score", score);
 
-            // Additional info
-            // TODO: doesn't take OT/SO into account just yet
-            // progress, etc.
+            // Additional info, progress, etc.
             // 0 - Not started
             // 17 - 1. period
             // 33 - 1. break
             // 50 - 2. Period
             // 67 - 2. break
             // 83 - 3. Period
-            // 88 - Overtime or something ?
+            // 88 + "Overtime"
             // 100 - Finished
+            // 100 + "Shootout"
+            // 100 + "Ende*"
+            // 100 + "Ende"
             // Roughly corresponds to the following formula: progress/100*6 = "old status code"
-            data.insert("status", round(meta.value("percent").toDouble()/100*6));
+            double progress = meta.value("percent").toDouble();
+            int status = 0;
+            if(progress == 100) {
+                QString statustext = meta.value("name").toString();
+                if(statustext.compare("Shootout")) {
+                    status = 8;
+                } else if(statustext.compare("Ende")) {
+                    // Note to self: Here we ignore the additional info about the way the game finished (OT/SO)
+                    status = 12;
+                } else if(statustext.compare("Ende*")) {
+                    if(otIndicator.compare("OT")) {
+                        // Unofficial final result after overtime
+                        status = 10;
+                    } else if(otIndicator.compare("SO")) {
+                        // Unofficial final result after shootout
+                        status = 11;
+                    } else {
+                        // Unofficial final result
+                        status = 9;
+                    }
+                }
+            } else if(progress == 88) {
+                // Overtime in progress
+                status = 7;
+            } else {
+                // Regular, 1, ..., 6
+                status = round(progress/100*6);
+            }
+            data.insert("status", status);
             logger.log(Logger::DEBUG, "SIHFDataSource::parseGameSummary(): Game status calculated to be " + data.value("status").toString());
         } else {
-            logger.log(Logger::DEBUG, "SIHFDataSource::parseGameSummary(): Not NLA or Cup, data discarded.");
+            logger.log(Logger::DEBUG, "SIHFDataSource::parseGameSummary(): Not NLA, Cup, or CHL, data discarded.");
         }
     } else if(indata.size() == 1) {
         logger.log(Logger::DEBUG, "SIHFDataSource::parseGameSummary(): It appears that the supplied data doesn't contain any game info (no games today?).");
