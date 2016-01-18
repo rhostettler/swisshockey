@@ -149,16 +149,16 @@ QVariantMap SIHFDataSource::parseGameSummary(QVariantList indata) {
             int status = 0;
             if(progress == 100) {
                 QString statustext = meta.value("name").toString();
-                if(statustext.compare("Shootout")) {
+                if(!statustext.compare("Shootout")) {
                     status = 8;
-                } else if(statustext.compare("Ende")) {
+                } else if(!statustext.compare("Ende")) {
                     // Note to self: Here we ignore the additional info about the way the game finished (OT/SO)
                     status = 12;
-                } else if(statustext.compare("Ende*")) {
-                    if(otIndicator.compare("OT")) {
+                } else if(!statustext.compare("Ende*")) {
+                    if(!otIndicator.compare("OT")) {
                         // Unofficial final result after overtime
                         status = 10;
-                    } else if(otIndicator.compare("SO")) {
+                    } else if(!otIndicator.compare("SO")) {
                         // Unofficial final result after shootout
                         status = 11;
                     } else {
