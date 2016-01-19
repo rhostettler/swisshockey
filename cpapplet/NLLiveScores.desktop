@@ -1,0 +1,18 @@
+[Desktop Entry]
+Type=ControlPanelApplet
+Name=Live Scores
+X-logical-id=nl_live_scores
+X-translation-catalog=duisettings
+X-Maemo-Service=com.nokia.DuiControlPanel
+X-Maemo-Method=com.nokia.DuiControlPanelIf.appletPage
+X-Maemo-Object-Path=/
+X-Maemo-Fixed-Args=Live Scores
+
+[DUI]
+X-DUIApplet-Applet=libdeclarative.so
+
+[DCP]
+Category=Applications
+#Category=Notifications & Events
+Order=100
+Part=NLLiveScores.xml
