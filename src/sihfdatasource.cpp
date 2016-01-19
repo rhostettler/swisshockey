@@ -23,6 +23,9 @@ void SIHFDataSource::setGameId(QString gameId) {
    -H 'Host: data.sihf.ch' -H 'Accept-Encoding: deflate' -H 'Referer: http://www.sihf.ch/de/game-center/' -H 'Connection: keep-alive'
 */
 void SIHFDataSource::queryScores(void) {
+    // Notify that the update is being started
+    emit updateStarted();
+
     // Request URL / Headers
     QString url = "http://data.sihf.ch/Statistic/api/cms/table?alias=today&size=today&searchQuery=1,2,8,10,11//1,2,81,90&filterQuery=&orderBy=gameLeague&orderByDescending=false&take=20&filterBy=League&skip=0&language=de";
     QNetworkRequest request;
@@ -79,6 +82,9 @@ void SIHFDataSource::parseScoresResponse() {
     } else {
         logger.log(Logger::ERROR, "SIHFDataSource::parseScoresResponse(): No 'data' field in the response from the server.");
     }
+
+    // Signal that we're done parsing the data.
+    emit updateFinished();
 }
 
 // Parse the per-game JSON array from the response and put everything in an

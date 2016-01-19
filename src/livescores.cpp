@@ -17,7 +17,6 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
     this->nla = new GamedayData(this);
     this->dataSource = new SIHFDataSource(this);
     connect(this->dataSource, SIGNAL(gameSummaryUpdated(QVariantMap)), this->nla, SLOT(updateData(QVariantMap)));
-    this->dataSource->update();
 
     // Create the notifier
     this->notifier = new Notifier(nla);
@@ -36,11 +35,25 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
     this->viewer->rootContext()->setContextProperty("listData", nla);
     QObject *rootObject = viewer->rootObject();
     connect(rootObject, SIGNAL(viewChanged(QString)), this, SLOT(updateView(QString)));
+    connect(rootObject, SIGNAL(updateTriggered()), this, SLOT(updateData()));  // Manually trigger update
     rootObject->installEventFilter(this);
+
+    // Connect the
+    QObject *overviewPage = rootObject->findChild<QObject*>("overviewPage");
+    if(overviewPage == 0) {
+        Logger& logger = Logger::getInstance();
+        logger.log(Logger::DEBUG, "LiveScores::LiveScores(): Couldn't find the 'overviewPage' QML object, updates in progress will not be shown.");
+    } else {
+        connect(dataSource, SIGNAL(updateStarted()), overviewPage, SLOT(toggleUpdateIndicator()));
+        connect(dataSource, SIGNAL(updateFinished()), overviewPage, SLOT(toggleUpdateIndicator()));
+    }
 
     // TODO: Use this code to show info in the info banner.
 /*    QVariant msg = "Hello from C++";
     QMetaObject::invokeMethod(rootObject, "showInfo", Q_ARG(QVariant, msg));*/
+
+    // Trigger an update after all the GUI signals have been connected.
+    this->dataSource->update();
 
     // Create a timer that periodically fires to update the data, defaults to 5
     Config& config = Config::getInstance();
@@ -105,7 +118,7 @@ bool LiveScores::eventFilter(QObject* obj, QEvent* event) {
 // Updates the data when the timer fires
 void LiveScores::updateData() {
     Logger& logger = Logger::getInstance();
-    logger.log(Logger::DEBUG, "LiveScores::updateData() called for a data update.");
+    logger.log(Logger::DEBUG, "LiveScores::updateData(): called for a data update.");
 
     // Query the website and update
     // TODO: I think I want to split this into updateSummaries() and updateDetails() ? I have to think about what's the most generic way?

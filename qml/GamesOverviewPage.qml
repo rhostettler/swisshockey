@@ -4,6 +4,11 @@ import com.nokia.meego 1.0
 Page {
     tools: mainToolbar
 
+    function toggleUpdateIndicator() {
+        updateIndicator.running = !updateIndicator.running;
+        updateIndicator.visible = !updateIndicator.visible;
+    }
+
     // The header
     Rectangle {
         id: header
@@ -32,6 +37,26 @@ Page {
             color: "#FFFFFF"
             text: "NL A"
             smooth: true
+        }
+
+        // A spinning busy indicator shown while the data is loading upon
+        // application start
+        BusyIndicator {
+            id: updateIndicator
+            anchors {
+                right: selectorIcon.left
+                rightMargin: 32
+                verticalCenter: parent.verticalCenter
+            }
+
+            platformStyle: BusyIndicatorStyle {
+                size: "small"
+                inverted: true
+            }
+            visible: false
+            running: false
+            //running: gameList.count == 0
+            //visible: gameList.count == 0
         }
 
         // Selector Icon
@@ -73,23 +98,12 @@ Page {
          model: ListModel {
              ListElement { name: "NL A" }
 /*             ListElement { name: "NL B" }
-             ListElement { name: "Cup" }*/
+             ListElement { name: "Cup" }
+             ListElement { name: "CHL" }
+*/
          }
      }
 
-    // A spinning busy indicator shown while the data is loading upon
-    // application start
-/*    BusyIndicator {
-        id: spinningIndicator
-        anchors {
-            horizontalCenter: parent.horizontalCenter
-            verticalCenter: parent.verticalCenter
-        }
-
-        platformStyle: BusyIndicatorStyle { size: "large" }
-        running: gameList.count == 0
-        visible: gameList.count == 0
-    }*/
     Text {
         id: statusLabel
         anchors {
@@ -223,6 +237,7 @@ Page {
         }
     }
 
+    property bool bannerStart: false
     ListView {
         id: gameList
         width: parent.width
@@ -235,5 +250,37 @@ Page {
 
         model: listData
         delegate: gameDelegate
+
+        // Pull-down when at rest triggers a manual update, see
+        // http://talk.maemo.org/showthread.php?t=85182
+        //
+        // Note: contentY is as in a cartesian coordinate system, that is,
+        // positive is up, negative is down.
+        onContentYChanged: {
+            if(bannerStart && (contentY <= -72)) {
+                // Trigger the action when we pulled down from the top
+                appWindow.updateTriggered();
+
+                // Set to false to avoid multiple triggering
+                bannerStart = false;
+            }
+        }
+        onMovementStarted: {
+            // Determine whether we started pulling from the top or not
+            if(contentY == 0) {
+                bannerStart = true;
+            } else {
+                bannerStart = false;
+            }
+        }
+        onVerticalVelocityChanged: {
+            // Prevent triggering pulldown item when rebound from top boundary
+            if(verticalVelocity > 0) {
+                bannerStart = false;
+            }
+        }
+        onMovementEnded: {
+            bannerStart = false;
+        }
     }
 }

@@ -16,6 +16,8 @@ class DataSource : public QObject {
         void gameSummaryUpdated(QVariantMap data);
         void gameDetailsUpdated();
         void updateError(QString message);
+        void updateStarted();
+        void updateFinished();
 
     public slots:
     

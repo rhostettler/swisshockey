@@ -8,6 +8,7 @@ PageStackWindow {
 
     // Emitted when one of the games is selected for details view
     signal viewChanged(string gameId)
+    signal updateTriggered()
 
     // Create an info banner with no icon
     InfoBanner {
@@ -24,6 +25,7 @@ PageStackWindow {
     // Define the pages
     GamesOverviewPage {
         id: overviewPage
+        objectName: "overviewPage"
     }
 
     GameDetailsPage {
