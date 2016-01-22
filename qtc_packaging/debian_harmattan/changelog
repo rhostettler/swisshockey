@@ -1,3 +1,8 @@
+nllivescores (0.2.0) unstable; urgency=low
+  * League filter support
+
+ -- Roland Hostettler <r.hostettler@gmx.ch>  Fri, 22 Jan 2016 10:00:11 +0100
+
 nllivescores (0.1.0) unstable; urgency=low
   * First public release.
 

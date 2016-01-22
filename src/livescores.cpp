@@ -12,11 +12,20 @@
 #include "config.h"
 
 LiveScores::LiveScores(QObject *parent) : QObject(parent) {
+    // TODO: rename "nla" to something else
     // Create data lists and setup the data source, then run an initial query
     // N.B.: I could maybe use the insert/update facility of the QAbstractItemModel but then the data source would have to know about the model again. We'll se how we'll handle this.
     this->nla = new GamedayData(this);
     this->dataSource = new SIHFDataSource(this);
     connect(this->dataSource, SIGNAL(gameSummaryUpdated(QVariantMap)), this->nla, SLOT(updateData(QVariantMap)));
+
+    // Create a filter for the league
+    this->filter = new QSortFilterProxyModel(this);
+    this->filter->setFilterRole(GamedayData::LeagueRole);
+    this->filter->setDynamicSortFilter(true);
+    this->filter->setFilterKeyColumn(0);  // We only have the 0-column
+    this->filter->setFilterRegExp("NL A");
+    this->filter->setSourceModel(this->nla);
 
     // Create the notifier
     this->notifier = new Notifier(nla);
@@ -26,19 +35,21 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
     this->viewer = new QmlApplicationViewer();
     this->viewer->setOrientation(QmlApplicationViewer::ScreenOrientationAuto);
     this->viewer->setMainQmlFile(QLatin1String("qml/main.qml"));
-
-    // Show the view
     this->viewer->showExpanded();
 
     // Set data sources, connect to signals, and add an event filter to catch
     // switches between foreground and background.
+#if 0
     this->viewer->rootContext()->setContextProperty("listData", nla);
+#endif
+    this->viewer->rootContext()->setContextProperty("listData", this->filter);
     QObject *rootObject = viewer->rootObject();
     connect(rootObject, SIGNAL(viewChanged(QString)), this, SLOT(updateView(QString)));
+    connect(rootObject, SIGNAL(leagueChanged(QString)), this, SLOT(updateLeague(QString)));
     connect(rootObject, SIGNAL(updateTriggered()), this, SLOT(updateData()));  // Manually trigger update
     rootObject->installEventFilter(this);
 
-    // Connect the
+    // Connect the update*()-signals to the update indicator
     QObject *overviewPage = rootObject->findChild<QObject*>("overviewPage");
     if(overviewPage == 0) {
         Logger& logger = Logger::getInstance();
@@ -48,14 +59,16 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
         connect(dataSource, SIGNAL(updateFinished()), overviewPage, SLOT(toggleUpdateIndicator()));
     }
 
+#if 0
     // TODO: Use this code to show info in the info banner.
-/*    QVariant msg = "Hello from C++";
-    QMetaObject::invokeMethod(rootObject, "showInfo", Q_ARG(QVariant, msg));*/
+    QVariant msg = "Hello from C++";
+    QMetaObject::invokeMethod(rootObject, "showInfo", Q_ARG(QVariant, msg));
+#endif
 
     // Trigger an update after all the GUI signals have been connected.
     this->dataSource->update();
 
-    // Create a timer that periodically fires to update the data, defaults to 5
+    // Create a timer that periodically fires to update the data, defaults to 5 mins
     Config& config = Config::getInstance();
     int updateInterval = config.getValue("updateInterval", 5).toInt();
     this->timer = new QTimer(this);
@@ -66,6 +79,7 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
 
 // TODO: Re-implement / rework when details view is reworked
 void LiveScores::updateView(QString id) {
+#if 0
     this->current = nla->getGame(id);
 
     if(this->current != NULL) {
@@ -89,6 +103,14 @@ void LiveScores::updateView(QString id) {
         // Here we set the correct data source, then that's it
         context->setContextProperty("gameEventsData", this->current);
     }
+#endif
+}
+
+// Update the filter to the selected league
+void LiveScores::updateLeague(QString league) {
+    Logger& logger = Logger::getInstance();
+    logger.log(Logger::DEBUG, "LiveScores::updateLeague(): Changing league filter to " + league);
+    this->filter->setFilterRegExp(league);
 }
 
 // Observe the focus state of the app (foreground / background) and set the

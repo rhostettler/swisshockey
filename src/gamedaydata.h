@@ -31,7 +31,8 @@ class GamedayData : public QAbstractListModel {
             TotalScoreRole,
             PeriodsScoreRole,
             GameStatusRole,
-            GameIdRole
+            GameIdRole,
+            LeagueRole
         };
 
         int rowCount(const QModelIndex & parent = QModelIndex()) const;

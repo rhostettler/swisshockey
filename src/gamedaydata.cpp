@@ -12,6 +12,7 @@ GamedayData::GamedayData(QObject *parent) : QAbstractListModel(parent) {
     roles[PeriodsScoreRole] = "periodsscore";
     roles[GameStatusRole] = "gamestatus";
     roles[GameIdRole] = "gameid";
+    roles[LeagueRole] = "league";
 
     setRoleNames(roles);
 
@@ -138,6 +139,10 @@ QVariant GamedayData::data(const QModelIndex &index, int role) const {
 
         case GameIdRole:
             data = QString::number(key);
+            break;
+
+        case LeagueRole:
+        data = this->games[key]->getLeague();
             break;
 
         default:

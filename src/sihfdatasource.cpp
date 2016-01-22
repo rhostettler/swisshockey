@@ -107,10 +107,12 @@ QVariantMap SIHFDataSource::parseGameSummary(QVariantList indata) {
         QVariantMap meta = indata[7].toMap();
         QVariantMap details = indata[8].toMap();
 
+#if 0
         // TODO: This is just a quick & dirty workaround right now to only
         // fetch the NLA data, this must be handled properly using a filter in
         // the presentation layer in the future
         if(!QString::compare(league, "NL A") || !QString::compare(league, "Cup") || !QString::compare(league, "CHL")) {
+#endif
             // Put everything into a QVariantMap that we'll use as the common
             // internal raw data representation
             //QVariantMap data;
@@ -181,9 +183,11 @@ QVariantMap SIHFDataSource::parseGameSummary(QVariantList indata) {
             }
             data.insert("status", status);
             logger.log(Logger::DEBUG, "SIHFDataSource::parseGameSummary(): Game status calculated to be " + data.value("status").toString());
+#if 0
         } else {
             logger.log(Logger::DEBUG, "SIHFDataSource::parseGameSummary(): Not NLA, Cup, or CHL, data discarded.");
         }
+#endif
     } else if(indata.size() == 1) {
         logger.log(Logger::DEBUG, "SIHFDataSource::parseGameSummary(): It appears that the supplied data doesn't contain any game info (no games today?).");
         // TODO: here, we should somehow signal that there are no games today? Or maybe that's to be done somewhere else instead?

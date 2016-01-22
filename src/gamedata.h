@@ -17,6 +17,7 @@ class GameData : public QAbstractListModel {
 
     private:
         QString gameId;
+        QString league;
 
         // Home- and away team
         QString hometeam;
@@ -55,6 +56,7 @@ class GameData : public QAbstractListModel {
         bool hasChanged(void);
         bool hasChanged(QString type);
 
+        QString getLeague();
         QString getHometeam();
         QString getHometeamId();
         QString getAwayteam();

@@ -5,6 +5,9 @@
 
 // Instantate and initialize the game
 GameData::GameData(QVariantMap data, QObject *parent) : QAbstractListModel(parent) {
+    // Get the league
+    this->league = data["league"].toString();
+
     // Get the game ID
     this->gameId = data["gameId"].toString();
 
@@ -198,6 +201,10 @@ bool GameData::hasChanged(QString type) {
     }
 
     return changed;
+}
+
+QString GameData::getLeague() {
+    return this->league;
 }
 
 QString GameData::getHometeam() {

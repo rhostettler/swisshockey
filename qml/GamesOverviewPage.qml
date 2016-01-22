@@ -35,7 +35,8 @@ Page {
                 pixelSize: 28
             }
             color: "#FFFFFF"
-            text: "NL A"
+            //text: "NL A"
+            text: leagueSelectionDialog.model.get(leagueSelectionDialog.selectedIndex).name
             smooth: true
         }
 
@@ -97,10 +98,13 @@ Page {
 
          model: ListModel {
              ListElement { name: "NL A" }
-/*             ListElement { name: "NL B" }
+             ListElement { name: "NL B" }
              ListElement { name: "Cup" }
              ListElement { name: "CHL" }
-*/
+         }
+
+         onAccepted: {
+             appWindow.leagueChanged(leagueSelectionDialog.model.get(leagueSelectionDialog.selectedIndex).name);
          }
      }
 
