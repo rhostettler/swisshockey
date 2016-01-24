@@ -36,9 +36,25 @@ QString GameEvent::getEventSubtext(void) const {
 bool GameEvent::greaterThan(const GameEvent *e1, const GameEvent *e2) {
     bool less = false;
 
+    QString t1 = e1->getTime();
+    if(!QString::compare(t1.at(0), "6")) {
+        t1.replace(0, 1, "0");
+        t1.prepend("1:");
+    } else {
+        t1.prepend("0:");
+    }
+
+    QString t2 = e2->getTime();
+    if(!QString::compare(t2.at(0), "6")) {
+        t2.replace(0, 1, "0");
+        t2.prepend("1:");
+    } else {
+        t2.prepend("0:");
+    }
+
     // Calculate the time difference between the two events
-    QTime time1 = QTime::fromString(e1->getTime(), "mm:ss");
-    QTime time2 = QTime::fromString(e2->getTime(), "mm:ss");
+    QTime time1 = QTime::fromString(t1, "h:mm:ss");
+    QTime time2 = QTime::fromString(t2, "h:mm:ss");
     int deltaTime = time1.secsTo(time2);
 
     // Positive delta => time2-time1 > 0 => time1 < time2
@@ -71,7 +87,7 @@ QList<QString> GameEvent::penaltyTexts = QList<QString>()
     << QString("Holding an opponent")
     << QString("Hooking")
     << QString("Holding the stick")
-    << QString("UIllegal equipment")
+    << QString("Illegal equipment")
     << QString("Interference")
     << QString("Kneeing")
     << QString("Match penalty")
