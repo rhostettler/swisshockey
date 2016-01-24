@@ -24,10 +24,10 @@ class SIHFDataSource : public DataSource {
 
     public:
         explicit SIHFDataSource(QObject *parent = 0);
-        void update();
+        void update(QString id);
         void setGameId(QString gameId);
         void queryScores(void);
-        void queryStats(void);            // TODO: Rename
+        void queryStats(QString gameId);            // TODO: Rename
 
     signals:
 

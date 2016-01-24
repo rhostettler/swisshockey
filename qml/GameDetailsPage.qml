@@ -215,6 +215,24 @@ Page {
                 text: eventtext
             }
 
+            // Additional text under the score/penalty
+            Text {
+                id: eventSubtext
+                width: 96
+                horizontalAlignment: Text.Center
+                anchors {
+                    horizontalCenter: eventText.horizontalCenter
+                    top: parent.verticalCenter
+                }
+
+                font {
+                    family: "Nokia Pure Light"
+                    pointSize: 18
+                }
+
+                text: eventsubtext
+            }
+
             // Separator between the entries
             Image {
                 id: eventSeparator

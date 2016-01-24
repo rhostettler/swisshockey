@@ -132,24 +132,16 @@ void Notifier::dataChanged(const QModelIndex & topLeft, const QModelIndex & bott
             notification->setIdentifier(gameId);
         }
 
+        // Add the callback action
+
         // Publish / update the notification
         notification->publish();
     }
 }
 
-// TODO: Move to Config-singleton
+// Check if the notification for a given team is enabled
 bool Notifier::notificationEnabled(QString team) {
     QString key = teams[team];
-#if 0
-    QString gconfPath = "/apps/NLLiveScores/settings/";
-    QString gconfKey = gconfPath.append(key);
-
-    GConfItem item(gconfKey);
-    bool status = item.value(false).toBool();
-
-    return status;
-#endif
-
     Config& config = Config::getInstance();
     return config.getValue(key, false).toBool();
 }

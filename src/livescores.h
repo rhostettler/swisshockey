@@ -23,6 +23,7 @@ class LiveScores : public QObject {
         SIHFDataSource *dataSource;
         QmlApplicationViewer *viewer;
         QTimer *timer;
+        QString currentId;
 
     public:
         explicit LiveScores(QObject *parent = 0);

@@ -31,6 +31,7 @@ GameData::GameData(QVariantMap data, QObject *parent) : QAbstractListModel(paren
     roles[PlayerRole] = "eventplayer";
     roles[AdditionalInfoRole] = "eventinfo";
     roles[EventRole] = "eventtext";
+    roles[EventSubtextRole] = "eventsubtext";
     setRoleNames(roles);
 }
 
@@ -75,17 +76,19 @@ void GameData::updateSummary(QVariantMap data) {
     }
 }
 
-void GameData::updateEvents(QVariantMap gameInfo, QVariantList goals, QVariantList fouls, QVariantMap players) {
-    // Store general data
-    this->hometeamId = gameInfo.value("hometeamid").toLongLong();
-    this->awayteamId = gameInfo.value("awayteamid").toLongLong();
+// TODO: For simplicity, we update the parsing functions here for now, we'll
+// move to the generic solution later on.
+void GameData::updateEvents(QVariantList goals, QVariantList fouls, QVariantList players) {
+    Logger& logger = Logger::getInstance();
+    logger.log(Logger::DEBUG, "GameData::updateEvents(): Updating game events.");
 
-    // begin insert/remove rows
+    // Clear all events
     beginResetModel();
     this->events.clear();
     endResetModel();
 
-    if(goals.count() + fouls.count() > 0) {
+    // Update the list of events (if there are any)
+    if(goals.size() + fouls.size() > 0) {
         beginInsertRows(QModelIndex(), rowCount(), rowCount());
         // Parse the players, goals, and fouls
         this->updatePlayerList(players);
@@ -97,25 +100,31 @@ void GameData::updateEvents(QVariantMap gameInfo, QVariantList goals, QVariantLi
 
         // End insert/remove rows
         this->endInsertRows();
+
+        logger.log(Logger::DEBUG, "GameData::updateEvents(): Added " + QString::number(this->players.size()) + " players and " + QString::number(this->events.size()) + " events.");
+    } else {
+        logger.log(Logger::DEBUG, "GameData::updateEvents(): No game events to add.");
     }
 }
 
 // Parses the player list and adds them to the local list of players where we
 // have a player license <=> player name map
-void GameData::updatePlayerList(QVariantMap players) {
-    QMapIterator<QString, QVariant> iterator(players);
+void GameData::updatePlayerList(QVariantList players) {
+    QListIterator<QVariant> iterator(players);
 
     while(iterator.hasNext()) {
-        QVariantMap player = iterator.next().value().toMap();
-        quint32 playerId = player.value("pid").toUInt();
-        QString playerFirstName = player.value("firstname").toString();
-        playerFirstName = playerFirstName.remove(1, playerFirstName.length());
-        QString playerLastName = GameData::parsePlayerName(player.value("lastname").toString());
-
-        this->players.insert(playerId, playerFirstName + ". " + playerLastName);
+        QVariantMap player = iterator.next().toMap();
+        quint32 playerId = player.value("id").toUInt();
+        QString playerName = player.value("fullName").toString();
+        int index = playerName.lastIndexOf(" ");
+        QString lastName = playerName.left(index);
+        QString firstName = playerName.at(index+1);
+        QString name = firstName + ". " + lastName;
+        this->players.insert(playerId, name);
     }
 }
 
+#if 0
 // TODO: That should be obsolete now that we have proper UTF-8 parsing
 QString GameData::parsePlayerName(QString name) {
     QMap<QString, QString> lookupTable = QMap<QString, QString>();
@@ -132,6 +141,7 @@ QString GameData::parsePlayerName(QString name) {
 
     return name;
 }
+#endif
 
 // Parse the list of goals and add an event for each goal
 void GameData::updateGoals(QVariantList goals) {
@@ -140,18 +150,22 @@ void GameData::updateGoals(QVariantList goals) {
     int cumulativeAwayScore = 0;
 
     // Iterate through the goals list backwards since the newest is the first
+#if 0
     iterator.toBack();
     while(iterator.hasPrevious()) {
         QVariantMap goal = iterator.previous().toMap();
+#endif
+    while(iterator.hasNext()) {
+        QVariantMap goal = iterator.next().toMap();
         QString time = goal.value("time").toString();
-        QString player = this->players.value(goal.value("scorerlicencenr").toUInt());
-        QString additionalInfo = this->players.value(goal.value("assist1licencenr").toUInt(), "");
-        QString assist2 = this->players.value(goal.value("assist2licencenr").toUInt(), "");
+        QString player = this->players.value(goal.value("scorerLicenceNr").toUInt());
+        QString additionalInfo = this->players.value(goal.value("assist1LicenceNr").toUInt(), "");
+        QString assist2 = this->players.value(goal.value("assist2LicenceNr").toUInt(), "");
         if(assist2.compare("") != 0) {
             additionalInfo = additionalInfo + ", " + assist2;
         }
 
-        if(goal.value("teamid").toLongLong() == this->hometeamId) {
+        if(goal.value("teamId").toLongLong() == this->hometeamId) {
             cumulativeHomeScore += 1;
         } else {
             cumulativeAwayScore += 1;
@@ -170,8 +184,8 @@ void GameData::updateFouls(QVariantList fouls) {
     while(iterator.hasNext()) {
         QVariantMap foul = iterator.next().toMap();
         QString time = foul.value("time").toString();
-        QString player = this->players.value(foul.value("licencenr").toUInt());
-        QString additionalInfo = GameEvent::getPenaltyText(foul.value("foulid").toInt());
+        QString player = this->players.value(foul.value("playerLicenceNr").toUInt(), "");
+        QString additionalInfo = GameEvent::getPenaltyText(foul.value("id").toInt());
         QString penalty = foul.value("minutes").toString() + "'";
         this->events.append(new GameEvent(time, player, additionalInfo, penalty));
     }
@@ -295,6 +309,10 @@ QVariant GameData::data(const QModelIndex &index, int role) const {
 
         case EventRole:
             data = this->events[key]->getEvent();
+            break;
+
+        case EventSubtextRole:
+            data = this->events[key]->getEventSubtext(); // TODO: A Hack!
             break;
 
         default:

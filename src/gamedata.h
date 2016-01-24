@@ -49,8 +49,7 @@ class GameData : public QAbstractListModel {
     public:
         explicit GameData(QVariantMap data, QObject *parent = 0);
         void updateSummary(QVariantMap data);
-        void updateEvents(QVariantMap gameInfo, QVariantList goals, QVariantList fouls, QVariantMap players);
-        void updatePlayerList(QVariantMap players);
+        void updatePlayerList(QVariantList players);
         void updateGoals(QVariantList goals);
         void updateFouls(QVariantList fouls);
         bool hasChanged(void);
@@ -74,7 +73,8 @@ class GameData : public QAbstractListModel {
             TimeRole,
             PlayerRole,
             AdditionalInfoRole,
-            EventRole
+            EventRole,
+            EventSubtextRole
         };
 
         int rowCount(const QModelIndex & parent = QModelIndex()) const;
@@ -86,6 +86,7 @@ class GameData : public QAbstractListModel {
     signals:
 
     public slots:
+        void updateEvents(QVariantList goals, QVariantList fouls, QVariantList players);
 };
 
 #endif // GAMEDATA_H

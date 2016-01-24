@@ -39,9 +39,6 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
 
     // Set data sources, connect to signals, and add an event filter to catch
     // switches between foreground and background.
-#if 0
-    this->viewer->rootContext()->setContextProperty("listData", nla);
-#endif
     this->viewer->rootContext()->setContextProperty("listData", this->filter);
     QObject *rootObject = viewer->rootObject();
     connect(rootObject, SIGNAL(viewChanged(QString)), this, SLOT(updateView(QString)));
@@ -55,8 +52,8 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
         Logger& logger = Logger::getInstance();
         logger.log(Logger::DEBUG, "LiveScores::LiveScores(): Couldn't find the 'overviewPage' QML object, updates in progress will not be shown.");
     } else {
-        connect(dataSource, SIGNAL(updateStarted()), overviewPage, SLOT(toggleUpdateIndicator()));
-        connect(dataSource, SIGNAL(updateFinished()), overviewPage, SLOT(toggleUpdateIndicator()));
+        connect(dataSource, SIGNAL(updateStarted()), overviewPage, SLOT(startUpdateIndicator()));
+        connect(dataSource, SIGNAL(updateFinished()), overviewPage, SLOT(stopUpdateIndicator()));
     }
 
 #if 0
@@ -66,7 +63,8 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
 #endif
 
     // Trigger an update after all the GUI signals have been connected.
-    this->dataSource->update();
+    //this->currentId = NULL;
+    this->dataSource->update(this->currentId);
 
     // Create a timer that periodically fires to update the data, defaults to 5 mins
     Config& config = Config::getInstance();
@@ -79,31 +77,34 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
 
 // TODO: Re-implement / rework when details view is reworked
 void LiveScores::updateView(QString id) {
-#if 0
-    this->current = nla->getGame(id);
+    GameData *game = nla->getGame(id);
+    this->currentId = id;
 
     if(this->current != NULL) {
         // Set the game id in the totomat & force update
-        this->dataSource->setGameId(id);
-        this->dataSource->queryStats();
+        connect(this->dataSource, SIGNAL(gameDetailsUpdated(QVariantList, QVariantList, QVariantList)), game, SLOT(updateEvents(QVariantList, QVariantList, QVariantList)));
+        //this->dataSource->setGameId(id);
+        this->dataSource->queryStats(id);
 
-        // Q: can we start the BusyIndicator here?
+        // Q: Can we start the BusyIndicator here?
+        // A: Not here but we'll get to that...
 
         // Get the context since we'll be invoking it a couple of times
         QDeclarativeContext *context = viewer->rootContext();
 
         // Set the info for the page top
-        context->setContextProperty("detailstotalscore", this->current->getTotalScore());
-        context->setContextProperty("detailshometeamId", this->current->getHometeamId());
-        context->setContextProperty("detailsawayteamId", this->current->getAwayteamId());
-        context->setContextProperty("detailsperiodsscore", this->current->getPeriodsScore());
+        // TODO: Here, i should rather pass the whole object to QML and use the
+        // getters there, that should (might) trigger the auto update
+        context->setContextProperty("detailstotalscore", game->getTotalScore());
+        context->setContextProperty("detailshometeamId", game->getHometeamId());
+        context->setContextProperty("detailsawayteamId", game->getAwayteamId());
+        context->setContextProperty("detailsperiodsscore", game->getPeriodsScore());
         //context->setContextProperty("", );
         // TODO: Here we implement stuff like the game location, refs, spectators
 
         // Here we set the correct data source, then that's it
-        context->setContextProperty("gameEventsData", this->current);
+        context->setContextProperty("gameEventsData", game);
     }
-#endif
 }
 
 // Update the filter to the selected league
@@ -145,7 +146,7 @@ void LiveScores::updateData() {
     // Query the website and update
     // TODO: I think I want to split this into updateSummaries() and updateDetails() ? I have to think about what's the most generic way?
     // Maybe provide an overloaded update() function that takes an argument and if the argument is set, the update is for a specific game?
-    this->dataSource->update();
+    this->dataSource->update(this->currentId);
     //this->queryStats();  % Disabled until re-implemented
 }
 

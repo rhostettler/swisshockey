@@ -28,13 +28,17 @@ QString GameEvent::getEvent(void) const {
     return this->event;
 }
 
+QString GameEvent::getEventSubtext(void) const {
+    return "";
+}
+
 // Compares two events e1 and e2
 bool GameEvent::greaterThan(const GameEvent *e1, const GameEvent *e2) {
     bool less = false;
 
     // Calculate the time difference between the two events
-    QTime time1 = QTime::fromString(e1->getTime(), "m:ss");
-    QTime time2 = QTime::fromString(e2->getTime(), "m:ss");
+    QTime time1 = QTime::fromString(e1->getTime(), "mm:ss");
+    QTime time2 = QTime::fromString(e2->getTime(), "mm:ss");
     int deltaTime = time1.secsTo(time2);
 
     // Positive delta => time2-time1 > 0 => time1 < time2

@@ -4,9 +4,14 @@ import com.nokia.meego 1.0
 Page {
     tools: mainToolbar
 
-    function toggleUpdateIndicator() {
-        updateIndicator.running = !updateIndicator.running;
-        updateIndicator.visible = !updateIndicator.visible;
+    function startUpdateIndicator() {
+        updateIndicator.running = true;
+        updateIndicator.visible = true;
+    }
+
+    function stopUpdateIndicator() {
+        updateIndicator.running = false;
+        updateIndicator.visible = false;
     }
 
     // The header
@@ -35,7 +40,6 @@ Page {
                 pixelSize: 28
             }
             color: "#FFFFFF"
-            //text: "NL A"
             text: leagueSelectionDialog.model.get(leagueSelectionDialog.selectedIndex).name
             smooth: true
         }
@@ -138,8 +142,8 @@ Page {
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
-                /*    appWindow.viewChanged(gameid);
-                    pageStack.push(detailsPage);*/
+                    appWindow.viewChanged(gameid);
+                    pageStack.push(detailsPage);
                 }
             }
 
