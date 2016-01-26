@@ -44,7 +44,7 @@ class GamedayData : public QAbstractListModel {
 
     public slots:
         void updateData(QVariantMap data);
-        void gamedataChanged(qulonglong key);
+        void gamedataChanged(const QString & key);
     
 };
 

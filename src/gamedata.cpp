@@ -76,6 +76,9 @@ void GameData::updateSummary(QVariantMap data) {
         // GamedayData will listen to the scoreChanged()- and statusChanged()-signals instead.
         this->m_scoreChanged = true;
         emit scoreChanged();
+
+        // TODO: I should also fire a scoreChanged() when a new period starts
+        // for updating the details view
     }
 
     // Check if the game status has changed and set the flag

@@ -1,6 +1,8 @@
 #include "gamedaydata.h"
 #include <QDate>
 
+#include "logger.h"
+
 GamedayData::GamedayData(QObject *parent) : QAbstractListModel(parent) {
     // Initialize the different data roles
     QHash<int, QByteArray> roles;
@@ -20,7 +22,7 @@ GamedayData::GamedayData(QObject *parent) : QAbstractListModel(parent) {
 
     // Signal mapper acts as a proxy between the GameData -> GamedayData -> outside world
     this->signalMapper = new QSignalMapper(this);
-    connect(this->signalMapper, SIGNAL(mapped(qulonglong)), this, SLOT(gamedataChanged(qulonglong)));
+    connect(this->signalMapper, SIGNAL(mapped(const QString &)), this, SLOT(gamedataChanged(const QString &)));
 }
 
 void GamedayData::updateGames(QString date, QVariantMap data) {
@@ -38,6 +40,7 @@ void GamedayData::updateGames(QString date, QVariantMap data) {
         // NOP.
     }
 
+    // TODO: I should replace the qulonglong with QStrings throughout the code.
     qulonglong key = data["gameId"].toULongLong();
     if(this->games.contains(key)) {
         // The game is already in the list, hence, we simply update it with
@@ -59,7 +62,7 @@ void GamedayData::updateGames(QString date, QVariantMap data) {
         // the sender in GamedayData (and the views).
         connect(this->games[key], SIGNAL(scoreChanged()), this->signalMapper, SLOT(map()));
         connect(this->games[key], SIGNAL(statusChanged()), this->signalMapper, SLOT(map()));
-        signalMapper->setMapping(this->games[key], key);
+        signalMapper->setMapping(this->games[key], QString::number(key));
     }
 
 #if 0
@@ -78,8 +81,11 @@ void GamedayData::updateData(QVariantMap data) {
     this->updateGames("", data);
 }
 
-void GamedayData::gamedataChanged(qulonglong key) {
-    QModelIndex index = createIndex(this->gameIndices.indexOf(key), 0);
+void GamedayData::gamedataChanged(const QString & key) {
+    Logger& logger = Logger::getInstance();
+    logger.log(Logger::DEBUG, "GamedayData::gamedataChanged(): With key " + key);
+
+    QModelIndex index = createIndex(this->gameIndices.indexOf(key.toLongLong()), 0);
     emit dataChanged(index, index);
 }
 
