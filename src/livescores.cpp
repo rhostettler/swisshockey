@@ -57,7 +57,7 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
     }
 
 #if 0
-    // TODO: Use this code to show info in the info banner.
+    // TODO: Use this code to show the info banner from C++.
     QVariant msg = "Hello from C++";
     QMetaObject::invokeMethod(rootObject, "showInfo", Q_ARG(QVariant, msg));
 #endif
@@ -75,7 +75,7 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
     this->timer->start(updateInterval*60*1000);
 }
 
-// TODO: Re-implement / rework when details view is reworked
+// TODO: Re-implement / rework when details view is reworked -> p.g.
 void LiveScores::updateView(QString id) {
     GameData *game = nla->getGame(id);
     this->currentId = id;
@@ -92,6 +92,7 @@ void LiveScores::updateView(QString id) {
         // Get the context since we'll be invoking it a couple of times
         QDeclarativeContext *context = viewer->rootContext();
 
+#if 0
         // Set the info for the page top
         // TODO: Here, i should rather pass the whole object to QML and use the
         // getters there, that should (might) trigger the auto update
@@ -101,6 +102,10 @@ void LiveScores::updateView(QString id) {
         context->setContextProperty("detailsperiodsscore", game->getPeriodsScore());
         //context->setContextProperty("", );
         // TODO: Here we implement stuff like the game location, refs, spectators
+#endif
+        // Replace the game object in the GUI
+        //context->setContextObject(game);
+        context->setContextProperty("gameDetailsData", game);
 
         // Here we set the correct data source, then that's it
         context->setContextProperty("gameEventsData", game);

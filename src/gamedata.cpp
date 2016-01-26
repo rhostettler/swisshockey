@@ -1,9 +1,23 @@
-#include <QStringList>
-#include <QTextStream>
 #include "gamedata.h"
 #include "logger.h"
 
-// Instantate and initialize the game
+// The list of game status texts
+QStringList GameData::gameStatusTexts = QStringList()
+    << QString("Not Started")    // 0
+    << QString("First Period")
+    << QString("End of First")
+    << QString("Second Period")
+    << QString("End of Second")
+    << QString("Third Period")   // 5
+    << QString("End of Third")
+    << QString("Overtime")
+    << QString("Shootout")
+    << QString("Final (unofficial)")
+    << QString("Final (unofficial, overtime)") // 10
+    << QString("Final (unofficial, shootout)")
+    << QString("Final");
+
+// Initialize the game
 GameData::GameData(QVariantMap data, QObject *parent) : QAbstractListModel(parent) {
     // Get the league
     this->league = data["league"].toString();
@@ -21,8 +35,8 @@ GameData::GameData(QVariantMap data, QObject *parent) : QAbstractListModel(paren
     updateSummary(data);
 
     // Reset the changed flag to prevent notifications on application startup
-    this->scoreChanged = false;
-    this->statusChanged = false;
+    this->m_scoreChanged = false;
+    this->m_statusChanged = false;
 
     // Set the data roles
     QHash<int, QByteArray> roles;
@@ -34,15 +48,6 @@ GameData::GameData(QVariantMap data, QObject *parent) : QAbstractListModel(paren
     roles[EventSubtextRole] = "eventsubtext";
     setRoleNames(roles);
 }
-
-#if 0
-// TODO: May be removed?
-QString GameData::parseTeam(QString team) {
-    team.replace("&egrave;", "e");
-    team.replace("", "e");
-    return team;
-}
-#endif
 
 // Update the game score
 void GameData::updateSummary(QVariantMap data) {
@@ -65,14 +70,20 @@ void GameData::updateSummary(QVariantMap data) {
     // Update game status
     this->status = data["status"].toInt();
 
-    // Check if the total score changed and set the flag
+    // Check if the total score changed and trigger an update
     if(this->score["total"].compare(oldScore)) {
-        this->scoreChanged = true;
+        // TODO: Legacy, as not to confuse the GamedayData, will be removed and
+        // GamedayData will listen to the scoreChanged()- and statusChanged()-signals instead.
+        this->m_scoreChanged = true;
+        emit scoreChanged();
     }
 
     // Check if the game status has changed and set the flag
     if(this->status != oldStatus) {
-        this->statusChanged = true;
+        // TODO: Legacy, as not to confuse the GamedayData, will be removed and
+        // GamedayData will listen to the scoreChanged()- and statusChanged()-signals instead.
+        this->m_statusChanged = true;
+        emit statusChanged();
     }
 }
 
@@ -194,9 +205,9 @@ void GameData::updateFouls(QVariantList fouls) {
 // Return the status of the game (changed/the same) since last read. Resets the
 // flags!
 bool GameData::hasChanged(void) {
-    bool changed = this->scoreChanged || this->statusChanged;
-    this->scoreChanged = false;
-    this->statusChanged = false;
+    bool changed = this->m_scoreChanged || this->m_statusChanged;
+    this->m_scoreChanged = false;
+    this->m_statusChanged = false;
     return changed;
 }
 
@@ -205,13 +216,13 @@ bool GameData::hasChanged(QString type) {
     bool changed = false;
 
     if(type.compare("score")) {
-        changed = this->scoreChanged;
-        this->scoreChanged = false;
+        changed = this->m_scoreChanged;
+        this->m_scoreChanged = false;
     }
 
     if(type.compare("status")) {
-        changed = this->statusChanged;
-        this->statusChanged = false;
+        changed = this->m_statusChanged;
+        this->m_statusChanged = false;
     }
 
     return changed;
@@ -241,29 +252,6 @@ QString GameData::getTotalScore() {
     return this->score["total"];
 }
 
-#if 0
-QString GameData::getPeriodsScore(int period) {
-    QString key;
-
-    switch(period) {
-        case 1:
-            key = "first";
-            break;
-        case 2:
-            key = "second";
-            break;
-        case 3:
-            key = "third";
-            break;
-        default:
-            key = "first";
-            break;
-    }
-
-    return this->score.value(key);
-}
-#endif
-
 QString GameData::getPeriodsScore() {
     QString score = this->score.value("first") + ", " +
         this->score.value("second") + ", " + this->score.value("third");
@@ -279,7 +267,11 @@ int GameData::getGameStatus() {
     return this->status;
 }
 
-// implementation of the listmodel
+QString GameData::getGameStatusText() {
+    return GameData::gameStatusTexts.value(this->status, "Unknown Status.");
+}
+
+// Implementation of the QAbstractListModel methods
 // Returns the number of rows in the list
 int GameData::rowCount(const QModelIndex &parent) const {
     return this->events.count();
@@ -312,7 +304,8 @@ QVariant GameData::data(const QModelIndex &index, int role) const {
             break;
 
         case EventSubtextRole:
-            data = this->events[key]->getEventSubtext(); // TODO: A Hack!
+            // TODO: This is meant to be used with "EQ", "PP1", etc. in the future.
+            data = this->events[key]->getEventSubtext();
             break;
 
         default:
@@ -326,3 +319,5 @@ QVariant GameData::data(const QModelIndex &index, int role) const {
 QVariant GameData::headerData(int section, Qt::Orientation orientation, int role) const {
     return QVariant();
 }
+
+/* EOF */

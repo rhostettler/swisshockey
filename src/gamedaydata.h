@@ -2,6 +2,7 @@
 #define GAMEDAYDATA_H
 
 #include <QAbstractListModel>
+#include <QSignalMapper>
 
 #include "gamedata.h"
 
@@ -12,7 +13,7 @@ class GamedayData : public QAbstractListModel {
         QMap<qulonglong, GameData *> games;
         QList<qulonglong> gameIndices;
         QString date;
-        QList<QString> gameStatuses;
+        QSignalMapper *signalMapper;
 
     public:
         explicit GamedayData(QObject *parent = 0);
@@ -43,6 +44,7 @@ class GamedayData : public QAbstractListModel {
 
     public slots:
         void updateData(QVariantMap data);
+        void gamedataChanged(qulonglong key);
     
 };
 

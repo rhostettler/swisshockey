@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QString>
 #include <QList>
+#include <QStringList>
 #include <QVariantMap>
 #include <QMap>
 #include <QAbstractListModel>
@@ -11,15 +12,21 @@
 #include "gamedata.h"
 #include "gameevent.h"
 
-//class GameData : public QObject {
+
 class GameData : public QAbstractListModel {
     Q_OBJECT
+
+    Q_PROPERTY(QString hometeamId READ getHometeamId)
+    Q_PROPERTY(QString awayteamId READ getAwayteamId)
+    Q_PROPERTY(QString totalScore READ getTotalScore NOTIFY scoreChanged)
+    Q_PROPERTY(QString periodsScore READ getPeriodsScore NOTIFY scoreChanged)
+    Q_PROPERTY(int gameStatus READ getGameStatus NOTIFY statusChanged)
 
     private:
         QString gameId;
         QString league;
 
-        // Home- and away team
+        // Home- and away team names & IDs
         QString hometeam;
         qulonglong hometeamId;
         QString awayteam;
@@ -38,13 +45,11 @@ class GameData : public QAbstractListModel {
         int status;
 
         // Flag that indicates whether the game has changed or not
-        bool scoreChanged;
-        bool statusChanged;
+        bool m_scoreChanged;
+        bool m_statusChanged;
 
-        // Method that parses the team name and removes special characters
-#if 0
-        QString parseTeam(QString team);
-#endif
+        //
+        static QStringList gameStatusTexts;
 
     public:
         explicit GameData(QVariantMap data, QObject *parent = 0);
@@ -61,11 +66,9 @@ class GameData : public QAbstractListModel {
         QString getAwayteam();
         QString getAwayteamId();
         QString getTotalScore();
-#if 0
-        QString getPeriodsScore(int period);
-#endif
         QString getPeriodsScore();
         int getGameStatus();
+        QString getGameStatusText();
 
         // implementations of interface QAbstractListModel
         enum EventRoles {
@@ -84,6 +87,8 @@ class GameData : public QAbstractListModel {
         static QString parsePlayerName(QString name);
 
     signals:
+        void scoreChanged(void);
+        void statusChanged(void);
 
     public slots:
         void updateEvents(QVariantList goals, QVariantList fouls, QVariantList players);
