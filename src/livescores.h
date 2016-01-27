@@ -17,7 +17,7 @@ class LiveScores : public QObject {
 
     private:
         Notifier *notifier;
-        GamedayData *nla;
+        GamedayData *dataStore;
         QSortFilterProxyModel *filter;
         GameData *current;
         SIHFDataSource *dataSource;

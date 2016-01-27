@@ -52,13 +52,14 @@ GameData::GameData(QVariantMap data, QObject *parent) : QAbstractListModel(paren
 // Update the game score
 void GameData::updateSummary(QVariantMap data) {
     // Store the total score before the update
+#if 0
     QString oldScore = this->score["total"];
+#endif
+    QMap<QString, QString> oldScore = this->score;
     int oldStatus = this->status;
 
-    // Get the score from the game map
-    QVariantMap newScore = data["score"].toMap();
-
     // Update score per period
+    QVariantMap newScore = data["score"].toMap();
     this->score["first"] = newScore.value("first", "-:-").toString();
     this->score["second"] = newScore.value("second", "-:-").toString();
     this->score["third"] =  newScore.value("third", "-:-").toString();
@@ -71,21 +72,18 @@ void GameData::updateSummary(QVariantMap data) {
     this->status = data["status"].toInt();
 
     // Check if the total score changed and trigger an update
+#if 0
     if(this->score["total"].compare(oldScore)) {
-        // TODO: Legacy, as not to confuse the GamedayData, will be removed and
-        // GamedayData will listen to the scoreChanged()- and statusChanged()-signals instead.
-        this->m_scoreChanged = true;
-        emit scoreChanged();
-
+#endif
+    if(this->score != oldScore) {
         // TODO: I should also fire a scoreChanged() when a new period starts
         // for updating the details view
+        // => Should be fixed now, but there's no way of knowing really until friday
+        emit scoreChanged();
     }
 
-    // Check if the game status has changed and set the flag
+    // Check if the game status has changed and signal it
     if(this->status != oldStatus) {
-        // TODO: Legacy, as not to confuse the GamedayData, will be removed and
-        // GamedayData will listen to the scoreChanged()- and statusChanged()-signals instead.
-        this->m_statusChanged = true;
         emit statusChanged();
     }
 }
@@ -138,37 +136,13 @@ void GameData::updatePlayerList(QVariantList players) {
     }
 }
 
-#if 0
-// TODO: That should be obsolete now that we have proper UTF-8 parsing
-QString GameData::parsePlayerName(QString name) {
-    QMap<QString, QString> lookupTable = QMap<QString, QString>();
-    lookupTable.insert(QString::fromUtf8("Ã©"), QString::fromUtf8("é"));
-    lookupTable.insert(QString::fromUtf8("Ã´"), QString::fromUtf8("ô"));
-    lookupTable.insert(QString::fromUtf8("Ã¯"), QString::fromUtf8("ï"));
-    lookupTable.insert(QString::fromUtf8("Ã¼"), QString::fromUtf8("ü"));
-
-    QMapIterator<QString, QString> iterator(lookupTable);
-    while(iterator.hasNext()) {
-        QString key = iterator.next().key();
-        name.replace(key, lookupTable.value(key, ""));
-    }
-
-    return name;
-}
-#endif
-
 // Parse the list of goals and add an event for each goal
 void GameData::updateGoals(QVariantList goals) {
     QListIterator<QVariant> iterator(goals);
     int cumulativeHomeScore = 0;
     int cumulativeAwayScore = 0;
 
-    // Iterate through the goals list backwards since the newest is the first
-#if 0
-    iterator.toBack();
-    while(iterator.hasPrevious()) {
-        QVariantMap goal = iterator.previous().toMap();
-#endif
+    // Iterate through the goals, the oldest is first in the list
     while(iterator.hasNext()) {
         QVariantMap goal = iterator.next().toMap();
         QString time = goal.value("time").toString();
@@ -184,7 +158,7 @@ void GameData::updateGoals(QVariantList goals) {
         } else {
             cumulativeAwayScore += 1;
         }
-        QString score = QString::number(cumulativeHomeScore).append(":").append(QString::number(cumulativeAwayScore));
+        QString score = QString::number(cumulativeHomeScore) + ":" + QString::number(cumulativeAwayScore);
 
         // Finally, add the goal as a new event
         this->events.append(new GameEvent(time, player, additionalInfo, score));
@@ -207,6 +181,7 @@ void GameData::updateFouls(QVariantList fouls) {
 
 // Return the status of the game (changed/the same) since last read. Resets the
 // flags!
+// DEPRECATED
 bool GameData::hasChanged(void) {
     bool changed = this->m_scoreChanged || this->m_statusChanged;
     this->m_scoreChanged = false;
@@ -215,6 +190,7 @@ bool GameData::hasChanged(void) {
 }
 
 // Check and reset whether the field "type" changed
+// DEPRECATED
 bool GameData::hasChanged(QString type) {
     bool changed = false;
 
@@ -271,7 +247,7 @@ int GameData::getGameStatus() {
 }
 
 QString GameData::getGameStatusText() {
-    return GameData::gameStatusTexts.value(this->status, "Unknown Status.");
+    return GameData::gameStatusTexts.value(this->status, "Unknown status");
 }
 
 // Implementation of the QAbstractListModel methods
@@ -287,7 +263,8 @@ QVariant GameData::data(const QModelIndex &index, int role) const {
 
     switch(role) {
         case TeamRole:
-            // needs to be implemented
+            // TODO: Needs to be implemented in GameEvent
+            //data = this->events[key]->getTeamId();
             break;
 
         case TimeRole:
@@ -308,6 +285,7 @@ QVariant GameData::data(const QModelIndex &index, int role) const {
 
         case EventSubtextRole:
             // TODO: This is meant to be used with "EQ", "PP1", etc. in the future.
+            //       Needs to be implemented in the parser.
             data = this->events[key]->getEventSubtext();
             break;
 
