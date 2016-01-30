@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <settings>
-    <group title="Notifications">
+    <group title="NL A">
         <boolean key="/apps/NLLiveScores/settings/hcap" title="Ambri-Piotta"></boolean>
         <boolean key="/apps/NLLiveScores/settings/scb" title="SC Bern"></boolean>
         <boolean key="/apps/NLLiveScores/settings/ehcb" title="EHC Biel"></boolean>
@@ -8,12 +8,23 @@
         <boolean key="/apps/NLLiveScores/settings/hcfg" title="HC Fribourg Gottéron"></boolean>
         <boolean key="/apps/NLLiveScores/settings/hcgs" title="HC Genève Servette"></boolean>
         <boolean key="/apps/NLLiveScores/settings/ehck" title="Kloten Flyers"></boolean>
-<!--    <boolean key="/apps/NLLiveScores/settings/scrj" title="Rapperswil-Jona Lakers"></boolean> -->
         <boolean key="/apps/NLLiveScores/settings/lhc" title="Lausanne HC"></boolean>
         <boolean key="/apps/NLLiveScores/settings/zsc" title="ZSC Lions"></boolean>
         <boolean key="/apps/NLLiveScores/settings/hcl" title="HC Lugano"></boolean>
         <boolean key="/apps/NLLiveScores/settings/scl" title="SCL Tigers"></boolean>
         <boolean key="/apps/NLLiveScores/settings/evz" title="EV Zug"></boolean>
+    </group>
+    <group title="NL B">
+        <boolean key="/apps/NLLiveScores/settings/hca" title="HC Ajoie"></boolean>
+        <boolean key="/apps/NLLiveScores/settings/hccf" title="HC La Chaux-de-Fonds"></boolean>
+        <boolean key="/apps/NLLiveScores/settings/sclangenthal" title="SC Langenthal"></boolean>
+        <boolean key="/apps/NLLiveScores/settings/gck" title="GCK Lions"></boolean>
+        <boolean key="/apps/NLLiveScores/settings/ehco" title="EHC Olten"></boolean>
+        <boolean key="/apps/NLLiveScores/settings/scrj" title="SC Rapperswil-Jona Lakers"></boolean>
+        <boolean key="/apps/NLLiveScores/settings/hcri" title="HC Red Ice"></boolean>
+        <boolean key="/apps/NLLiveScores/settings/ht" title="Hockey Thurgau"></boolean>
+        <boolean key="/apps/NLLiveScores/settings/ehcv" title="EHC Visp"></boolean>
+        <boolean key="/apps/NLLiveScores/settings/ehcw" title="EHC Winterthur"></boolean>
     </group>
     <group title="App Settings">
         <integer key="/apps/NLLiveScores/settings/updateInterval" title="Update Interval (mins)" min="1" max="10"></integer>

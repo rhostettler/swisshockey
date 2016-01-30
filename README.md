@@ -6,12 +6,12 @@ national ice hockey leagues, National League A and B.
 Roadmap
 -------
 *Version 0.2.0*
-[ ] Notification callback action
-[ ] Full support for NL B (Notifications in cp missing)
+[X] Game details support
+[X] Full support for NL B
 [X] Proper league filtering
 
 *Version 1.0.0*
-[ ] Game details support
+[ ] Notification callback action
 [ ] Code cleanup
 
 Known Issues
@@ -28,10 +28,7 @@ Notifications:
 * Tapping the notification doesn't open the app.
 
 Game details view:
-* Overtime- and shootout events are sorted at the bottom.
 * One should be able to distinguish which event belongs to which team 
-  more easily (Consider implementing event icons and logos).
+  more easily (consider implementing event icons and logos).
 * Game roaster is not implemented.
-* Game summary at the top doesn't update score.
-* Times < 1min are not parsed correctly
 

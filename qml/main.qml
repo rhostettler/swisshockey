@@ -85,8 +85,6 @@ PageStackWindow {
                       + "<br><br>"
                       + "Version 0.2.0"
                       + "<br><br>"
-                      + "(c) 2014-2016 Roland Hostettler"
-                      + "<br><br>"
                       + "<a href=\"https://github.com/rolandh83/nl-live-scores\">https://github.com/rolandh83/nl-live-scores</a>"
                       )
         acceptButtonText: qsTr("Close")
