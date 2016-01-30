@@ -53,6 +53,7 @@ Notifier::Notifier(GamedayData *model, QWidget *parent) : QObject(parent) {
 
 
     // Add all the teams to the teams->GConf key map
+    // NLA
     teams.insert("HC Ambri-Piotta", "hcap");
     teams.insert("SC Bern", "scb");
     teams.insert("EHC Biel", "ehcb");
@@ -60,12 +61,22 @@ Notifier::Notifier(GamedayData *model, QWidget *parent) : QObject(parent) {
     teams.insert("Fribourg-Gottéron", "hcfg");
     teams.insert("Genève-Servette HC", "hcgs");
     teams.insert("Kloten Flyers", "ehck"); // TODO: Name in data needs to be verified
-//    teams.insert("Lakers", "scrj");
     teams.insert("Lausanne HC", "lhc");
     teams.insert("ZSC Lions", "zsc");      // TODO: Name in data needs to be verified
     teams.insert("HC Lugano", "hcl");
     teams.insert("SCL Tigers", "scl");
     teams.insert("EV Zug", "evz");
+    // NLB
+    teams.insert("EHC Winterthur", "ehcw");
+    teams.insert("EHC Visp", "ehcv");
+    teams.insert("SC Langenthal", "sclangenthal");
+    teams.insert("GCK Lions", "gck");
+    teams.insert("HC Red Ice", "hcri");
+    teams.insert("EHC Olten", "ehco");
+    teams.insert("HC Ajoie", "hca");
+    teams.insert("SC Rapperswil-Jona Lakers", "scrj");
+    teams.insert("HC La Chaux-de-Fonds", "hccf");
+    teams.insert("Hockey Thurgau", "ht");
 
     // Disable the notifier by default (assuming that we go to FG directly upon
     // start)
@@ -132,24 +143,16 @@ void Notifier::dataChanged(const QModelIndex & topLeft, const QModelIndex & bott
             notification->setIdentifier(gameId);
         }
 
+        // Add the callback action
+
         // Publish / update the notification
         notification->publish();
     }
 }
 
-// TODO: Move to Config-singleton
+// Check if the notification for a given team is enabled
 bool Notifier::notificationEnabled(QString team) {
     QString key = teams[team];
-#if 0
-    QString gconfPath = "/apps/NLLiveScores/settings/";
-    QString gconfKey = gconfPath.append(key);
-
-    GConfItem item(gconfKey);
-    bool status = item.value(false).toBool();
-
-    return status;
-#endif
-
     Config& config = Config::getInstance();
     return config.getValue(key, false).toBool();
 }

@@ -10,12 +10,14 @@ class DataSource : public QObject {
     public:
         explicit DataSource(QObject *parent = 0);
 
-        virtual void update() = 0;
+        virtual void update(QString id) = 0;
 
     signals:
         void gameSummaryUpdated(QVariantMap data);
-        void gameDetailsUpdated();
+        void gameDetailsUpdated(QVariantList goals, QVariantList fouls, QVariantList players);
         void updateError(QString message);
+        void updateStarted();
+        void updateFinished();
 
     public slots:
     

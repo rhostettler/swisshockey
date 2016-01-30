@@ -34,6 +34,7 @@ int main(int argc, char *argv[]) {
 
     // Close the log
     logger.close();
+    delete livescores;
 
     return exitcode;
 }

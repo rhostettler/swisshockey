@@ -30,7 +30,10 @@ Page {
                 pointSize: 18
                 weight: Font.Bold
             }
-            text: detailstotalscore
+
+            //text: detailstotalscore
+            // Automagically updated because of Q_PROPERTY has NOTIFY set
+            text: gameDetailsData.totalScore
         }
 
         // Label containing the per-period score
@@ -47,7 +50,9 @@ Page {
                 pointSize: 18
             }
 
-            text: "(" + detailsperiodsscore + ")"
+            //text: "(" + detailsperiodsscore + ")"
+            // Automagically updated because of Q_PROPERTY has NOTIFY set
+            text: "(" + gameDetailsData.periodsScore + ")"
         }
 
         // Label indicating the status of the game
@@ -80,7 +85,7 @@ Page {
             height: 96
             width: 96
             fillMode: Image.PreserveAspectFit
-            source: "icons/" + detailshometeamId + ".png"
+            source: "icons/" + gameDetailsData.hometeamId + ".png"
         }
 
         // Awayteam logo: to the right
@@ -96,10 +101,10 @@ Page {
             height: 96
             width: 96
             fillMode: Image.PreserveAspectFit
-            source: "icons/" + detailsawayteamId + ".png"
+            source: "icons/" + gameDetailsData.awayteamId + ".png"
         }
 
-        // Separator between the entries
+        // Separator between the header and the events
         Image {
             id: detailsGameSeparator
             anchors {
@@ -213,6 +218,24 @@ Page {
                 }
 
                 text: eventtext
+            }
+
+            // Additional text under the score/penalty
+            Text {
+                id: eventSubtext
+                width: 96
+                horizontalAlignment: Text.Center
+                anchors {
+                    horizontalCenter: eventText.horizontalCenter
+                    top: parent.verticalCenter
+                }
+
+                font {
+                    family: "Nokia Pure Light"
+                    pointSize: 18
+                }
+
+                text: eventsubtext
             }
 
             // Separator between the entries

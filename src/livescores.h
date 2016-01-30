@@ -5,6 +5,7 @@
 #include <QString>
 #include <QTimer>
 #include <QEvent>
+#include <QSortFilterProxyModel>
 
 #include "qmlapplicationviewer.h"
 #include "sihfdatasource.h"
@@ -16,11 +17,13 @@ class LiveScores : public QObject {
 
     private:
         Notifier *notifier;
-        GamedayData *nla;
+        GamedayData *dataStore;
+        QSortFilterProxyModel *filter;
         GameData *current;
         SIHFDataSource *dataSource;
         QmlApplicationViewer *viewer;
         QTimer *timer;
+        QString currentId;
 
     public:
         explicit LiveScores(QObject *parent = 0);
@@ -32,6 +35,7 @@ class LiveScores : public QObject {
     public slots:
         void updateData();
         void updateView(QString view);
+        void updateLeague(QString league);
 };
 
 #endif // LIVESCORES_H
