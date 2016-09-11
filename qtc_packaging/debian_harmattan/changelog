@@ -1,3 +1,8 @@
+nllivescores (0.3.0) unstable; urgency=low
+  * <Add change description here>
+
+ -- Roland Hostettler <r.hostettler@gmx.ch>  Sat, 30 Jan 2016 12:54:49 +0100
+
 nllivescores (0.2.0) unstable; urgency=low
   * League filter support
 

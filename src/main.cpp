@@ -11,7 +11,7 @@ int main(int argc, char *argv[]) {
     // Initialize the application
     QScopedPointer<QApplication> app(createApplication(argc, argv));
     MComponentData::createInstance(argc, argv);
-    app->setApplicationName("Live Scores");
+    app->setApplicationName("Swiss Ice Hockey");
 
     // Make sure UTF-8 is used internally
     QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
     // TODO: Maybe we coult move this into the LiveScores object?
     Config& config = Config::getInstance();
     Logger& logger = Logger::getInstance();
-    logger.setLogfile("/home/user/nl-live-scores.log");
+    logger.setLogfile("/home/user/swisshockey.log");
     logger.setLevel(config.getValue("loglevel", Logger::ERROR).toInt());
     //logger.setLevel(Logger::DEBUG);
     //logger.setLevel(Logger::ERROR);
