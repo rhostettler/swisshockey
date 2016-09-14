@@ -83,9 +83,9 @@ PageStackWindow {
         titleText: qsTr("About")
         message: qsTr("A simple app providing live results from the Swiss national ice hockey leagues, National League A and B."
                       + "<br><br>"
-                      + "Version 0.2.0"
+                      + "Version 0.2.1"
                       + "<br><br>"
-                      + "<a href=\"https://github.com/rolandh83/nl-live-scores\">https://github.com/rolandh83/nl-live-scores</a>"
+                      + "<a href=\"https://github.com/rolandh83/swisshockey\">https://github.com/rolandh83/swisshockey</a>"
                       )
         acceptButtonText: qsTr("Close")
     }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by Qt Creator 2.4.1, 2016-09-11T15:02:06. -->
+<!-- Written by Qt Creator 2.4.1, 2016-09-14T20:34:32. -->
 <qtcreator>
  <data>
   <variable>ProjectExplorer.Project.ActiveTarget</variable>
@@ -180,8 +180,10 @@
        <value type="QString">/home/roland/Projects/nl-live-scores/nl-live-scores/NLLiveScores-build-harmattan-Harmattan_Target_-_QEmu_PR1_2__Qt_SDK__Release/nllivescores_0.1.0_armel.deb</value>
        <value type="QString">/home/roland/Projects/nl-live-scores/nl-live-scores/NLLiveScores-build-harmattan-Harmattan_Target_-_QEmu_PR1_2__Qt_SDK__Debug/nllivescores_0.0.1_armel.deb</value>
        <value type="QString">/home/roland/Projects/nl-live-scores/build/nllivescores_0.1.0_armel.deb</value>
+       <value type="QString">/home/roland/Projects/nl-live-scores/build-harmattan/nllivescores_0.2.1_armel.deb</value>
       </valuelist>
       <valuelist type="QVariantList" key="Qt4ProjectManager.MaemoRunConfiguration.LastDeployedHosts">
+       <value type="QString">192.168.1.11</value>
        <value type="QString">192.168.1.11</value>
        <value type="QString">192.168.1.11</value>
        <value type="QString">192.168.1.11</value>
@@ -198,6 +200,7 @@
        <value type="QString"></value>
        <value type="QString"></value>
        <value type="QString"></value>
+       <value type="QString"></value>
       </valuelist>
       <valuelist type="QVariantList" key="Qt4ProjectManager.MaemoRunConfiguration.LastDeployedTimes">
        <value type="QDateTime">2016-01-30T12:44:31</value>
@@ -207,6 +210,7 @@
        <value type="QDateTime">2014-11-13T19:36:35</value>
        <value type="QDateTime">2014-10-22T21:46:59</value>
        <value type="QDateTime">2016-01-21T17:21:52</value>
+       <value type="QDateTime">2016-09-14T20:32:41</value>
       </valuelist>
      </valuemap>
      <value type="int" key="ProjectExplorer.BuildStepList.StepsCount">3</value>

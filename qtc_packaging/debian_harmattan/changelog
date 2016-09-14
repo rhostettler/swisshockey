@@ -1,7 +1,8 @@
-nllivescores (0.3.0) unstable; urgency=low
-  * <Add change description here>
+nllivescores (0.2.1) unstable; urgency=low
+  * Updated app name and repository link
+  * Updated artwork for season 2016/17
 
- -- Roland Hostettler <r.hostettler@gmx.ch>  Sat, 30 Jan 2016 12:54:49 +0100
+ -- Roland Hostettler <r.hostettler@gmx.ch>  Wed, 14 Sep 2016 20:11:35 +0300
 
 nllivescores (0.2.0) unstable; urgency=low
   * League filter support
