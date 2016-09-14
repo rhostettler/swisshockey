@@ -1,34 +1,37 @@
-nl-live-scores
-==============
-NLLiveScores is an app for the Nokia N9 providing live scores from the Swiss
-national ice hockey leagues, National League A and B.
+Swiss Ice Hockey
+================
+An app for Meego Harmattan (Nokia N9) and Sailfish OS that provides live scores
+from the Swiss men's national ice hockey leagues, National League A and B.
 
 Roadmap
 -------
-*Version 0.2.0*
-[X] Game details support
-[X] Full support for NL B
-[X] Proper league filtering
+Version 0.3.0:
+* Basic support for Sailfish OS (Jolla Harbour-ready) (w/o notification 
+  support and control panel integration)
+* Complete renaming from "Live Scores" to "Swiss Ice Hockey"
 
-*Version 1.0.0*
-[ ] Notification callback action
-[ ] Code cleanup
-
-Known Issues
+Future plans
 ------------
-General:
-* Implement a calendar-view
-* The cpapplet is kind of a mess
+Features:
+* Implement a browsable calendar
+
+UI:
+* Team logos in game details list
+* Implement roster
+
+Backend:
+* Code cleanup (yes, it's a mess in some places)
+* Implement a GameEvent type system
+* Implement an internal data model for game events
+* Implement roster
 
 Notifications:
-* Instead of completely disabling notifications when in foreground, I should 
-  consider just beeping without homescreen notification.
-* Notifications are not cleared on application shutdown
-* Use notification groups (?).
-* Tapping the notification doesn't open the app.
+* Notification callback actions (tap opens app)
+* Implement a notification-beep when app is in foreground
+* (Harmattan) Notifications are not cleared on application shutdown (implement
+  in Notifier destructor.)
+* Consider notification groups
 
-Game details view:
-* One should be able to distinguish which event belongs to which team 
-  more easily (consider implementing event icons and logos).
-* Game roaster is not implemented.
+Settings:
+* Implement a custom in-app settings window should be easier to manage
 

@@ -63,7 +63,7 @@ cpapplet_xml.path = /usr/share/duicontrolpanel/uidescriptions
 INSTALLS += cpapplet_xml
 
 # Please do not modify the following two lines. Required for deployment.
-include(qmlapplicationviewer/qmlapplicationviewer.pri)
+include(src/qmlapplicationviewer/qmlapplicationviewer.pri)
 qtcAddDeployment()
 
 OTHER_FILES += \
@@ -90,3 +90,9 @@ HEADERS += \
 # Add Qt dependencies
 QT += core network script
 PKGCONFIG += gq-gconf
+
+contains(MEEGO_EDITION,harmattan) {
+    icon.files = swisshockey80.png
+    icon.path = /usr/share/icons/hicolor/80x80/apps
+    INSTALLS += icon
+}
