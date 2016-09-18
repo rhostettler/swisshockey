@@ -1,11 +1,26 @@
 #include "livescores.h"
 
-#include <QDeclarativeView>
-#include <QDeclarativeContext>
-#include <QGraphicsObject>
+#ifdef PLATFORM_SFOS
+    #include <QQmlContext>
+    #include <QQuickItem>
+#else
+    #include <QDeclarativeView>
+    #include <QDeclarativeContext>
+    #include <QGraphicsObject>
+#endif
 
 #include "logger.h"
 #include "config.h"
+
+
+// SailfishApp::main() will display "qml/template.qml", if you need more
+// control over initialization, you can use:
+//
+//   - SailfishApp::application(int, char *[]) to get the QGuiApplication *
+//   - SailfishApp::createView() to get a new QQuickView * instance
+//   - SailfishApp::pathTo(QString) to get a QUrl to a resource file
+//
+// To display the view, call "show()" (will show fullscreen on device).
 
 LiveScores::LiveScores(QObject *parent) : QObject(parent) {
     // Create the data store and setup the data provider
@@ -24,14 +39,23 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
 
     // Create the notifier, disabled by default (enabled automatically when the
     // app is brought to the background)
+    // TODO: Enable on SFOS
+#ifndef PLATFORM_SFOS
     this->notifier = new Notifier(dataStore);
     this->notifier->disableNotifications();
+#endif
 
     // Load and show the QML
+#ifdef PLATFORM_SFOS
+    this->viewer = SailfishApp::createView();
+    this->viewer->setSource(SailfishApp::pathTo("qml/sailfishos/harbour-swisshockey.qml"));  // TODO: Adjust once the qml is sorted out
+    this->viewer->show();
+#else
     this->viewer = new QmlApplicationViewer();
     this->viewer->setOrientation(QmlApplicationViewer::ScreenOrientationAuto);
     this->viewer->setMainQmlFile(QLatin1String("qml/main.qml"));
     this->viewer->showExpanded();
+#endif
 
     // Connect the QML and the C++ bits, and add an event filter to catch
     // switches between foreground and background.
@@ -83,7 +107,11 @@ void LiveScores::updateView(QString id) {
         this->dataSource->queryStats(id);
 
         // Get the context since we'll be invoking it a couple of times
+#ifdef PLATFORM_SFOS
+        QQmlContext *context = viewer->rootContext();
+#else
         QDeclarativeContext *context = viewer->rootContext();
+#endif
         context->setContextProperty("gameDetailsData", game);
         context->setContextProperty("gameEventsData", game);
     }
@@ -100,6 +128,8 @@ void LiveScores::updateLeague(QString league) {
 // internal state accordingly
 bool LiveScores::eventFilter(QObject* obj, QEvent* event) {
     Logger& logger = Logger::getInstance();
+
+#ifndef PLATFORM_SFOS
     switch(event->type()) {
         case QEvent::WindowActivate:
             this->notifier->disableNotifications();
@@ -115,6 +145,7 @@ bool LiveScores::eventFilter(QObject* obj, QEvent* event) {
         default:
             break;
     }
+#endif
 
     // We don't mind other event handlers handling the events, so return false.
     return false;
@@ -135,5 +166,7 @@ void LiveScores::updateData() {
 LiveScores::~LiveScores(void) {
     // Remove the ones that are not deleted automagically
     delete viewer;
+#ifndef PLATFORM_SFOS
     delete notifier;
+#endif
 }
