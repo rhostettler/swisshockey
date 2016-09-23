@@ -10,6 +10,7 @@ class GamedayData : public QAbstractListModel {
     Q_OBJECT
 
     private:
+        QHash<int, QByteArray> roles;
         QMap<qulonglong, GameData *> games;
         QList<qulonglong> gameIndices;
         QString date;
@@ -39,6 +40,7 @@ class GamedayData : public QAbstractListModel {
         int rowCount(const QModelIndex & parent = QModelIndex()) const;
         QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
         QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+        QHash<int, QByteArray> roleNames() const;
 
     signals:
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.0">
+<TS version="2.1">
 <context>
     <name>CoverPage</name>
     <message>
@@ -9,30 +9,40 @@
     </message>
 </context>
 <context>
-    <name>FirstPage</name>
+    <name>LeagueSelectionDialog</name>
     <message>
-        <source>Show Page 2</source>
-        <translation>Zur Seite 2</translation>
-    </message>
-    <message>
-        <source>UI Template</source>
-        <translation>UI-Vorlage</translation>
-    </message>
-    <message>
-        <source>Hello Sailors</source>
-        <translation>Hallo Matrosen</translation>
+        <source>Select League</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
-    <name>SecondPage</name>
+    <name>OverviewPage</name>
     <message>
-        <source>Nested Page</source>
-        <translation>Unterseite</translation>
+        <source>No games today.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Item</source>
-        <translation>Element</translation>
+        <source>Update</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>League: </source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>main</name>
+    <message>
+        <source>About</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A simple app providing live results from the Swiss national ice hockey leagues, National League A and B.&lt;br&gt;&lt;br&gt;Version 0.2.1&lt;br&gt;&lt;br&gt;&lt;a href=&quot;https://github.com/rolandh83/swisshockey&quot;&gt;https://github.com/rolandh83/swisshockey&lt;/a&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>
-

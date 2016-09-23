@@ -54,7 +54,11 @@ int main(int argc, char *argv[]) {
     // TODO: Maybe we coult move this into the LiveScores object?
     Config& config = Config::getInstance();
     Logger& logger = Logger::getInstance();
+#ifdef PLATFORM_SFOS
+    logger.setLogfile("/home/nemo/swisshockey.log");
+#else
     logger.setLogfile("/home/user/swisshockey.log");                            // TODO: Update path
+#endif
     logger.setLevel(config.getValue("loglevel", Logger::ERROR).toInt());
     //logger.setLevel(Logger::DEBUG);
     //logger.setLevel(Logger::ERROR);

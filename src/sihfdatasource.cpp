@@ -7,7 +7,7 @@
 SIHFDataSource::SIHFDataSource(QObject *parent) : DataSource(parent) {
     // Create the network access objects
     this->nam = new QNetworkAccessManager(this);
-    this->decoder = new Json(this);
+    this->decoder = new JsonDecoder(this);
 }
 
 // TODO: The updateGameDetails() should take an argument which should make this
@@ -59,7 +59,7 @@ void SIHFDataSource::parseScoresResponse() {
     logger.log(Logger::DEBUG, rawdata);
 
     // Parse the response
-    QVariantMap parsedRawdata = this->decoder->decode(rawdata.data());
+    QVariantMap parsedRawdata = this->decoder->decode(rawdata);
     if(parsedRawdata.contains("data")) {
         logger.log(Logger::DEBUG, "SIHFDataSource::parseScoresResponse(): Parsing data...");
         QVariantList data = parsedRawdata.value("data").toList();
@@ -233,7 +233,7 @@ void SIHFDataSource::parseStatsResponse(void) {
     }
 
     // Convert from JSON to a map
-    QVariantMap parsedRawdata = this->decoder->decode(rawdata.data());
+    QVariantMap parsedRawdata = this->decoder->decode(rawdata);
 
     // Extract the game events
     QVariantList goals;

@@ -39,14 +39,14 @@ GameData::GameData(QVariantMap data, QObject *parent) : QAbstractListModel(paren
     this->m_statusChanged = false;
 
     // Set the data roles
-    QHash<int, QByteArray> roles;
-    roles[TeamRole] = "eventteam";
-    roles[TimeRole] = "eventtime";
-    roles[PlayerRole] = "eventplayer";
-    roles[AdditionalInfoRole] = "eventinfo";
-    roles[EventRole] = "eventtext";
-    roles[EventSubtextRole] = "eventsubtext";
-    setRoleNames(roles);
+    //QHash<int, QByteArray> roles;
+    this->roles[TeamRole] = "eventteam";
+    this->roles[TimeRole] = "eventtime";
+    this->roles[PlayerRole] = "eventplayer";
+    this->roles[AdditionalInfoRole] = "eventinfo";
+    this->roles[EventRole] = "eventtext";
+    this->roles[EventSubtextRole] = "eventsubtext";
+    //setRoleNames(roles);
 }
 
 // Update the game score
@@ -299,6 +299,11 @@ QVariant GameData::data(const QModelIndex &index, int role) const {
 // Returns the header
 QVariant GameData::headerData(int section, Qt::Orientation orientation, int role) const {
     return QVariant();
+}
+
+// Role names for QML
+QHash<int, QByteArray> GameData::roleNames() const {
+    return this->roles;
 }
 
 /* EOF */

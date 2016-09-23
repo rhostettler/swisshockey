@@ -26,6 +26,8 @@ class GameData : public QAbstractListModel {
         QString gameId;
         QString league;
 
+        QHash<int, QByteArray> roles;
+
         // Home- and away team names & IDs
         QString hometeam;
         qulonglong hometeamId;
@@ -83,6 +85,7 @@ class GameData : public QAbstractListModel {
         int rowCount(const QModelIndex & parent = QModelIndex()) const;
         QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
         QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+        QHash<int, QByteArray> roleNames() const;
 
         static QString parsePlayerName(QString name);
 

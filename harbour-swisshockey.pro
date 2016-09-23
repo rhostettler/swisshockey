@@ -28,14 +28,12 @@ SOURCES += \
     src/gamedata.cpp \
     src/gamedaydata.cpp \
     src/gameevent.cpp \
-    src/json.cpp \
     src/logger.cpp \
     src/sihfdatasource.cpp \
+    src/jsondecoder.cpp
 
 OTHER_FILES += qml/sailfishos/harbour-swisshockey.qml \
     qml/sailfishos/cover/CoverPage.qml \
-    qml/sailfishos/pages/FirstPage.qml \
-    qml/sailfishos/pages/SecondPage.qml \
     rpm/harbour-swisshockey.changes.in \
     rpm/harbour-swisshockey.spec \
     rpm/harbour-swisshockey.yaml \
@@ -61,7 +59,11 @@ HEADERS += \
     src/gamedata.h \
     src/gamedaydata.h \
     src/gameevent.h \
-    src/json.h \
     src/logger.h \
     src/sihfdatasource.h \
+    src/jsondecoder.h
+
+DISTFILES += \
+    qml/sailfishos/pages/OverviewPage.qml \
+    qml/sailfishos/pages/LeagueSelectionDialog.qml
 
