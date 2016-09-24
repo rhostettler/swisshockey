@@ -14,7 +14,6 @@ TARGET = harbour-swisshockey
 
 CONFIG += sailfishapp
 PKGCONFIG += mlite5
-
 QT += core network
 
 # Define the platform for platform-specific code
@@ -65,5 +64,6 @@ HEADERS += \
 
 DISTFILES += \
     qml/sailfishos/pages/OverviewPage.qml \
-    qml/sailfishos/pages/LeagueSelectionDialog.qml
+    qml/sailfishos/pages/LeagueSelectionDialog.qml \
+    qml/sailfishos/pages/DetailsPage.qml
 

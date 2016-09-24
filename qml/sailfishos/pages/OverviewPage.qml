@@ -50,11 +50,10 @@ Page {
             width: gameList.width
             contentHeight: Theme.itemSizeExtraLarge
 
-            // TODO: Implement MEEEEEE
-    /*        onClicked: {
+            onClicked: {
                 appWindow.viewChanged(gameid);
                 pageStack.push(detailsPage);
-            }*/
+            }
 
             // Label containing the total score
             Label {

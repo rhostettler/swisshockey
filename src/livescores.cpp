@@ -12,7 +12,6 @@
 #include "logger.h"
 #include "config.h"
 
-
 // SailfishApp::main() will display "qml/template.qml", if you need more
 // control over initialization, you can use:
 //
@@ -21,7 +20,6 @@
 //   - SailfishApp::pathTo(QString) to get a QUrl to a resource file
 //
 // To display the view, call "show()" (will show fullscreen on device).
-
 LiveScores::LiveScores(QObject *parent) : QObject(parent) {
     // Create the data store and setup the data provider
     this->dataStore = new GamedayData(this);
@@ -40,7 +38,9 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
     // Create the notifier, disabled by default (enabled automatically when the
     // app is brought to the background)
     // TODO: Enable on SFOS
-#ifndef PLATFORM_SFOS
+#ifdef PLATFORM_SFOS
+    // Not yet implemented for SFOS
+#else
     this->notifier = new Notifier(dataStore);
     this->notifier->disableNotifications();
 #endif

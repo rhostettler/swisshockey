@@ -32,22 +32,52 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 
 CoverBackground {
-    Label {
-        id: label
-        anchors.centerIn: parent
-        text: qsTr("My Cover")
+    id: cover
+
+    Image {
+        id: hometeamLogo
+        anchors {
+            right: parent.horizontalCenter
+            rightMargin: 1.5*Theme.horizontalPageMargin
+            bottom: parent.verticalCenter
+        }
+        height: Theme.fontSizeExtraLarge
+        width: Theme.fontSizeExtraLarge
+        fillMode: Image.PreserveAspectFit
+        source: "../icons/" + gameDetailsData.hometeamId + ".png"
     }
 
-    CoverActionList {
-        id: coverAction
-
-        CoverAction {
-            iconSource: "image://theme/icon-cover-next"
+    Label {
+        id: vsLabel
+        anchors {
+            verticalCenter: hometeamLogo.verticalCenter
+            horizontalCenter: parent.horizontalCenter
         }
+        font.pixelSize: Theme.fontSizeMedium
+        color: Theme.primaryColor
+        text: "vs."
+    }
 
-        CoverAction {
-            iconSource: "image://theme/icon-cover-pause"
+    Image{
+        anchors{
+            left: parent.horizontalCenter
+            leftMargin: 1.5*Theme.horizontalPageMargin
+            bottom: parent.verticalCenter
         }
+        height: Theme.fontSizeLarge
+        width: Theme.fontSizeLarge
+        fillMode: Image.PreserveAspectFit
+        source: "../icons/" + gameDetailsData.awayteamId + ".png"
+    }
+
+    Label {
+        anchors {
+            top: parent.verticalCenter
+            horizontalCenter: parent.horizontalCenter
+        }
+        font.pixelSize: Theme.fontSizeLarge
+        color: Theme.primaryColor
+        text: gameDetailsData.totalScore
     }
 }
 

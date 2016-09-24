@@ -6,7 +6,7 @@ ApplicationWindow
 {
     id: appWindow
     initialPage: overviewPage
-    //cover: Qt.resolvedUrl("cover/CoverPage.qml")
+    cover: Qt.resolvedUrl("cover/CoverPage.qml")
     allowedOrientations: Orientation.All
     _defaultPageOrientations: Orientation.All
 
@@ -20,9 +20,7 @@ ApplicationWindow
         objectName: "overviewPage"
     }
 
-    /*
     DetailsPage {
         id: detailsPage
     }
-    */
 }
