@@ -6,7 +6,6 @@
 
 GamedayData::GamedayData(QObject *parent) : QAbstractListModel(parent) {
     // Initialize the different data roles that can be used by the ListView
-    QHash<int, QByteArray> roles;
     this->roles[HometeamRole] = "hometeam";
     this->roles[HometeamIdRole] = "hometeamId";
     this->roles[AwayteamRole] = "awayteam";
@@ -16,7 +15,9 @@ GamedayData::GamedayData(QObject *parent) : QAbstractListModel(parent) {
     this->roles[GameStatusRole] = "gamestatus";
     this->roles[GameIdRole] = "gameid";
     this->roles[LeagueRole] = "league";
-    //setRoleNames(roles);
+#ifndef PLATFORM_SFOS
+    setRoleNames(this->roles);
+#endif
 
     // Set the date to <empty>
     this->date = QDate::currentDate().toString("yyyy-MM-dd");;
@@ -144,10 +145,12 @@ QVariant GamedayData::headerData(int section, Qt::Orientation orientation, int r
     return QVariant();
 }
 
+#ifdef PLATFORM_SFOS
 // Role names
 QHash<int, QByteArray> GamedayData::roleNames() const {
     return this->roles;
 }
+#endif
 
 //QHash<int, QByteArray> GamedayData::roles = QHash<int, QByteArray>();
 

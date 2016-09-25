@@ -22,6 +22,6 @@ QMap<QString, QVariant> JsonDecoder::decode(QByteArray json) {
     Json decoder;
     QString jsonStr = json.data();
 
-    return decoder->decode(jsonStr);
+    return decoder.decode(jsonStr);
 }
 #endif

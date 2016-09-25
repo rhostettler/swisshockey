@@ -53,7 +53,7 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
 #else
     this->viewer = new QmlApplicationViewer();
     this->viewer->setOrientation(QmlApplicationViewer::ScreenOrientationAuto);
-    this->viewer->setMainQmlFile(QLatin1String("qml/main.qml"));
+    this->viewer->setMainQmlFile(QLatin1String("harmattan/main.qml"));
     this->viewer->showExpanded();
 #endif
 

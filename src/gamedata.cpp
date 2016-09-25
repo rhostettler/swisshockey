@@ -101,7 +101,7 @@ void GameData::updateEvents(QVariantList goals, QVariantList fouls, QVariantList
 
     // Update the list of events (if there are any)
     if(goals.size() + fouls.size() > 0) {
-        beginInsertRows(QModelIndex(), rowCount(), rowCount());
+        //beginInsertRows(QModelIndex(), rowCount(), rowCount());
         // Parse the players, goals, and fouls
         this->updatePlayerList(players);
         this->updateGoals(goals);
@@ -111,7 +111,7 @@ void GameData::updateEvents(QVariantList goals, QVariantList fouls, QVariantList
         qSort(this->events.begin(), this->events.end(), GameEvent::greaterThan);
 
         // End insert/remove rows
-        this->endInsertRows();
+        //this->endInsertRows();
 
         logger.log(Logger::DEBUG, "GameData::updateEvents(): Added " + QString::number(this->players.size()) + " players and " + QString::number(this->events.size()) + " events.");
     } else {
@@ -144,6 +144,7 @@ void GameData::updateGoals(QVariantList goals) {
 
     // Iterate through the goals, the oldest is first in the list
     while(iterator.hasNext()) {
+        beginInsertRows(QModelIndex(), rowCount(), rowCount());
         QVariantMap goal = iterator.next().toMap();
         QString time = goal.value("time").toString();
         QString player = this->players.value(goal.value("scorerLicenceNr").toUInt());
@@ -162,6 +163,7 @@ void GameData::updateGoals(QVariantList goals) {
 
         // Finally, add the goal as a new event
         this->events.append(new GameEvent(time, player, additionalInfo, score));
+        endInsertRows();
     }
 }
 
@@ -170,12 +172,14 @@ void GameData::updateFouls(QVariantList fouls) {
     QListIterator<QVariant> iterator(fouls);
 
     while(iterator.hasNext()) {
+        beginInsertRows(QModelIndex(), rowCount(), rowCount());
         QVariantMap foul = iterator.next().toMap();
         QString time = foul.value("time").toString();
         QString player = this->players.value(foul.value("playerLicenceNr").toUInt(), "");
         QString additionalInfo = GameEvent::getPenaltyText(foul.value("id").toInt());
         QString penalty = foul.value("minutes").toString() + "'";
         this->events.append(new GameEvent(time, player, additionalInfo, penalty));
+        endInsertRows();
     }
 }
 
