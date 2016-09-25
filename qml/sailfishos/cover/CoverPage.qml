@@ -55,7 +55,7 @@ CoverBackground {
         }
         font.pixelSize: Theme.fontSizeMedium
         color: Theme.primaryColor
-        text: "vs."
+        text: typeof(gameDetailsData) != "undefined" ? "vs" : qsTr("No game<br />selected.")
     }
 
     Image{

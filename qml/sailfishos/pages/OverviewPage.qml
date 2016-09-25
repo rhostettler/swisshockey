@@ -100,7 +100,7 @@ Page {
                 anchors {
                     verticalCenter: parent.verticalCenter
                     left: parent.left
-                    leftMargin: 10
+                    leftMargin: Theme.horizontalPageMargin
                 }
                 height: 96
                 width: 96
@@ -114,7 +114,7 @@ Page {
                 anchors {
                     verticalCenter: parent.verticalCenter
                     right: parent.right
-                    rightMargin: 10
+                    rightMargin: Theme.horizontalPageMargin
                 }
                 height: 96
                 width: 96

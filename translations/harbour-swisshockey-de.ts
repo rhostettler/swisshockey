@@ -2,6 +2,13 @@
 <!DOCTYPE TS>
 <TS version="2.1">
 <context>
+    <name>CoverPage</name>
+    <message>
+        <source>No game&lt;br /&gt;selected.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>LeagueSelectionDialog</name>
     <message>
         <source>Select League</source>
