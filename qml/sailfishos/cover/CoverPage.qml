@@ -44,7 +44,7 @@ CoverBackground {
         height: Theme.fontSizeExtraLarge
         width: Theme.fontSizeExtraLarge
         fillMode: Image.PreserveAspectFit
-        source: "../icons/" + gameDetailsData.hometeamId + ".png"
+        source: "../../icons/" + gameDetailsData.hometeamId + ".png"
     }
 
     Label {
@@ -67,7 +67,7 @@ CoverBackground {
         height: Theme.fontSizeLarge
         width: Theme.fontSizeLarge
         fillMode: Image.PreserveAspectFit
-        source: "../icons/" + gameDetailsData.awayteamId + ".png"
+        source: "../../icons/" + gameDetailsData.awayteamId + ".png"
     }
 
     Label {

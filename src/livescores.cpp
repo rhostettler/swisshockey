@@ -82,7 +82,7 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
 
     // Create a timer that periodically fires to update the data, defaults to 5 mins
     Config& config = Config::getInstance();
-    int updateInterval = config.getValue("updateInterval", 5).toInt();
+    int updateInterval = config.getValue("updateInterval", 2).toInt();
     this->timer = new QTimer(this);
     this->timer->setSingleShot(false);
     connect(this->timer, SIGNAL(timeout()), this, SLOT(updateData()));
