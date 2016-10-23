@@ -5,15 +5,15 @@ from the Swiss men's national ice hockey leagues, National League A and B.
 
 Roadmap
 -------
-Version 0.3.0:
-* Basic support for Sailfish OS (Jolla Harbour-ready) (w/o notification 
-  support and control panel integration)
-* Complete renaming from "Live Scores" to "Swiss Ice Hockey"
+Version 0.4.0:
+* Automatically fetch the results from the last game day if there are no games
+  today.
 
 Future plans
 ------------
 Features:
-* Implement a browsable calendar
+* Standings
+* Browsable calendar
 
 UI:
 * Team logos in game details list
@@ -37,9 +37,11 @@ Settings:
 
 Known Issues
 ------------
-* On Sailfish OS, the harmattan QML-files are shipped as well.
+* None.
 
 License
 -------
-This software is free software and licensed under the GNU GPL version 3. The teams' logos included are trademarks of the respective team and used on a fair-use basis.
+This software is free software and licensed under the GNU GPL version 3. The 
+teams' logos included are trademarks of the respective team and used on a 
+fair-use basis.
 
