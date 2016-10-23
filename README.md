@@ -35,3 +35,11 @@ Notifications:
 Settings:
 * Implement a custom in-app settings window should be easier to manage
 
+Known Issues
+------------
+* On Sailfish OS, the harmattan QML-files are shipped as well.
+
+License
+-------
+This software is free software and licensed under the GNU GPL version 3. The teams' logos included are trademarks of the respective team and used on a fair-use basis.
+

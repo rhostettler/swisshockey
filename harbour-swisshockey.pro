@@ -12,9 +12,18 @@
 # The name of your application
 TARGET = harbour-swisshockey
 
+
 CONFIG += sailfishapp
 PKGCONFIG += mlite5
 QT += core network
+
+# QML files & icons
+#ui.source = qml/sailfishos
+#ui.target = .
+#DEPLOYMENTFOLDERS += ui
+#app_icons.source = qml/icons
+#app_icons.target = .
+#DEPLOYMENTFOLDERS += app_icons
 
 # Define the platform for platform-specific code
 DEFINES += "PLATFORM_SFOS"
@@ -31,9 +40,15 @@ SOURCES += \
     src/sihfdatasource.cpp \
     src/jsondecoder.cpp
 
+# Add QML files to Qt Creator
 OTHER_FILES += qml/sailfishos/harbour-swisshockey.qml \
     qml/sailfishos/cover/CoverPage.qml \
-    rpm/harbour-swisshockey.changes.in \
+    qml/sailfishos/pages/OverviewPage.qml \
+    qml/sailfishos/pages/LeagueSelectionDialog.qml \
+    qml/sailfishos/pages/DetailsPage.qml
+
+# Add other files to Qt Creator
+OTHER_FILES += rpm/harbour-swisshockey.changes.in \
     rpm/harbour-swisshockey.spec \
     rpm/harbour-swisshockey.yaml \
     translations/*.ts \
@@ -62,8 +77,8 @@ HEADERS += \
     src/sihfdatasource.h \
     src/jsondecoder.h
 
-DISTFILES += \
-    qml/sailfishos/pages/OverviewPage.qml \
-    qml/sailfishos/pages/LeagueSelectionDialog.qml \
-    qml/sailfishos/pages/DetailsPage.qml
+#DISTFILES += \
+#    qml/sailfishos/pages/OverviewPage.qml \
+#    qml/sailfishos/pages/LeagueSelectionDialog.qml \
+#    qml/sailfishos/pages/DetailsPage.qml
 

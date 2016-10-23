@@ -1,4 +1,3 @@
-
 // Platform specific modules
 #ifdef PLATFORM_SFOS
     #ifdef QT_QML_DEBUG
@@ -20,20 +19,6 @@
 #include "logger.h"
 #include "config.h"
 
-/*
-// SailfishApp::main() will display "qml/template.qml", if you need more
-// control over initialization, you can use:
-//
-//   - SailfishApp::application(int, char *[]) to get the QGuiApplication *
-//   - SailfishApp::createView() to get a new QQuickView * instance
-//   - SailfishApp::pathTo(QString) to get a QUrl to a resource file
-//
-// To display the view, call "show()" (will show fullscreen on device).
-
-return SailfishApp::main(argc, argv);
-*/
-
-//Q_DECL_EXPORT int main(int argc, char *argv[])
 int main(int argc, char *argv[]) {
 #ifdef PLATFORM_SFOS
     QGuiApplication *app = SailfishApp::application(argc, argv);
@@ -59,8 +44,8 @@ int main(int argc, char *argv[]) {
 #else
     logger.setLogfile("/home/user/swisshockey.log");                            // TODO: Update path
 #endif
-    logger.setLevel(config.getValue("loglevel", Logger::ERROR).toInt());
-    //logger.setLevel(Logger::DEBUG);
+    //logger.setLevel(config.getValue("loglevel", Logger::ERROR).toInt());
+    logger.setLevel(Logger::DEBUG);
     //logger.setLevel(Logger::ERROR);
 
     // Create a controller that generates the UI and connects all the necessary

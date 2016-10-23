@@ -12,11 +12,11 @@ Name:       harbour-swisshockey
 %{!?qtc_qmake5:%define qtc_qmake5 %qmake5}
 %{!?qtc_make:%define qtc_make make}
 %{?qtc_builddir:%define _builddir %qtc_builddir}
-Summary:    My SailfishOS Application
+Summary:    Live results and standings from the Swiss ice hockey leagues.
 Version:    0.3.0
 Release:    1
 Group:      Qt/Qt
-License:    LICENSE
+License:    GPLv3
 URL:        http://example.org/
 Source0:    %{name}-%{version}.tar.bz2
 Source100:  harbour-swisshockey.yaml

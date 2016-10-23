@@ -105,7 +105,7 @@ Page {
                 height: 96
                 width: 96
                 fillMode: Image.PreserveAspectFit
-                source: "../icons/" + hometeamId + ".png"
+                source: "../../icons/" + hometeamId + ".png"
             }
 
             // Awayteam logo: to the right
@@ -119,7 +119,7 @@ Page {
                 height: 96
                 width: 96
                 fillMode: Image.PreserveAspectFit
-                source: "../icons/" + awayteamId + ".png"
+                source: "../../icons/" + awayteamId + ".png"
             }
         }
 
@@ -140,15 +140,17 @@ Page {
                 }
             }
         }
+    }
 
-        ViewPlaceholder{
-            anchors {
-                horizontalCenter: parent.horizontalCenter
-                verticalCenter: parent.verticalCenter
-            }
-            enabled: gameList.count === 0
-            text: qsTr("No games today.");
-            //hintText: qsTr("")
+    // TODO: This should actually be inside the ListView, but that will place it
+    // strangely so we put it here and take the error.
+    ViewPlaceholder{
+        anchors {
+            horizontalCenter: parent.horizontalCenter
+            verticalCenter: parent.verticalCenter
         }
+        enabled: gameList.count === 0
+        text: qsTr("No games today.");
+        //hintText: qsTr("")
     }
 }

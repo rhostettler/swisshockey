@@ -86,7 +86,7 @@ Page {
                 height: 96
                 width: 96
                 fillMode: Image.PreserveAspectFit
-                source: "../icons/" + gameDetailsData.hometeamId + ".png"
+                source: "../../icons/" + gameDetailsData.hometeamId + ".png"
             }
 
             // Awayteam logo: to the right
@@ -102,7 +102,7 @@ Page {
                 height: 96
                 width: 96
                 fillMode: Image.PreserveAspectFit
-                source: "../icons/" + gameDetailsData.awayteamId + ".png"
+                source: "../../icons/" + gameDetailsData.awayteamId + ".png"
             }
         }
 

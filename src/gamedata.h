@@ -85,7 +85,9 @@ class GameData : public QAbstractListModel {
         int rowCount(const QModelIndex & parent = QModelIndex()) const;
         QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
         QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+#ifdef PLATFORM_SFOS
         QHash<int, QByteArray> roleNames() const;
+#endif
 
         static QString parsePlayerName(QString name);
 
