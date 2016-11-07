@@ -48,7 +48,7 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
     // Load and show the QML
 #ifdef PLATFORM_SFOS
     this->viewer = SailfishApp::createView();
-    this->viewer->setSource(SailfishApp::pathTo("qml/sailfishos/harbour-swisshockey.qml"));  // TODO: Adjust once the qml is sorted out
+    this->viewer->setSource(SailfishApp::pathTo("sailfishos/harbour-swisshockey.qml"));  // TODO: Adjust once the qml is sorted out
     this->viewer->show();
 #else
     this->viewer = new QmlApplicationViewer();

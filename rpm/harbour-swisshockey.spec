@@ -12,12 +12,12 @@ Name:       harbour-swisshockey
 %{!?qtc_qmake5:%define qtc_qmake5 %qmake5}
 %{!?qtc_make:%define qtc_make make}
 %{?qtc_builddir:%define _builddir %qtc_builddir}
-Summary:    Live results and standings from the Swiss ice hockey leagues.
+Summary:    Live results from the Swiss ice hockey leagues.
 Version:    0.3.0
 Release:    1
 Group:      Qt/Qt
 License:    GPLv3
-URL:        http://example.org/
+URL:        https://github.com/rhostettler/swisshockey
 Source0:    %{name}-%{version}.tar.bz2
 Source100:  harbour-swisshockey.yaml
 Requires:   sailfishsilica-qt5 >= 0.10.9
@@ -28,7 +28,9 @@ BuildRequires:  pkgconfig(Qt5Quick)
 BuildRequires:  desktop-file-utils
 
 %description
-Short description of my SailfishOS Application
+An app providing live results from the Swiss national ice hockey leagues,
+(National League A and B), the Swiss Cup, and the Champions Hockey League
+(Swiss teams only).
 
 
 %prep
