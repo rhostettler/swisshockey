@@ -35,7 +35,7 @@ SOURCES += src/main.cpp \
     src/jsondecoder.cpp
 
 # Files used for custom notifications
-notification_conf.files = livescores.score.update.conf
+notification_conf.files = harmattan/notifications/livescores.score.update.conf
 notification_conf.path = /usr/share/meegotouch/notifications/eventtypes
 INSTALLS += notification_conf
 
@@ -45,11 +45,11 @@ notification_icons.path = /usr/share/themes/blanco/meegotouch/icons
 INSTALLS += notification_icons
 
 # Control Panel Applet
-cpapplet_desktop.files = cpapplet/NLLiveScores.desktop
+cpapplet_desktop.files = harmattan/cpapplet/NLLiveScores.desktop
 cpapplet_desktop.path = /usr/share/duicontrolpanel/desktops
 INSTALLS += cpapplet_desktop
 
-cpapplet_xml.files = cpapplet/NLLiveScores.xml
+cpapplet_xml.files = harmattan/cpapplet/NLLiveScores.xml
 cpapplet_xml.path = /usr/share/duicontrolpanel/uidescriptions
 INSTALLS += cpapplet_xml
 

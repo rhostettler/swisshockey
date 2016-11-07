@@ -65,6 +65,6 @@ AutoGenerateAegisFile
 
 	</request>
 
-	<for path="/opt/NLLiveScores/bin/NLLiveScores" />
+        <for path="/opt/harmattan-swisshockey/bin/harmattan-swisshockey" />
 	<for path="applauncherd-launcher::/usr/bin/applauncherd.bin" id="" />
 </aegis>

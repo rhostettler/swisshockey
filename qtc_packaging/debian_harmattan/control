@@ -1,12 +1,12 @@
-Source: nllivescores
+Source: swisshockey
 Section: user/other
 Priority: optional
 Maintainer: Roland Hostettler <r.hostettler@gmx.ch>
 Build-Depends: debhelper (>= 5), libqt4-dev
 Standards-Version: 3.7.3
-Homepage: https://github.com/rolandh83/nl-live-scores
+Homepage: https://github.com/rhostettler/swisshockey
 
-Package: nllivescores
+Package: swisshockey
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Live scores from the Swiss national ice hockey leagues.
