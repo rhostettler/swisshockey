@@ -1,22 +1,15 @@
 # Add more folders to ship with the application, here
-ui.source = qml
+ui.source = qml/harmattan
 ui.target = .
 DEPLOYMENTFOLDERS = ui
 
+# The icons within the app
+app_icons.source = qml/icons
+app_icons.target = .
+DEPLOYMENTFOLDERS += app_icons
+
 # Additional import path used to resolve QML modules in Creator's code model
 QML_IMPORT_PATH =
-
-symbian:TARGET.UID3 = 0xEF61829D
-
-# Smart Installer package's UID
-# This UID is from the protected range and therefore the package will
-# fail to install if self-signed. By default qmake uses the unprotected
-# range value if unprotected UID is defined for the application and
-# 0x2002CCCF value if protected UID is given to the application
-#symbian:DEPLOYMENT.installer_header = 0x2002CCCF
-
-# Allow network access on Symbian
-symbian:TARGET.CAPABILITY += NetworkServices
 
 # If your application uses the Qt Mobility libraries, uncomment the following
 # lines and add the respective components to the MOBILITY variable.
@@ -26,9 +19,6 @@ symbian:TARGET.CAPABILITY += NetworkServices
 # Speed up launching on MeeGo/Harmattan when using applauncherd daemon
 CONFIG += qdeclarative-boostable
 CONFIG += meegotouch
-
-# Add dependency to Symbian components
-# CONFIG += qt-components
 
 # The .cpp file which was generated for your project. Feel free to hack it.
 SOURCES += src/main.cpp \
@@ -41,10 +31,11 @@ SOURCES += src/main.cpp \
     src/datasource.cpp \
     src/sihfdatasource.cpp \
     src/logger.cpp \
-    src/config.cpp
+    src/config.cpp \
+    src/jsondecoder.cpp
 
 # Files used for custom notifications
-notification_conf.files = livescores.score.update.conf
+notification_conf.files = harmattan/notifications/livescores.score.update.conf
 notification_conf.path = /usr/share/meegotouch/notifications/eventtypes
 INSTALLS += notification_conf
 
@@ -54,11 +45,11 @@ notification_icons.path = /usr/share/themes/blanco/meegotouch/icons
 INSTALLS += notification_icons
 
 # Control Panel Applet
-cpapplet_desktop.files = cpapplet/NLLiveScores.desktop
+cpapplet_desktop.files = harmattan/cpapplet/NLLiveScores.desktop
 cpapplet_desktop.path = /usr/share/duicontrolpanel/desktops
 INSTALLS += cpapplet_desktop
 
-cpapplet_xml.files = cpapplet/NLLiveScores.xml
+cpapplet_xml.files = harmattan/cpapplet/NLLiveScores.xml
 cpapplet_xml.path = /usr/share/duicontrolpanel/uidescriptions
 INSTALLS += cpapplet_xml
 
@@ -85,14 +76,15 @@ HEADERS += \
     src/datasource.h \
     src/sihfdatasource.h \
     src/logger.h \
-    src/config.h
+    src/config.h \
+    src/jsondecoder.h
 
 # Add Qt dependencies
 QT += core network script
 PKGCONFIG += gq-gconf
 
 contains(MEEGO_EDITION,harmattan) {
-    icon.files = swisshockey80.png
+    icon.files = icons/harmattan/swisshockey80.png
     icon.path = /usr/share/icons/hicolor/80x80/apps
     INSTALLS += icon
 }

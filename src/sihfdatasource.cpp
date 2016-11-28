@@ -7,17 +7,8 @@
 SIHFDataSource::SIHFDataSource(QObject *parent) : DataSource(parent) {
     // Create the network access objects
     this->nam = new QNetworkAccessManager(this);
-    this->decoder = new Json(this);
+    this->decoder = new JsonDecoder(this);
 }
-
-// TODO: The updateGameDetails() should take an argument which should make this
-// unnecessary. The data would be passed to the data store in the same way as the
-// game summaries.
-#if 0
-void SIHFDataSource::setGameId(QString gameId) {
-    this->gameId = gameId;
-}
-#endif
 
 // Send a query to the National League Server
 /*
@@ -33,15 +24,12 @@ void SIHFDataSource::queryScores(void) {
     QNetworkRequest request;
     request.setUrl(QUrl(url));
     request.setRawHeader("Accept-Encoding", "deflate");
-#if 0
-    request.setRawHeader("Connection", "keep-alive");
-#endif
     request.setRawHeader("Referer", "http://www.sihf.ch/de/game-center/");
 
     // Send the request and connect the finished() signal of the reply to parser
     this->totomatReply = this->nam->get(request);
     connect(this->totomatReply, SIGNAL(finished()), this, SLOT(parseScoresResponse()));
-    connect(this->totomatReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(handleNetworkError()));
+    connect(this->totomatReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(handleNetworkError(QNetworkReply::NetworkError)));
 
     // Log the request
     Logger& logger = Logger::getInstance();
@@ -59,7 +47,7 @@ void SIHFDataSource::parseScoresResponse() {
     logger.log(Logger::DEBUG, rawdata);
 
     // Parse the response
-    QVariantMap parsedRawdata = this->decoder->decode(rawdata.data());
+    QVariantMap parsedRawdata = this->decoder->decode(rawdata);
     if(parsedRawdata.contains("data")) {
         logger.log(Logger::DEBUG, "SIHFDataSource::parseScoresResponse(): Parsing data...");
         QVariantList data = parsedRawdata.value("data").toList();
@@ -233,7 +221,7 @@ void SIHFDataSource::parseStatsResponse(void) {
     }
 
     // Convert from JSON to a map
-    QVariantMap parsedRawdata = this->decoder->decode(rawdata.data());
+    QVariantMap parsedRawdata = this->decoder->decode(rawdata);
 
     // Extract the game events
     QVariantList goals;

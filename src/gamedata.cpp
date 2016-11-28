@@ -39,14 +39,15 @@ GameData::GameData(QVariantMap data, QObject *parent) : QAbstractListModel(paren
     this->m_statusChanged = false;
 
     // Set the data roles
-    QHash<int, QByteArray> roles;
-    roles[TeamRole] = "eventteam";
-    roles[TimeRole] = "eventtime";
-    roles[PlayerRole] = "eventplayer";
-    roles[AdditionalInfoRole] = "eventinfo";
-    roles[EventRole] = "eventtext";
-    roles[EventSubtextRole] = "eventsubtext";
-    setRoleNames(roles);
+    this->roles[TeamRole] = "eventteam";
+    this->roles[TimeRole] = "eventtime";
+    this->roles[PlayerRole] = "eventplayer";
+    this->roles[AdditionalInfoRole] = "eventinfo";
+    this->roles[EventRole] = "eventtext";
+    this->roles[EventSubtextRole] = "eventsubtext";
+#ifndef PLATFORM_SFOS
+    setRoleNames(this->roles);
+#endif
 }
 
 // Update the game score
@@ -88,7 +89,7 @@ void GameData::updateSummary(QVariantMap data) {
     }
 }
 
-// TODO: For simplicity, we update the parsing functions here for now, we'll
+// TODO: Move the parsing of the data to the actual parser
 // move to the generic solution later on.
 void GameData::updateEvents(QVariantList goals, QVariantList fouls, QVariantList players) {
     Logger& logger = Logger::getInstance();
@@ -101,7 +102,6 @@ void GameData::updateEvents(QVariantList goals, QVariantList fouls, QVariantList
 
     // Update the list of events (if there are any)
     if(goals.size() + fouls.size() > 0) {
-        beginInsertRows(QModelIndex(), rowCount(), rowCount());
         // Parse the players, goals, and fouls
         this->updatePlayerList(players);
         this->updateGoals(goals);
@@ -109,10 +109,6 @@ void GameData::updateEvents(QVariantList goals, QVariantList fouls, QVariantList
 
         // Sort the events
         qSort(this->events.begin(), this->events.end(), GameEvent::greaterThan);
-
-        // End insert/remove rows
-        this->endInsertRows();
-
         logger.log(Logger::DEBUG, "GameData::updateEvents(): Added " + QString::number(this->players.size()) + " players and " + QString::number(this->events.size()) + " events.");
     } else {
         logger.log(Logger::DEBUG, "GameData::updateEvents(): No game events to add.");
@@ -144,6 +140,7 @@ void GameData::updateGoals(QVariantList goals) {
 
     // Iterate through the goals, the oldest is first in the list
     while(iterator.hasNext()) {
+        beginInsertRows(QModelIndex(), rowCount(), rowCount());
         QVariantMap goal = iterator.next().toMap();
         QString time = goal.value("time").toString();
         QString player = this->players.value(goal.value("scorerLicenceNr").toUInt());
@@ -162,6 +159,7 @@ void GameData::updateGoals(QVariantList goals) {
 
         // Finally, add the goal as a new event
         this->events.append(new GameEvent(time, player, additionalInfo, score));
+        endInsertRows();
     }
 }
 
@@ -170,12 +168,14 @@ void GameData::updateFouls(QVariantList fouls) {
     QListIterator<QVariant> iterator(fouls);
 
     while(iterator.hasNext()) {
+        beginInsertRows(QModelIndex(), rowCount(), rowCount());
         QVariantMap foul = iterator.next().toMap();
         QString time = foul.value("time").toString();
         QString player = this->players.value(foul.value("playerLicenceNr").toUInt(), "");
         QString additionalInfo = GameEvent::getPenaltyText(foul.value("id").toInt());
         QString penalty = foul.value("minutes").toString() + "'";
         this->events.append(new GameEvent(time, player, additionalInfo, penalty));
+        endInsertRows();
     }
 }
 
@@ -300,5 +300,12 @@ QVariant GameData::data(const QModelIndex &index, int role) const {
 QVariant GameData::headerData(int section, Qt::Orientation orientation, int role) const {
     return QVariant();
 }
+
+// Role names for QML
+#ifdef PLATFORM_SFOS
+QHash<int, QByteArray> GameData::roleNames() const {
+    return this->roles;
+}
+#endif
 
 /* EOF */

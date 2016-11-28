@@ -3,7 +3,23 @@
 
 #include <QObject>
 #include <QMap>
-#include <QtScript>
+
+#ifdef PLATFORM_SFOS
+    #include <QJSEngine>
+    #include <QJSValue>
+    #include <QJSValueIterator>
+#else
+    //#include <QtScript>
+    #include <QtScript/QScriptEngine>
+    #include <QtScript/QScriptValue>
+    #include <QtScript/QScriptValueIterator>
+
+    #define QJSEngine QScriptEngine
+    #define QJSValue QScriptValue
+    #define QJSValueIterator QScriptValueIterator
+#endif
+
+
 
 /**
   * JSON Parser Class
@@ -20,9 +36,9 @@ class Json : public QObject {
         QMap<QString, QVariant> decode(const QString &jsonStr);
 
     private:
-        QScriptValue encodeInner(const QMap<QString, QVariant> &map, QScriptEngine* engine);
-        QMap<QString, QVariant> decodeInner(QScriptValue object);
-        QList<QVariant> decodeInnerToList(QScriptValue arrayValue);
+        QJSValue encodeInner(const QMap<QString, QVariant> &map, QJSEngine* engine);
+        QMap<QString, QVariant> decodeInner(QJSValue object);
+        QList<QVariant> decodeInnerToList(QJSValue arrayValue);
 
     signals:
 

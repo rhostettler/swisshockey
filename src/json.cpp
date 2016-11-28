@@ -1,28 +1,30 @@
 #include "json.h"
-#include <QtScript/QScriptEngine>
-#include <QtScript/QScriptValueIterator>
+
+//#include <QtScript/QScriptEngine>
+//#include <QtScript/QScriptValueIterator>
 
 Json::Json(QObject *parent) : QObject(parent) {
 }
 
 QString Json::encode(const QMap<QString,QVariant> &map) {
-    QScriptEngine engine;
+    QJSEngine engine;
     engine.evaluate("function toString() { return JSON.stringify(this) }");
 
-    QScriptValue toString = engine.globalObject().property("toString");
-    QScriptValue obj = encodeInner(map, &engine);
-    return toString.call(obj).toString();
+    QJSValue toString = engine.globalObject().property("toString");
+    QJSValue obj = encodeInner(map, &engine);
+    //return toString.call(obj).toString(); // TODO: This is broken!
+    return QString();
 }
 
 QMap<QString, QVariant> Json::decode(const QString &jsonStr) {
-    QScriptValue object;
-    QScriptEngine engine;
+    QJSValue object;
+    QJSEngine engine;
     object = engine.evaluate("(" + jsonStr + ")");
     return decodeInner(object);
 }
 
-QScriptValue Json::encodeInner(const QMap<QString,QVariant> &map, QScriptEngine* engine) {
-    QScriptValue obj = engine->newObject();
+QJSValue Json::encodeInner(const QMap<QString,QVariant> &map, QJSEngine* engine) {
+    QJSValue obj = engine->newObject();
     QMapIterator<QString, QVariant> i(map);
     while (i.hasNext()) {
         i.next();
@@ -41,9 +43,9 @@ QScriptValue Json::encodeInner(const QMap<QString,QVariant> &map, QScriptEngine*
 }
 
 
-QMap<QString, QVariant> Json::decodeInner(QScriptValue object) {
+QMap<QString, QVariant> Json::decodeInner(QJSValue object) {
     QMap<QString, QVariant> map;
-    QScriptValueIterator it(object);
+    QJSValueIterator it(object);
     while (it.hasNext()) {
         it.next();
         if (it.value().isArray())
@@ -60,9 +62,9 @@ QMap<QString, QVariant> Json::decodeInner(QScriptValue object) {
     return map;
 }
 
-QList<QVariant> Json::decodeInnerToList(QScriptValue arrayValue) {
+QList<QVariant> Json::decodeInnerToList(QJSValue arrayValue) {
     QList<QVariant> list;
-    QScriptValueIterator it(arrayValue);
+    QJSValueIterator it(arrayValue);
     while (it.hasNext()) {
         it.next();
         if (it.name() == "length")

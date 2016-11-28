@@ -1,4 +1,5 @@
 #include "gameevent.h"
+#include "logger.h"
 
 #include <QTime>
 #include <QTextStream>
