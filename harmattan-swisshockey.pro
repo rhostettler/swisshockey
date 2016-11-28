@@ -84,7 +84,7 @@ QT += core network script
 PKGCONFIG += gq-gconf
 
 contains(MEEGO_EDITION,harmattan) {
-    icon.files = swisshockey80.png
+    icon.files = icons/harmattan/swisshockey80.png
     icon.path = /usr/share/icons/hicolor/80x80/apps
     INSTALLS += icon
 }

@@ -13,31 +13,33 @@ Future plans
 ------------
 Features:
 * Standings
-* Browsable calendar
+* Roster
+* Last / next
+* Browseable calendar
 
 UI:
-* Team logos in game details list
-* Implement roster
+* [All] Team logos in game details list
+* [SailfishOS] Tablet UI
 
 Backend:
-* Code cleanup (yes, it's a mess in some places)
-* Implement a GameEvent type system
-* Implement an internal data model for game events
-* Implement roster
+* Code cleanup (yes, it's a mess)
+* Implement the GameEvent type system / game event data model
 
 Notifications:
-* Notification callback actions (tap opens app)
-* Implement a notification-beep when app is in foreground
-* (Harmattan) Notifications are not cleared on application shutdown (implement
+* [Harmattan] Notification callback actions (tap opens app)
+* [Harmattan] Implement a notification-beep when app is in foreground
+* [Harmattan] Notifications are not cleared on application shutdown (implement
   in Notifier destructor.)
-* Consider notification groups
+* [Harmattan] Consider notification groups
+* [SailfishOS] Implement some kind of notifications
 
 Settings:
-* Implement a custom in-app settings window should be easier to manage
+* [All] Implement a custom in-app settings window should be easier to manage
 
 Known Issues
 ------------
-* None.
+* [SailfishOS] Update is sometimes not triggered when minimized.
+* [All] GK & shootout events are not implemented.
 
 License
 -------

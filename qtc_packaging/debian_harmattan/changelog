@@ -1,3 +1,9 @@
+nllivescores (0.3.0) unstable; urgency=low
+  * [SailfishOS] Initial release
+  * [Harmattan] Fixed notification regression
+
+ -- Roland Hostettler <r.hostettler@gmx.ch>  Mon, 07 Nov 2016 20:40:14 +0200
+
 nllivescores (0.2.1) unstable; urgency=low
   * Updated app name and repository link
   * Updated artwork for season 2016/17
