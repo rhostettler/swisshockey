@@ -108,7 +108,9 @@ void GameData::updateEvents(QVariantList goals, QVariantList fouls, QVariantList
         this->updateFouls(fouls);
 
         // Sort the events
+        layoutAboutToBeChanged();
         qSort(this->events.begin(), this->events.end(), GameEvent::greaterThan);
+        layoutChanged();
         logger.log(Logger::DEBUG, "GameData::updateEvents(): Added " + QString::number(this->players.size()) + " players and " + QString::number(this->events.size()) + " events.");
     } else {
         logger.log(Logger::DEBUG, "GameData::updateEvents(): No game events to add.");
