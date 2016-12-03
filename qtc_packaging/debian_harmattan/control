@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Roland Hostettler <r.hostettler@gmx.ch>
 Build-Depends: debhelper (>= 5), libqt4-dev
 Standards-Version: 3.7.3
-Homepage: https://github.com/rolandh83/nl-live-scores
+Homepage: https://github.com/rhostettler/swisshockey
 
 Package: nllivescores
 Architecture: any

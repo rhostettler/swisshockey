@@ -67,7 +67,7 @@ Page {
         // Selector Icon
         Image {
             id: selectorIcon
-            source: "icons/icon-m-toolbar-updown.png"
+            source: "../icons/icon-m-toolbar-updown.png"
             anchors {
                 verticalCenter: parent.verticalCenter
                 right: parent.right
@@ -212,7 +212,7 @@ Page {
                 height: 96
                 width: 96
                 fillMode: Image.PreserveAspectFit
-                source: "icons/" + hometeamId + ".png"
+                source: "../icons/" + hometeamId + ".png"
             }
 
             // Awayteam logo: to the right
@@ -228,7 +228,7 @@ Page {
                 height: 96
                 width: 96
                 fillMode: Image.PreserveAspectFit
-                source: "icons/" + awayteamId + ".png"
+                source: "../icons/" + awayteamId + ".png"
             }
 
             // Separator between the entries

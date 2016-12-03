@@ -5,33 +5,45 @@ from the Swiss men's national ice hockey leagues, National League A and B.
 
 Roadmap
 -------
-Version 0.3.0:
-* Basic support for Sailfish OS (Jolla Harbour-ready) (w/o notification 
-  support and control panel integration)
-* Complete renaming from "Live Scores" to "Swiss Ice Hockey"
+Version 0.4.0:
+* Automatically fetch the results from the last game day if there are no games
+  today.
 
 Future plans
 ------------
 Features:
-* Implement a browsable calendar
+* Standings
+* Roster
+* Last / next
+* Browseable calendar
 
 UI:
-* Team logos in game details list
-* Implement roster
+* [All] Team logos in game details list
+* [SailfishOS] Tablet UI
 
 Backend:
-* Code cleanup (yes, it's a mess in some places)
-* Implement a GameEvent type system
-* Implement an internal data model for game events
-* Implement roster
+* Code cleanup (yes, it's a mess)
+* Implement the GameEvent type system / game event data model
 
 Notifications:
-* Notification callback actions (tap opens app)
-* Implement a notification-beep when app is in foreground
-* (Harmattan) Notifications are not cleared on application shutdown (implement
+* [Harmattan] Notification callback actions (tap opens app)
+* [Harmattan] Implement a notification-beep when app is in foreground
+* [Harmattan] Notifications are not cleared on application shutdown (implement
   in Notifier destructor.)
-* Consider notification groups
+* [Harmattan] Consider notification groups
+* [SailfishOS] Implement some kind of notifications
 
 Settings:
-* Implement a custom in-app settings window should be easier to manage
+* [All] Implement a custom in-app settings window should be easier to manage
+
+Known Issues
+------------
+* [SailfishOS] Update is sometimes not triggered when minimized.
+* [All] GK & shootout events are not implemented.
+
+License
+-------
+This software is free software and licensed under the GNU GPL version 3. The 
+teams' logos included are trademarks of the respective team and used on a 
+fair-use basis.
 

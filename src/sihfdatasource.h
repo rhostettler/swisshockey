@@ -8,7 +8,8 @@
 
 #include "datasource.h"
 #include "gamedaydata.h"
-#include "json.h"
+
+#include "jsondecoder.h"
 
 class SIHFDataSource : public DataSource {
     Q_OBJECT
@@ -17,7 +18,7 @@ class SIHFDataSource : public DataSource {
         QNetworkAccessManager *nam;
         QNetworkReply *totomatReply;  // TODO: Rename
         QNetworkReply *statsReply;    // TODO: Rename
-        Json *decoder;
+        JsonDecoder *decoder;
         QString gameId;               // TODO: Hmmm?
 
         QVariantMap parseGameSummary(QVariantList indata);

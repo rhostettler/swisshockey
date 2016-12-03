@@ -7,21 +7,32 @@
 #include <QEvent>
 #include <QSortFilterProxyModel>
 
-#include "qmlapplicationviewer.h"
+#ifdef PLATFORM_SFOS
+// here we'll add the sailfishapp thing
+    #include <QQuickView>
+    #include <sailfishapp.h>
+#else
+    #include "qmlapplicationviewer.h"
+    #include "notifier.h"
+#endif // PLATFORM_SFOS
+
 #include "sihfdatasource.h"
 #include "gamedaydata.h"
-#include "notifier.h"
 
 class LiveScores : public QObject {
     Q_OBJECT
 
     private:
+#ifdef PLATFORM_SFOS
+        QQuickView *viewer;
+#else
         Notifier *notifier;
+        QmlApplicationViewer *viewer;
+#endif
         GamedayData *dataStore;
         QSortFilterProxyModel *filter;
         GameData *current;
         SIHFDataSource *dataSource;
-        QmlApplicationViewer *viewer;
         QTimer *timer;
         QString currentId;
 
