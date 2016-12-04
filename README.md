@@ -3,6 +3,8 @@ Swiss Ice Hockey
 An app for Meego Harmattan (Nokia N9) and Sailfish OS that provides live scores
 from the Swiss men's national ice hockey leagues, National League A and B.
 
+[![Flattr this](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?fid=nw6llg&url=https://github.com/rhostettler/swisshockey)
+
 Roadmap
 -------
 Version 0.4.0:
@@ -46,4 +48,5 @@ License
 This software is free software and licensed under the GNU GPL version 3. The 
 teams' logos included are trademarks of the respective team and used on a 
 fair-use basis.
+
 
