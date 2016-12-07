@@ -13,7 +13,7 @@ Name:       harbour-swisshockey
 %{!?qtc_make:%define qtc_make make}
 %{?qtc_builddir:%define _builddir %qtc_builddir}
 Summary:    Live results from the Swiss ice hockey leagues.
-Version:    0.3.0
+Version:    0.3.1
 Release:    1
 Group:      Qt/Qt
 License:    GPLv3

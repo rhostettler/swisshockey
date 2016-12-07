@@ -6,6 +6,8 @@
 
     #include <QGuiApplication>
     #include <sailfishapp.h>
+    #include <QStandardPaths>
+    #include <QDir>
 #else
     #include <QtGui/QApplication>
     #include <MComponentData>
@@ -40,11 +42,15 @@ int main(int argc, char *argv[]) {
     Config& config = Config::getInstance();
     Logger& logger = Logger::getInstance();
 #ifdef PLATFORM_SFOS
-    logger.setLogfile("/home/nemo/swisshockey.log");
+    QDir datapath(QStandardPaths::writableLocation(QStandardPaths::DataLocation));
+    if(!datapath.exists()) {
+        datapath.mkpath(".");
+    }
+    logger.setLogfile(datapath.canonicalPath() + "/debug.log");
 #else
-    logger.setLogfile("/home/user/swisshockey.log");                            // TODO: Update path
+    logger.setLogfile("/home/user/swisshockey.log");                            // TODO: Update path (make generic)
 #endif
-    //logger.setLevel(config.getValue("loglevel", Logger::ERROR).toInt());
+    //logger.setLevel(config.getValue("loglevel", Logger::ERROR).toInt());  // TODO: Re-enable
     //logger.setLevel(Logger::DEBUG);
     logger.setLevel(Logger::ERROR);
 
