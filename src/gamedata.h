@@ -41,7 +41,7 @@ class GameData : public QAbstractListModel {
         QList<GameEvent *> events;
 
         // List of players
-        QMap<qint32, QString> players;
+        QMap<quint32, QString> players;
 
         // Status
         int status;
@@ -96,7 +96,7 @@ class GameData : public QAbstractListModel {
         void statusChanged(void);
 
     public slots:
-        void updateEvents(QVariantList goals, QVariantList fouls, QVariantList players);
+        void updateEvents(QList<GameEvent *> events, QVariantList players);
 };
 
 #endif // GAMEDATA_H

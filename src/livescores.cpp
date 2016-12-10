@@ -103,8 +103,8 @@ void LiveScores::updateView(QString id) {
 
     if(this->current != NULL) {
         // Set the game id in the totomat & force update
-        connect(this->dataSource, SIGNAL(gameDetailsUpdated(QVariantList, QVariantList, QVariantList)), game, SLOT(updateEvents(QVariantList, QVariantList, QVariantList)));
-        this->dataSource->queryStats(id);
+        connect(this->dataSource, SIGNAL(gameDetailsUpdated(QList<GameEvent *>, QVariantList)), game, SLOT(updateEvents(QList<GameEvent *>, QVariantList)));
+        this->dataSource->queryDetails(id);
 
         // Get the context since we'll be invoking it a couple of times
 #ifdef PLATFORM_SFOS
@@ -127,9 +127,9 @@ void LiveScores::updateLeague(QString league) {
 // Observe the focus state of the app (foreground / background) and set the
 // internal state accordingly
 bool LiveScores::eventFilter(QObject* obj, QEvent* event) {
+#ifndef PLATFORM_SFOS
     Logger& logger = Logger::getInstance();
 
-#ifndef PLATFORM_SFOS
     switch(event->type()) {
         case QEvent::WindowActivate:
             this->notifier->disableNotifications();

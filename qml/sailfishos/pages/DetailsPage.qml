@@ -5,12 +5,6 @@ Page {
     SilicaListView {
         id: gameEvents
         width: parent.width
-/*        anchors {
-            top: gameSummary.bottom
-            left: parent.left
-            //right: parent.right
-            bottom: parent.bottom
-        }*/
         anchors.fill: parent
         model: gameEventsData
 
@@ -119,8 +113,6 @@ Page {
                     left: parent.left
                     bottom: parent.verticalCenter
                     leftMargin: Theme.horizontalPageMargin
-                    //leftMargin: 10
-                    //horizontalCenter: parent.Center
                 }
                 font {
                     family: Theme.fontFamilyHeading
@@ -134,7 +126,6 @@ Page {
             Label {
                 id: player
                 anchors {
-                    //horizontalCenter: parent.left
                     left: time.right
                     bottom: parent.verticalCenter
                 }
@@ -163,9 +154,6 @@ Page {
             // Label containing the score or the penalty
             Label {
                 id: eventText
-                //width: 96    //////// TODO
-                //height: parent.height
-                //verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.Right
                 anchors {
                     right: parent.right
@@ -182,22 +170,21 @@ Page {
             }
 
             // Additional text under the score/penalty
-/*            Label {
+            Label {
                 id: eventSubtext
-                width: 96
                 horizontalAlignment: Text.Center
                 anchors {
                     horizontalCenter: eventText.horizontalCenter
+                    rightMargin: Theme.horizontalPageMargin
                     top: parent.verticalCenter
                 }
 
                 font {
-                    family: "Nokia Pure Light"
-                    pointSize: 18
+                    pixelSize: Theme.fontSizeMedium
                 }
-
+                color: Theme.secondaryColor
                 text: eventsubtext
-            }*/
+            }
         }
 
         VerticalScrollDecorator {}

@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QVariantMap>
 
+#include "gameevent.h"
+
 class DataSource : public QObject {
     Q_OBJECT
 
@@ -14,7 +16,7 @@ class DataSource : public QObject {
 
     signals:
         void gameSummaryUpdated(QVariantMap data);
-        void gameDetailsUpdated(QVariantList goals, QVariantList fouls, QVariantList players);
+        void gameDetailsUpdated(QList<GameEvent *> events, QVariantList players);
         void updateError(QString message);
         void updateStarted();
         void updateFinished();
