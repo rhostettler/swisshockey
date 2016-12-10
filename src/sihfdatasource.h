@@ -8,7 +8,6 @@
 
 #include "datasource.h"
 #include "gamedaydata.h"
-
 #include "jsondecoder.h"
 
 class SIHFDataSource : public DataSource {
@@ -16,25 +15,27 @@ class SIHFDataSource : public DataSource {
 
     private:
         QNetworkAccessManager *nam;
-        QNetworkReply *totomatReply;  // TODO: Rename
-        QNetworkReply *statsReply;    // TODO: Rename
+        QNetworkReply *summariesReply;
+        QNetworkReply *detailsReply;
         JsonDecoder *decoder;
-        QString gameId;               // TODO: Hmmm?
+        QString gameId; // TODO: Should this be here?
 
-        QVariantMap parseGameSummary(QVariantList indata);
+        QVariantMap parseSummaries(QVariantList indata);
+        QList<GameEvent *> parseGoals(QVariantList data);
+        QList<GameEvent *> parsePenalties(QVariantList data);
 
     public:
         explicit SIHFDataSource(QObject *parent = 0);
         void update(QString id);
         void setGameId(QString gameId);
         void queryScores(void);
-        void queryStats(QString gameId);            // TODO: Rename
+        void queryDetails(QString gameId);
 
     signals:
 
     public slots:
-        void parseScoresResponse();
-        void parseStatsResponse();
+        void parseSummariesResponse();
+        void parseDetailsResponse();
         void handleNetworkError(QNetworkReply::NetworkError error);
         //void update();
 };
