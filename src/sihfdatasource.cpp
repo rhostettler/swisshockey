@@ -265,18 +265,15 @@ QList<GameEvent *> SIHFDataSource::parseGoals(QVariantList data) {
         event->setTeam(goal.value("teamId").toUInt());
 
         // Parse the goal text to extract the score and play (PP1 / EQ / etc.).
-        // The format is '**EQ** / **0:1** - <Player Names>'.
+        // The format is '**EQ,GWG** / **0:1** - <Player Names>'.
         QString haystack = goal.value("text").toString();
-        QRegExp needle("(\\w+\\:?\\w+)");
-        QStringList tmp;
-        int pos = 0;
-        for(int i = 1; i <= 2; i++) {
-            pos = needle.indexIn(haystack, pos);
-            tmp.append(needle.cap(1));
-            pos += needle.matchedLength();
-        }
-        event->setScore(tmp[1], tmp[0]);
-
+        QRegExp typeNeedle("(\\w+)");
+        typeNeedle.indexIn(haystack);
+        QString type = typeNeedle.cap(1);
+        QRegExp scoreNeedle("(\\d+:\\d+)");
+        scoreNeedle.indexIn(haystack);
+        QString score = scoreNeedle.cap(1);
+        event->setScore(score, type);
         event->addPlayer(GameEvent::SCORER, goal.value("scorerLicenceNr").toUInt());
         event->addPlayer(GameEvent::FIRST_ASSIST, goal.value("assist1LicenceNr").toUInt());
         event->addPlayer(GameEvent::SECOND_ASSIST, goal.value("assist2LicenceNr").toUInt());
