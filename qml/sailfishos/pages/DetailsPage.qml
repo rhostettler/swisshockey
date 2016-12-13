@@ -1,6 +1,8 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 
+import "utils.js" as Utils
+
 Page {
     SilicaListView {
         id: gameEvents
@@ -81,6 +83,7 @@ Page {
                 width: 96
                 fillMode: Image.PreserveAspectFit
                 source: "../../icons/" + gameDetailsData.hometeamId + ".png"
+                onStatusChanged: Utils.checkIcon(detailsHomeLogo, gameDetailsData.hometeamId)
             }
 
             // Awayteam logo: to the right
@@ -97,6 +100,7 @@ Page {
                 width: 96
                 fillMode: Image.PreserveAspectFit
                 source: "../../icons/" + gameDetailsData.awayteamId + ".png"
+                onStatusChanged: Utils.checkIcon(detailsAwayLogo, gameDetailsData.awayteamId)
             }
         }
 
