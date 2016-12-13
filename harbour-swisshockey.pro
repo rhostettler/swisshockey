@@ -35,7 +35,8 @@ OTHER_FILES += qml/sailfishos/harbour-swisshockey.qml \
     qml/sailfishos/cover/CoverPage.qml \
     qml/sailfishos/pages/OverviewPage.qml \
     qml/sailfishos/pages/LeagueSelectionDialog.qml \
-    qml/sailfishos/pages/DetailsPage.qml
+    qml/sailfishos/pages/DetailsPage.qml \
+    qml/sailfishos/pages/utils.js
 
 # Add other files to Qt Creator
 OTHER_FILES += rpm/harbour-swisshockey.changes \

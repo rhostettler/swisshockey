@@ -1,6 +1,8 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 
+import "utils.js" as Utils
+
 Page {
     property alias leagueName: pulleyMenu.leagueName
 
@@ -106,6 +108,7 @@ Page {
                 width: 96
                 fillMode: Image.PreserveAspectFit
                 source: "../../icons/" + hometeamId + ".png"
+                onStatusChanged: Utils.checkIcon(homeLogo, hometeamId)
             }
 
             // Awayteam logo: to the right
@@ -120,6 +123,7 @@ Page {
                 width: 96
                 fillMode: Image.PreserveAspectFit
                 source: "../../icons/" + awayteamId + ".png"
+                onStatusChanged: Utils.checkIcon(awayLogo, awayteamId)
             }
         }
 
