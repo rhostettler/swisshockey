@@ -11,11 +11,14 @@ Page {
             title: qsTr("Select League")
         }
 
+        // TODO: This needs to be loaded dynamically, really
         model: ListModel {
-            ListElement { leagueName: "NL A" }
-            ListElement { leagueName: "NL B" }
-            ListElement { leagueName: "Cup" }
-            ListElement { leagueName: "CHL" }
+            ListElement { leagueName: "All"; leagueId: "0" }
+            ListElement { leagueName: "NL A"; leagueId: "1" }
+            ListElement { leagueName: "NL B"; leagueId: "2" }
+            ListElement { leagueName: "Cup"; leagueId: "89" }
+            ListElement { leagueName: "CHL"; leagueId: "90" }
+            ListElement { leagueName: "Men's National Team"; leagueId: "8" }
         }
 
         delegate: ListItem {
@@ -31,7 +34,7 @@ Page {
             }
             onClicked: {
                 overviewPage.leagueName = leagueName;
-                appWindow.leagueChanged(leagueName);
+                appWindow.leagueChanged(leagueId);
                 pageStack.pop();
             }
         }

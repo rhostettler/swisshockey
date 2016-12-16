@@ -13,7 +13,7 @@ ApplicationWindow
     // Emitted when one of the games is selected for details view
     signal viewChanged(string gameId);
     signal updateTriggered();
-    signal leagueChanged(string league);
+    signal leagueChanged(string leagueId);
 
     OverviewPage {
         id: overviewPage

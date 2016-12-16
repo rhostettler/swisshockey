@@ -46,7 +46,7 @@ class LiveScores : public QObject {
     public slots:
         void updateData();
         void updateView(QString view);
-        void updateLeague(QString league);
+        void updateLeague(QString leagueId);
 };
 
 #endif // LIVESCORES_H

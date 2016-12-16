@@ -24,12 +24,17 @@ class SIHFDataSource : public DataSource {
         QList<GameEvent *> parseGoals(QVariantList data);
         QList<GameEvent *> parsePenalties(QVariantList data);
 
+        static QMap<QString, QString> leagues;
+
     public:
         explicit SIHFDataSource(QObject *parent = 0);
         void update(QString id);
         void setGameId(QString gameId);
         void queryScores(void);
         void queryDetails(QString gameId);
+
+        static QString getLeagueId(QString name);
+        static const QMap<QString, QString> initLeagueList(void);
 
     signals:
 
