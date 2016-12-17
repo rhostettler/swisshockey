@@ -14,8 +14,8 @@ class GameEvent : public QObject {
             GOAL = 1,
             PENALTY,
             PENALTY_SHOT,
-            GOALKEEPER_IN, // TODO: GK events are stupid too.
-            GOALKEEPER_OUT
+            GOALKEEPER_OUT,
+            GOALKEEPER_IN
         };
 
         // TODO: I should find better names for these I think.
@@ -23,7 +23,8 @@ class GameEvent : public QObject {
             SCORER = 1,
             FIRST_ASSIST,
             SECOND_ASSIST,
-            PENALIZED
+            PENALIZED,
+            GOALKEEPER
         };
 
     private:
@@ -31,7 +32,7 @@ class GameEvent : public QObject {
         int type;
 
         // Stores the event time in seconds
-        quint32 time;
+        float time;
 
         // List of players involved in this event
         QMap<int, quint32> players;
@@ -47,6 +48,9 @@ class GameEvent : public QObject {
         int penaltyId;
         QString penaltyType;
 
+        //
+        bool penaltyShot;
+
         // List of human-readable penalty texts
         static QList<QString> penaltyTexts;
 
@@ -54,13 +58,14 @@ class GameEvent : public QObject {
         explicit GameEvent(int type);
         int getType(void);
         void setTime(QString time);
-        quint32 getTime(void) const;
+        float getTime(void) const;
         void setTeam(qlonglong team);
         qlonglong getTeam(void);
         void addPlayer(int role, quint32 playerId);
         void setScore(QString score, QString type);
         void setPenalty(int id, QString type);
         int getPenalty(void);
+        void setPenaltyShot(bool scored);
 
         // TODO: These are convenience methods and are to disappear/change in
         // future versions

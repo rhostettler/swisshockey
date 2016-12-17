@@ -1,4 +1,3 @@
-#include <QDateTime>
 #include <cmath>
 
 #include "sihfdatasource.h"
@@ -48,13 +47,13 @@ void SIHFDataSource::parseSummariesResponse() {
 
     // Log the raw data for debugging
     Logger& logger = Logger::getInstance();
-    logger.log(Logger::DEBUG, "SIHFDataSource::parseScoresResponse(): Received the following raw data:");
+    logger.log(Logger::DEBUG, "SIHFDataSource::parseSummariesResponse(): Received the following raw data:");
     logger.log(Logger::DEBUG, rawdata);
 
     // Parse the response
     QVariantMap parsedRawdata = this->decoder->decode(rawdata);
     if(parsedRawdata.contains("data")) {
-        logger.log(Logger::DEBUG, "SIHFDataSource::parseScoresResponse(): Parsing data...");
+        logger.log(Logger::DEBUG, "SIHFDataSource::parseSummariesResponse(): Parsing data...");
         QVariantList data = parsedRawdata.value("data").toList();
         QListIterator<QVariant> iter(data);
         while(iter.hasNext()) {
@@ -68,7 +67,7 @@ void SIHFDataSource::parseSummariesResponse() {
             }
         }
     } else {
-        logger.log(Logger::ERROR, "SIHFDataSource::parseScoresResponse(): No 'data' field in the response from the server.");
+        logger.log(Logger::ERROR, "SIHFDataSource::parseSummariesResponse(): No 'data' field in the response from the server.");
     }
 
     // Signal that we're done parsing the data.
@@ -240,8 +239,10 @@ void SIHFDataSource::parseDetailsResponse(void) {
             QVariantMap period = iter.next().toMap();
             events.append(this->parseGoals(period["goals"].toList()));
             events.append(this->parsePenalties(period["fouls"].toList()));
-            // TODO: Implement GK events and shootout here.
+            events.append(this->parseGoalkeepers(period["goalkeepers"].toList()));
         }
+        QVariantMap shootout = parsedRawdata["shootout"].toMap();
+        events.append(this->parseShootout(shootout["shoots"].toList()));
         logger.log(Logger::DEBUG, "SIHFDataSource::parseStatsResponse(): Number of parsed events: " + QString::number(events.size()));
     } else {
         logger.log(Logger::ERROR, "SIHFDataSource::parseStatsResponse(): No game events data found!");
@@ -302,6 +303,49 @@ QList<GameEvent *> SIHFDataSource::parsePenalties(QVariantList data) {
         event->addPlayer(GameEvent::PENALIZED, penalty.value("playerLicenceNr").toUInt());
         event->setPenalty(penalty.value("id").toInt(), penalty.value("minutes").toString() + "'");
         events.append(event);
+    }
+
+    return events;
+}
+
+// Parses the GK events
+// TODO: New code, untested (as of 17.12.2016)
+QList<GameEvent *> SIHFDataSource::parseGoalkeepers(QVariantList data) {
+    QList<GameEvent *> events;
+    QListIterator<QVariant> iterator(data);
+    while(iterator.hasNext()) {
+        QVariantMap tmp = iterator.next().toMap();
+        // Parse the action from the human readable data since it isn't provided in the data
+        // The format is '<Player Name> (ACTION)'. where ACTION is either IN or OUT
+        int type = GameEvent::GOALKEEPER_OUT;
+        QString haystack = tmp.value("text").toString();
+        QRegExp needle("\\(IN\\)");
+        if(needle.indexIn(haystack) != -1) {
+            type = GameEvent::GOALKEEPER_IN;
+        }
+        GameEvent *event = new GameEvent(type);
+        event->setTime(tmp.value("time").toString());
+        event->setTeam(tmp.value("teamId").toLongLong());
+        event->addPlayer(GameEvent::GOALKEEPER, tmp.value("playerLicenceNr").toUInt());
+        events.append(event);
+    }
+
+    return events;
+}
+
+// Parse shootout
+// TODO: New code, untested (as of 17.12.2016)
+QList<GameEvent *> SIHFDataSource::parseShootout(QVariantList data) {
+    QList<GameEvent *> events;
+    QListIterator<QVariant> iterator(data);
+    while(iterator.hasNext()) {
+        QVariantMap tmp = iterator.next().toMap();
+        GameEvent *event = new GameEvent(GameEvent::PENALTY_SHOT);
+        event->setTime("65:00." + tmp["number"].toString());
+        event->setPenaltyShot(tmp["scored"].toBool());
+        //event->setTeam(); <- Team is not set here :(
+        event->addPlayer(GameEvent::SCORER, tmp["scorerLicenceNr"].toUInt());
+        event->addPlayer(GameEvent::GOALKEEPER, tmp["goalkeeperLiceneNr"].toUInt());
     }
 
     return events;

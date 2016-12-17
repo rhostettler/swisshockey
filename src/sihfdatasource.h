@@ -20,9 +20,12 @@ class SIHFDataSource : public DataSource {
         JsonDecoder *decoder;
         QString gameId; // TODO: Should this be here?
 
+        // Private helper functions
         QVariantMap parseSummaries(QVariantList indata);
         QList<GameEvent *> parseGoals(QVariantList data);
         QList<GameEvent *> parsePenalties(QVariantList data);
+        QList<GameEvent *> parseGoalkeepers(QVariantList data);
+        QList<GameEvent *> parseShootout(QVariantList data);
 
         static QMap<QString, QString> leagues;
 
