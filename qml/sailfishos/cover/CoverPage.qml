@@ -31,6 +31,8 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 
+import "../pages/utils.js" as Utils
+
 CoverBackground {
     id: cover
 
@@ -45,6 +47,7 @@ CoverBackground {
         width: Theme.fontSizeExtraLarge
         fillMode: Image.PreserveAspectFit
         source: "../../icons/" + gameDetailsData.hometeamId + ".png"
+        onStatusChanged: Utils.checkIcon(hometeamLogo, gameDetailsData.hometeamId)
     }
 
     Label {
@@ -59,6 +62,7 @@ CoverBackground {
     }
 
     Image{
+        id: awayteamLogo
         anchors{
             left: parent.horizontalCenter
             leftMargin: 1.5*Theme.horizontalPageMargin
@@ -68,6 +72,7 @@ CoverBackground {
         width: Theme.fontSizeLarge
         fillMode: Image.PreserveAspectFit
         source: "../../icons/" + gameDetailsData.awayteamId + ".png"
+        onStatusChanged: Utils.checkIcon(awayteamLogo, gameDetailsData.awayteamId)
     }
 
     Label {

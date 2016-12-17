@@ -31,13 +31,13 @@ int GameEvent::getType(void) {
 void GameEvent::setTime(QString time) {
     QStringList split = time.split(":");
     if(split.size() == 2) {
-        this->time = 60*split[0].toInt() + split[1].toInt();
+        this->time = 60*split[0].toFloat() + split[1].toFloat();
     } else {
         this->time = 0;
     }
 }
 
-quint32 GameEvent::getTime(void) const {
+float GameEvent::getTime(void) const {
     return this->time;
 }
 
@@ -71,6 +71,10 @@ int GameEvent::getPenalty(void) {
     return this->penaltyId;
 }
 
+void GameEvent::setPenaltyShot(bool scored) {
+    this->penaltyShot = scored;
+}
+
 quint32 GameEvent::getPlayer(void) const {
     int role = -1;
     switch(this->type) {
@@ -80,6 +84,14 @@ quint32 GameEvent::getPlayer(void) const {
 
         case GameEvent::PENALTY:
             role = GameEvent::PENALIZED;
+            break;
+
+        case GameEvent::GOALKEEPER_IN:
+            role = GameEvent::GOALKEEPER;
+            break;
+
+        case GameEvent::GOALKEEPER_OUT:
+            role = GameEvent::GOALKEEPER;
             break;
 
         default:
@@ -110,13 +122,20 @@ QString GameEvent::getAdditionalInfo(void) const {
 }
 
 QString GameEvent::getEvent(void) const {
-    QString event;
+    QString event("");
     switch(this->type) {
         case GameEvent::GOAL:
             event = this->score;
             break;
         case GameEvent::PENALTY:
             event = this->penaltyType;
+            break;
+        case GameEvent::PENALTY_SHOT:
+            if(this->penaltyShot) {
+                event = "X";
+            } else {
+                event = "O";
+            }
             break;
         default:
             break;

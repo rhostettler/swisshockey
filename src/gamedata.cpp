@@ -214,36 +214,53 @@ QVariant GameData::data(const QModelIndex &index, int role) const {
             data = event->getTeam();
             break;
 
-        case TimeRole:
-            {
-                quint32 tmp = event->getTime();
-                quint32 minutes = tmp/60;
-                quint32 seconds = tmp-minutes*60;
+        case TimeRole: {
+                float tmp = event->getTime();
+                quint32 minutes = (int)tmp/60;
+                quint32 seconds = (int)(tmp-minutes*60);
                 QString str;
                 str.sprintf("%02u:%02u", minutes, seconds);
                 data = str;
             }
             break;
 
-        case PlayerRole:
-            {
+        case PlayerRole: {
                 quint32 id = event->getPlayer();
                 data = this->players.value(id, "");
             }
             break;
 
-        case AdditionalInfoRole:
-            {
+        case AdditionalInfoRole: {
                 int type = event->getType();
-                if(type == GameEvent::GOAL) {
-                    QString text = this->players.value(event->getPlayer(GameEvent::FIRST_ASSIST), "");
-                    QString tmp = this->players.value(event->getPlayer(GameEvent::SECOND_ASSIST), "");
-                    if(tmp != "") {
-                        text.append(", " + tmp);
-                    }
-                    data = text;
-                } else if(type == GameEvent::PENALTY) {
-                    data = GameEvent::getPenaltyText(event->getPenalty());
+                switch(type) {
+                    case GameEvent::GOAL: {
+                            QString text = this->players.value(event->getPlayer(GameEvent::FIRST_ASSIST), "");
+                            QString tmp = this->players.value(event->getPlayer(GameEvent::SECOND_ASSIST), "");
+                            if(tmp != "") {
+                                text.append(", " + tmp);
+                            }
+                            data = text;
+                        }
+                        break;
+
+                    case GameEvent::PENALTY:
+                        data = GameEvent::getPenaltyText(event->getPenalty());
+                        break;
+
+                    case GameEvent::GOALKEEPER_IN:
+                        data = "Goalkeeper in";
+                        break;
+
+                    case GameEvent::GOALKEEPER_OUT:
+                        data = "Goalkeeper out";
+                        break;
+
+                    case GameEvent::PENALTY_SHOT:
+                        data = "Goalkeeper: " + this->players.value(event->getPlayer(GameEvent::GOALKEEPER), "");
+                        break;
+
+                    default:
+                        break;
                 }
             }
             break;
