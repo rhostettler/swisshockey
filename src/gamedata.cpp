@@ -67,7 +67,8 @@ void GameData::updateSummary(QVariantMap data) {
     }
     this->score["total"] = newScore["total"].toString();
 
-    // Update game status
+    // Update game starting time and status
+    this->startTime = data["time"].toString();
     this->status = data["status"].toInt();
 
     // Check if the total score changed and trigger an UI update
@@ -194,7 +195,14 @@ int GameData::getGameStatus() {
 }
 
 QString GameData::getGameStatusText() {
-    return GameData::gameStatusTexts.value(this->status, "Unknown status");
+    QString text;
+    if(this->status == 0) {
+        text = "Starts " + this->startTime;
+    } else {
+        text = GameData::gameStatusTexts.value(this->status, "Unknown status");
+    }
+
+    return text;
 }
 
 // Implementation of the QAbstractListModel methods
