@@ -16,7 +16,7 @@ Page {
             ListElement { leagueName: "All"; leagueId: "0" }
             ListElement { leagueName: "NL A"; leagueId: "1" }
             ListElement { leagueName: "NL B"; leagueId: "2" }
-            ListElement { leagueName: "Cup"; leagueId: "89" }
+            ListElement { leagueName: "Cup"; leagueId: "81" }
             ListElement { leagueName: "CHL"; leagueId: "90" }
             ListElement { leagueName: "Men's National Team"; leagueId: "8" }
         }

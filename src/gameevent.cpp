@@ -94,6 +94,10 @@ quint32 GameEvent::getPlayer(void) const {
             role = GameEvent::GOALKEEPER;
             break;
 
+        case GameEvent::PENALTY_SHOT:
+            role = GameEvent::SCORER;
+            break;
+
         default:
             role = -1;
             break;

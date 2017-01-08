@@ -34,6 +34,9 @@ class GameData : public QAbstractListModel {
         QString awayteam;
         qulonglong awayteamId;
 
+        // Time
+        QString startTime;
+
         // Score
         QMap<QString, QString> score;
 

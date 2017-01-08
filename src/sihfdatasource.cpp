@@ -16,7 +16,7 @@ SIHFDataSource::SIHFDataSource(QObject *parent) : DataSource(parent) {
    1 - NLA
    2 - NLB
    8 - National Teams
-   89 - Cup?
+   81 - Cup?
    90 - CHL?
 */
 void SIHFDataSource::queryScores(void) {
@@ -98,6 +98,7 @@ QVariantMap SIHFDataSource::parseSummaries(QVariantList indata) {
         // internal raw data representation
         // Add the basic game info
         data.insert("league", SIHFDataSource::getLeagueId(league));
+        data.insert("time", time);
         data.insert("gameId", details.value("gameId"));
 
         // Add the team info
@@ -239,7 +240,7 @@ void SIHFDataSource::parseDetailsResponse(void) {
             events.append(this->parsePenalties(period["fouls"].toList()));
             events.append(this->parseGoalkeepers(period["goalkeepers"].toList()));
         }
-        QVariantMap shootout = parsedRawdata["shootout"].toMap();
+        QVariantMap shootout = summary["shootout"].toMap();
         events.append(this->parseShootout(shootout["shoots"].toList()));
         logger.log(Logger::DEBUG, "SIHFDataSource::parseStatsResponse(): Number of parsed events: " + QString::number(events.size()));
     } else {
@@ -307,7 +308,6 @@ QList<GameEvent *> SIHFDataSource::parsePenalties(QVariantList data) {
 }
 
 // Parses the GK events
-// TODO: New code, untested (as of 17.12.2016)
 QList<GameEvent *> SIHFDataSource::parseGoalkeepers(QVariantList data) {
     QList<GameEvent *> events;
     QListIterator<QVariant> iterator(data);
@@ -334,6 +334,9 @@ QList<GameEvent *> SIHFDataSource::parseGoalkeepers(QVariantList data) {
 // Parse shootout
 // TODO: New code, untested (as of 17.12.2016)
 QList<GameEvent *> SIHFDataSource::parseShootout(QVariantList data) {
+    Logger& logger = Logger::getInstance();
+    logger.log(Logger::DEBUG, "SIHFDataSource:parseShootout(): Parsing shootout, " + QString::number(data.size()) + " shots.");
+
     QList<GameEvent *> events;
     QListIterator<QVariant> iterator(data);
     while(iterator.hasNext()) {
@@ -344,6 +347,7 @@ QList<GameEvent *> SIHFDataSource::parseShootout(QVariantList data) {
         //event->setTeam(); <- Team is not set here :(
         event->addPlayer(GameEvent::SCORER, tmp["scorerLicenceNr"].toUInt());
         event->addPlayer(GameEvent::GOALKEEPER, tmp["goalkeeperLiceneNr"].toUInt());
+        events.append(event);
     }
 
     return events;
