@@ -3,6 +3,9 @@
 #include "sihfdatasource.h"
 #include "logger.h"
 
+const QString SIHFDataSource::SCORES_URL = "http://data.sihf.ch/Statistic/api/cms/table?alias=today&size=today&searchQuery=1,2,8,10,11//1,2,8,81,90&filterQuery=&orderBy=gameLeague&orderByDescending=false&take=20&filterBy=League&skip=0&language=de";
+const QString SIHFDataSource::DETAILS_URL = "http://data.sihf.ch/statistic/api/cms/gameoverview?alias=gameDetail&language=de&searchQuery=";
+
 SIHFDataSource::SIHFDataSource(QObject *parent) : DataSource(parent) {
     // Create the network access objects
     this->nam = new QNetworkAccessManager(this);
@@ -24,9 +27,8 @@ void SIHFDataSource::queryScores(void) {
     emit updateStarted();
 
     // Request URL / Headers
-    QString url = "http://data.sihf.ch/Statistic/api/cms/table?alias=today&size=today&searchQuery=1,2,8,10,11//1,2,8,81,90&filterQuery=&orderBy=gameLeague&orderByDescending=false&take=20&filterBy=League&skip=0&language=de";
     QNetworkRequest request;
-    request.setUrl(QUrl(url));
+    request.setUrl(QUrl(SIHFDataSource::SCORES_URL));
     request.setRawHeader("Accept-Encoding", "deflate");
     request.setRawHeader("Referer", "http://www.sihf.ch/de/game-center/");
 
@@ -186,13 +188,17 @@ QVariantMap SIHFDataSource::parseSummaries(QVariantList indata) {
 void SIHFDataSource::queryDetails(QString gameId) {
     // STATUS:
     //  * Request should be OK
-    //  * updateStarted() signal missing
+    // TODO: Add a signal for detailsUpdateStarted()
+
     // Request URL / Headers
+#if 0
     QString url = "http://data.sihf.ch/statistic/api/cms/gameoverview?alias=gameDetail&language=de&searchQuery=";
     url.append(gameId);
+#endif
 
     QNetworkRequest request;
-    request.setUrl(QUrl(url));
+//    request.setUrl(QUrl(url));
+    request.setUrl(QUrl(SIHFDataSource::DETAILS_URL.append(gameId)));
     request.setRawHeader("Accept-Encoding", "deflate");
     request.setRawHeader("Referer", "http://www.sihf.ch/de/game-center/game/");
     request.setRawHeader("Host", "data.sihf.ch");

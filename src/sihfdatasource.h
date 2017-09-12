@@ -29,6 +29,9 @@ class SIHFDataSource : public DataSource {
 
         static QMap<QString, QString> leagues;
 
+        static const QString SCORES_URL;
+        static const QString DETAILS_URL;
+
     public:
         explicit SIHFDataSource(QObject *parent = 0);
         void update(QString id);
