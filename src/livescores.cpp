@@ -118,13 +118,13 @@ void LiveScores::updateView(QString id) {
 }
 
 // Update the filter to the selected league
-void LiveScores::updateLeague(QString league) {
+void LiveScores::updateLeague(QString leagueId) {
     Logger& logger = Logger::getInstance();
-    logger.log(Logger::DEBUG, "LiveScores::updateLeague(): Changing league filter to " + league);
-    if(league.compare("All") == 0) {
+    logger.log(Logger::DEBUG, "LiveScores::updateLeague(): Changing league filter to " + leagueId);
+    if(!leagueId.compare("0")) {
         this->filter->setFilterRegExp(".*");
     } else {
-        this->filter->setFilterRegExp(league);
+        this->filter->setFilterRegExp(leagueId);
     }
 }
 

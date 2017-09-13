@@ -14,13 +14,18 @@ SIHFDataSource::SIHFDataSource(QObject *parent) : DataSource(parent) {
 /*
    curl 'http://data.sihf.ch/Statistic/api/cms/table?alias=today&size=today&searchQuery=1,2,8,10,11//1,2,4,5,6,7,8,9,20,47,48,49,50,81,90&filterQuery=&orderBy=gameLeague&orderByDescending=false&take=20&filterBy=League&language=de'
    -H 'Host: data.sihf.ch' -H 'Accept-Encoding: deflate' -H 'Referer: http://www.sihf.ch/de/game-center/' -H 'Connection: keep-alive'
+   1 - NLA
+   2 - NLB
+   8 - National Teams
+   89 - Cup?
+   90 - CHL?
 */
 void SIHFDataSource::queryScores(void) {
     // Notify that the update is being started
     emit updateStarted();
 
     // Request URL / Headers
-    QString url = "http://data.sihf.ch/Statistic/api/cms/table?alias=today&size=today&searchQuery=1,2,8,10,11//1,2,81,90&filterQuery=&orderBy=gameLeague&orderByDescending=false&take=20&filterBy=League&skip=0&language=de";
+    QString url = "http://data.sihf.ch/Statistic/api/cms/table?alias=today&size=today&searchQuery=1,2,8,10,11//1,2,8,81,90&filterQuery=&orderBy=gameLeague&orderByDescending=false&take=20&filterBy=League&skip=0&language=de";
     QNetworkRequest request;
     request.setUrl(QUrl(url));
     request.setRawHeader("Accept-Encoding", "deflate");
@@ -95,7 +100,7 @@ QVariantMap SIHFDataSource::parseSummaries(QVariantList indata) {
         // Put everything into a QVariantMap that we'll use as the common
         // internal raw data representation
         // Add the basic game info
-        data.insert("league", league);
+        data.insert("league", SIHFDataSource::getLeagueId(league));
         data.insert("gameId", details.value("gameId"));
 
         // Add the team info
@@ -318,4 +323,20 @@ void SIHFDataSource::update(QString id) {
 void SIHFDataSource::handleNetworkError(QNetworkReply::NetworkError error) {
     Logger& logger = Logger::getInstance();
     logger.log(Logger::ERROR, "SIHFDataSource::handleNetworkError(): Network error occured.");
+}
+
+// League list initialization and access
+QMap<QString, QString> SIHFDataSource::leagues = initLeagueList();
+const QMap<QString, QString> SIHFDataSource::initLeagueList() {
+    QMap<QString, QString> map;
+    map.insert("NL A", "1");
+    map.insert("NL B", "2");
+    map.insert("Länderspiel A", "8");
+    map.insert("Cup", "89");  // TODO: 89&90 might be the other way around!
+    map.insert("CHL", "90");
+    return map;
+}
+
+QString SIHFDataSource::getLeagueId(QString name) {
+    return SIHFDataSource::leagues.value(name, "-1");
 }
