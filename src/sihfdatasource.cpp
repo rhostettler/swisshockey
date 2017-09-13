@@ -78,17 +78,19 @@ QVariantMap SIHFDataSource::parseGameSummary(QVariantList indata) {
 
     Logger& logger = Logger::getInstance();
 
-    if(indata.size() == 9) {
+    // TODO: Move the constant (10) to the header
+    if(indata.size() == 10) {
         // Extract all the fields for "easy" access
         QString league = indata[0].toString();
         QString time = indata[1].toString();
         QVariantMap hometeam = indata[2].toMap();
         QVariantMap awayteam = indata[3].toMap();
-        QVariantMap totalScore = indata[4].toMap();
-        QVariantMap periodsScore = indata[5].toMap();
-        QString otIndicator = indata[6].toString();
-        QVariantMap meta = indata[7].toMap();
-        QVariantMap details = indata[8].toMap();
+        // 4 is 'Phase', e.g. regular season, etc.
+        QVariantMap totalScore = indata[5].toMap();
+        QVariantMap periodsScore = indata[6].toMap();
+        QString otIndicator = indata[7].toString();
+        QVariantMap meta = indata[8].toMap();
+        QVariantMap details = indata[9].toMap();
 
         // Put everything into a QVariantMap that we'll use as the common
         // internal raw data representation

@@ -127,7 +127,7 @@ Page {
 
         PullDownMenu {
             id: pulleyMenu
-            property string leagueName: "NL A"
+            property string leagueName: "All"
 
             MenuItem {
                 text: qsTr("Update")

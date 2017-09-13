@@ -12,8 +12,9 @@ Page {
         }
 
         model: ListModel {
-            ListElement { leagueName: "NL A" }
-            ListElement { leagueName: "NL B" }
+            ListElement { leagueName: "All" }
+            ListElement { leagueName: "NL" }
+            ListElement { leagueName: "SL" }
             ListElement { leagueName: "Cup" }
             ListElement { leagueName: "CHL" }
         }

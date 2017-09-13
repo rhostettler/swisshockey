@@ -32,7 +32,7 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
     this->filter->setFilterRole(GamedayData::LeagueRole);
     this->filter->setDynamicSortFilter(true);
     this->filter->setFilterKeyColumn(0);  // We only have the 0-column
-    this->filter->setFilterRegExp("NL A");
+    this->filter->setFilterRegExp(".*");
     this->filter->setSourceModel(this->dataStore);
 
     // Create the notifier, disabled by default (enabled automatically when the
@@ -121,7 +121,11 @@ void LiveScores::updateView(QString id) {
 void LiveScores::updateLeague(QString league) {
     Logger& logger = Logger::getInstance();
     logger.log(Logger::DEBUG, "LiveScores::updateLeague(): Changing league filter to " + league);
-    this->filter->setFilterRegExp(league);
+    if(league.compare("All") == 0) {
+        this->filter->setFilterRegExp(".*");
+    } else {
+        this->filter->setFilterRegExp(league);
+    }
 }
 
 // Observe the focus state of the app (foreground / background) and set the
