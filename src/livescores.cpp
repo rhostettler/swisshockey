@@ -104,7 +104,7 @@ void LiveScores::updateView(QString id) {
     if(this->current != NULL) {
         // Set the game id in the totomat & force update
         connect(this->dataSource, SIGNAL(gameDetailsUpdated(QList<GameEvent *>, QVariantList)), game, SLOT(updateEvents(QList<GameEvent *>, QVariantList)));
-        this->dataSource->queryDetails(id);
+        this->dataSource->getGameDetails(id);
 
         // Get the context since we'll be invoking it a couple of times
 #ifdef PLATFORM_SFOS
@@ -155,16 +155,11 @@ bool LiveScores::eventFilter(QObject* obj, QEvent* event) {
     return false;
 }
 
-// Updates the data when the timer fires
+// Updates the data when the timer fires or when triggered by the user
 void LiveScores::updateData() {
     Logger& logger = Logger::getInstance();
     logger.log(Logger::DEBUG, "LiveScores::updateData(): called for a data update.");
-
-    // Query the website and update
-    // TODO: I think I want to split this into updateSummaries() and updateDetails() ? I have to think about what's the most generic way?
-    // Maybe provide an overloaded update() function that takes an argument and if the argument is set, the update is for a specific game?
     this->dataSource->update(this->currentId);
-    //this->queryStats();  % Disabled until re-implemented
 }
 
 LiveScores::~LiveScores(void) {

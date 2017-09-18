@@ -21,7 +21,7 @@ class SIHFDataSource : public DataSource {
         QString gameId; // TODO: Should this be here?
 
         // Private helper functions
-        QVariantMap parseSummaries(QVariantList indata);
+        QVariantMap parseGame(QVariantList indata);
         QList<GameEvent *> parseGoals(QVariantList data);
         QList<GameEvent *> parsePenalties(QVariantList data);
         QList<GameEvent *> parseGoalkeepers(QVariantList data);
@@ -36,8 +36,8 @@ class SIHFDataSource : public DataSource {
         explicit SIHFDataSource(QObject *parent = 0);
         void update(QString id);
         void setGameId(QString gameId);
-        void queryScores(void);
-        void queryDetails(QString gameId);
+        void getGameSummaries(void);
+        void getGameDetails(QString gameId);
 
         static QString getLeagueId(QString name);
         static const QMap<QString, QString> initLeagueList(void);
@@ -45,8 +45,8 @@ class SIHFDataSource : public DataSource {
     signals:
 
     public slots:
-        void parseSummariesResponse();
-        void parseDetailsResponse();
+        void parseGameSummaries();
+        void parseGameDetails();
         void handleNetworkError(QNetworkReply::NetworkError error);
         //void update();
 };

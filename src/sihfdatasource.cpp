@@ -3,6 +3,7 @@
 #include "sihfdatasource.h"
 #include "logger.h"
 
+// TODO: I should only store the base URLs and then add the parameters dynamically. In particular, this would be helpful if the baseurl changes
 const QString SIHFDataSource::SCORES_URL = "http://data.sihf.ch/Statistic/api/cms/table?alias=today&size=today&searchQuery=1,2,8,10,11//1,2,8,81,90&filterQuery=&orderBy=gameLeague&orderByDescending=false&take=20&filterBy=League&skip=0&language=de";
 const QString SIHFDataSource::DETAILS_URL = "http://data.sihf.ch/statistic/api/cms/gameoverview?alias=gameDetail&language=de&searchQuery=";
 
@@ -12,21 +13,12 @@ SIHFDataSource::SIHFDataSource(QObject *parent) : DataSource(parent) {
     this->decoder = new JsonDecoder(this);
 }
 
-// Send a query to the National League Server
-/*
-   curl 'http://data.sihf.ch/Statistic/api/cms/table?alias=today&size=today&searchQuery=1,2,8,10,11//1,2,4,5,6,7,8,9,20,47,48,49,50,81,90&filterQuery=&orderBy=gameLeague&orderByDescending=false&take=20&filterBy=League&language=de'
-   -H 'Host: data.sihf.ch' -H 'Accept-Encoding: deflate' -H 'Referer: http://www.sihf.ch/de/game-center/' -H 'Connection: keep-alive'
-   1 - NLA
-   2 - NLB
-   8 - National Teams
-   81 - Cup?
-   90 - CHL?
-*/
-void SIHFDataSource::queryScores(void) {
+// Update the game summaries
+void SIHFDataSource::getGameSummaries(void) {
     // Notify that the update is being started
     emit updateStarted();
 
-    // Request URL / Headers
+    // Request URL and headers
     QNetworkRequest request;
     request.setUrl(QUrl(SIHFDataSource::SCORES_URL));
     request.setRawHeader("Accept-Encoding", "deflate");
@@ -34,7 +26,7 @@ void SIHFDataSource::queryScores(void) {
 
     // Send the request and connect the finished() signal of the reply to parser
     this->summariesReply = this->nam->get(request);
-    connect(this->summariesReply, SIGNAL(finished()), this, SLOT(parseSummariesResponse()));
+    connect(this->summariesReply, SIGNAL(finished()), this, SLOT(parseGameSummaries()));
     connect(this->summariesReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(handleNetworkError(QNetworkReply::NetworkError)));
 
     // Log the request
@@ -43,8 +35,8 @@ void SIHFDataSource::queryScores(void) {
 }
 
 // Parse the response from the HTTP Request
-void SIHFDataSource::parseSummariesResponse() {
-    // Get all the raw data
+void SIHFDataSource::parseGameSummaries() {
+    // Get the raw data
     QByteArray rawdata = this->summariesReply->readAll();
 
     // Log the raw data for debugging
@@ -59,10 +51,9 @@ void SIHFDataSource::parseSummariesResponse() {
         QVariantList data = parsedRawdata.value("data").toList();
         QListIterator<QVariant> iter(data);
         while(iter.hasNext()) {
-            QVariantMap gamedata = this->parseSummaries(iter.next().toList());
+            QVariantMap gamedata = this->parseGame(iter.next().toList());
 
             if(gamedata.size() > 0) {
-                // Signal that we have new data to consider
                 emit gameSummaryUpdated(gamedata);
             } else {
                 // NOP?
@@ -72,14 +63,13 @@ void SIHFDataSource::parseSummariesResponse() {
         logger.log(Logger::ERROR, "SIHFDataSource::parseSummariesResponse(): No 'data' field in the response from the server.");
     }
 
-    // Signal that we're done parsing the data.
     emit updateFinished();
 }
 
 // Parse the per-game JSON array from the response and put everything in an
 // associative array with predefined fields for internal data exchange between
 // data sources and data stores.
-QVariantMap SIHFDataSource::parseSummaries(QVariantList indata) {
+QVariantMap SIHFDataSource::parseGame(QVariantList indata) {
     QVariantMap data;
 
     Logger& logger = Logger::getInstance();
@@ -181,38 +171,26 @@ QVariantMap SIHFDataSource::parseSummaries(QVariantList indata) {
 }
 
 // Query the NL servers for the game stats
-/*
-    curl 'http://data.sihf.ch/statistic/api/cms/gameoverview?alias=gameDetail&searchQuery=20161105071221&language=de'
-    -H 'Accept-Encoding: deflate' -H 'Host: data.sihf.ch' -H 'Referer: http://www.sihf.ch/de/game-center/game/'
- */
-void SIHFDataSource::queryDetails(QString gameId) {
-    // STATUS:
-    //  * Request should be OK
-    // TODO: Add a signal for detailsUpdateStarted()
+void SIHFDataSource::getGameDetails(QString gameId) {
+    // TODO: Uses the same signal as getGameSummaries(), might consider using its
+    emit updateStarted();
 
-    // Request URL / Headers
-#if 0
-    QString url = "http://data.sihf.ch/statistic/api/cms/gameoverview?alias=gameDetail&language=de&searchQuery=";
-    url.append(gameId);
-#endif
-
+    // Request URL and eaders
     QNetworkRequest request;
-//    request.setUrl(QUrl(url));
-    request.setUrl(QUrl(SIHFDataSource::DETAILS_URL.append(gameId)));
+    request.setUrl(QUrl(SIHFDataSource::DETAILS_URL + gameId));
     request.setRawHeader("Accept-Encoding", "deflate");
     request.setRawHeader("Referer", "http://www.sihf.ch/de/game-center/game/");
-    request.setRawHeader("Host", "data.sihf.ch");
+    //request.setRawHeader("Host", "data.sihf.ch");
 
     // Send the request and connect the finished() signal of the reply to parser
     this->detailsReply = this->nam->get(request);
-    connect(detailsReply, SIGNAL(finished()), this, SLOT(parseDetailsResponse()));
+    connect(detailsReply, SIGNAL(finished()), this, SLOT(parseGameDetails()));
     connect(detailsReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(handleNetworkError()));
 }
 
-// TODO: There's still major work to be done regarding how we should handle
-// the game events. As it is now, having three separate lists seems unpractical.
-void SIHFDataSource::parseDetailsResponse(void) {
-    // Get all the raw data
+// Parse the response of a getGameDetails() request
+void SIHFDataSource::parseGameDetails(void) {
+    // Get the raw data
     QByteArray rawdata = this->detailsReply->readAll();
 
     // Log the raw data for debugging
@@ -233,10 +211,8 @@ void SIHFDataSource::parseDetailsResponse(void) {
         logger.log(Logger::DEBUG, rawdata);
     }
 
-    // Convert from JSON to a map
+    // Convert from JSON to a map, then parse the game details
     QVariantMap parsedRawdata = this->decoder->decode(rawdata);
-
-    // Parse the game details in the JSON data
     QList<GameEvent *> events;
     if(parsedRawdata.contains("summary")) {
         QVariantMap summary = parsedRawdata["summary"].toMap();
@@ -255,7 +231,7 @@ void SIHFDataSource::parseDetailsResponse(void) {
         logger.log(Logger::ERROR, "SIHFDataSource::parseStatsResponse(): No game events data found!");
     }
 
-    // TODO: Continue here!
+    // TODO: We might want to think about how we handle the players in the future
     // Extract the players
     //QList<Player> players;
     QVariantList players;
@@ -340,7 +316,6 @@ QList<GameEvent *> SIHFDataSource::parseGoalkeepers(QVariantList data) {
 }
 
 // Parse shootout
-// TODO: New code, untested (as of 17.12.2016)
 QList<GameEvent *> SIHFDataSource::parseShootout(QVariantList data) {
     Logger& logger = Logger::getInstance();
     logger.log(Logger::DEBUG, "SIHFDataSource:parseShootout(): Parsing shootout, " + QString::number(data.size()) + " shots.");
@@ -362,14 +337,11 @@ QList<GameEvent *> SIHFDataSource::parseShootout(QVariantList data) {
 }
 
 // Update the data from this source
-// TODO: Implement so that we either can update the summaries or the details
 void SIHFDataSource::update(QString id) {
     // Query the website and update
-    this->queryScores();
-
-    // TODO: Doesn't update the stats periodically yet
+    this->getGameSummaries();
     if(id != NULL) {
-        this->queryDetails(id);
+        this->getGameDetails(id);
     }
 }
 
@@ -380,12 +352,13 @@ void SIHFDataSource::handleNetworkError(QNetworkReply::NetworkError error) {
 }
 
 // League list initialization and access
+// TODO: Use this in other places?
 QMap<QString, QString> SIHFDataSource::leagues = initLeagueList();
 const QMap<QString, QString> SIHFDataSource::initLeagueList() {
     QMap<QString, QString> map;
-    map.insert("NL A", "1");
-    map.insert("NL B", "2");
-    map.insert("Länderspiel A", "8");
+    map.insert("National League", "1");
+    map.insert("Swiss League", "2");
+    map.insert("Men's National Team", "8");
     map.insert("Cup", "89");  // TODO: 89&90 might be the other way around!
     map.insert("CHL", "90");
     return map;
