@@ -28,7 +28,8 @@ SOURCES += \
     src/gameevent.cpp \
     src/logger.cpp \
     src/sihfdatasource.cpp \
-    src/jsondecoder.cpp
+    src/jsondecoder.cpp \
+    src/league.cpp
 
 # Add QML files to Qt Creator
 OTHER_FILES += qml/sailfishos/harbour-swisshockey.qml \
@@ -65,4 +66,5 @@ HEADERS += \
     src/gameevent.h \
     src/logger.h \
     src/sihfdatasource.h \
-    src/jsondecoder.h
+    src/jsondecoder.h \
+    src/league.h

@@ -29,12 +29,13 @@ class LiveScores : public QObject {
         Notifier *notifier;
         QmlApplicationViewer *viewer;
 #endif
-        GamedayData *dataStore;
+        GamedayData *mDataStore;
         QSortFilterProxyModel *filter;
         GameData *current;
-        SIHFDataSource *dataSource;
+        SIHFDataSource *mDataSource;
         QTimer *timer;
         QString currentId;
+        QList<QObject *> mLeaguesList;
 
     public:
         explicit LiveScores(QObject *parent = 0);

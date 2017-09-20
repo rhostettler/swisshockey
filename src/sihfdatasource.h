@@ -9,6 +9,7 @@
 #include "datasource.h"
 #include "gamedaydata.h"
 #include "jsondecoder.h"
+#include "league.h"
 
 class SIHFDataSource : public DataSource {
     Q_OBJECT
@@ -27,7 +28,7 @@ class SIHFDataSource : public DataSource {
         QList<GameEvent *> parseGoalkeepers(QVariantList data);
         QList<GameEvent *> parseShootout(QVariantList data);
 
-        static QMap<QString, QString> leagues;
+        static QMap<uint, League *> mLeaguesMap;
 
         static const QString SCORES_URL;
         static const QString DETAILS_URL;
@@ -39,8 +40,10 @@ class SIHFDataSource : public DataSource {
         void getGameSummaries(void);
         void getGameDetails(QString gameId);
 
-        static QString getLeagueId(QString name);
-        static const QMap<QString, QString> initLeagueList(void);
+        // League stuff
+        void getLeagues(QList<QObject *> *leagueList);
+        QString getLeagueId(QString abbreviation);
+        static const QMap<uint, League *> initLeagueList(void);
 
     signals:
 
@@ -48,7 +51,6 @@ class SIHFDataSource : public DataSource {
         void parseGameSummaries();
         void parseGameDetails();
         void handleNetworkError(QNetworkReply::NetworkError error);
-        //void update();
 };
 
 #endif // SIHFDATASOURCE_H

@@ -2,6 +2,7 @@
 
 #include "sihfdatasource.h"
 #include "logger.h"
+#include "league.h"
 
 // TODO: I should only store the base URLs and then add the parameters dynamically. In particular, this would be helpful if the baseurl changes
 const QString SIHFDataSource::SCORES_URL = "http://data.sihf.ch/Statistic/api/cms/table?alias=today&size=today&searchQuery=1,2,8,10,11//1,2,8,81,90&filterQuery=&orderBy=gameLeague&orderByDescending=false&take=20&filterBy=League&skip=0&language=de";
@@ -351,19 +352,38 @@ void SIHFDataSource::handleNetworkError(QNetworkReply::NetworkError error) {
     logger.log(Logger::ERROR, "SIHFDataSource::handleNetworkError(): Network error occured.");
 }
 
+void SIHFDataSource::getLeagues(QList<QObject *> *leagueList) {
+    // Populate the list of leagues (static for this data source)
+    QMapIterator<uint, League *> iLeague(mLeaguesMap);
+    while(iLeague.hasNext()) {
+        leagueList->append(iLeague.next().value());
+    }
+}
+
 // League list initialization and access
-// TODO: Use this in other places?
-QMap<QString, QString> SIHFDataSource::leagues = initLeagueList();
-const QMap<QString, QString> SIHFDataSource::initLeagueList() {
-    QMap<QString, QString> map;
-    map.insert("National League", "1");
-    map.insert("Swiss League", "2");
-    map.insert("Men's National Team", "8");
-    map.insert("Cup", "89");  // TODO: 89&90 might be the other way around!
-    map.insert("CHL", "90");
+QMap<uint, League *> SIHFDataSource::mLeaguesMap = initLeagueList();
+const QMap<uint, League *> SIHFDataSource::initLeagueList() {
+    QMap<uint, League *> map;
+    map.insert(0, new League(0, "All", "All"));
+    map.insert(1, new League(1, "NL", "National League"));
+    map.insert(2, new League(2, "SL", "Swiss League"));
+    map.insert(8, new League(8, "Länderspiel A", "Men's National Team")); // TODO: What's the correct key for this (i.e. "Länderspiel A")
+    map.insert(89, new League(89, "SIHC", "Cup"));
+    map.insert(90, new League(90, "CHL", "CHL"));
     return map;
 }
 
-QString SIHFDataSource::getLeagueId(QString name) {
-    return SIHFDataSource::leagues.value(name, "-1");
+// Retrieves the league ID from the list of leagues
+QString SIHFDataSource::getLeagueId(QString abbreviation) {
+    bool found = false;
+    QString id = "-1";
+    QMapIterator<uint, League *> iLeague(mLeaguesMap);
+    while(iLeague.hasNext() && !found) {
+        League *league = iLeague.next().value();
+        if(abbreviation.compare(league->getAbbreviation()) == 0) {
+            id = league->getId();
+            found = true;
+        }
+    }
+    return id;
 }

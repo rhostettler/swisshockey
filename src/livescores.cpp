@@ -22,9 +22,9 @@
 // To display the view, call "show()" (will show fullscreen on device).
 LiveScores::LiveScores(QObject *parent) : QObject(parent) {
     // Create the data store and setup the data provider
-    this->dataStore = new GamedayData(this);
-    this->dataSource = new SIHFDataSource(this);
-    connect(this->dataSource, SIGNAL(gameSummaryUpdated(QVariantMap)), this->dataStore, SLOT(updateData(QVariantMap)));
+    mDataStore = new GamedayData(this);
+    mDataSource = new SIHFDataSource(this);
+    connect(mDataSource, SIGNAL(gameSummaryUpdated(QVariantMap)), mDataStore, SLOT(updateData(QVariantMap)));
 
     // Create a filter for the league, acts as a proxy between the view and the
     // data store
@@ -33,7 +33,7 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
     this->filter->setDynamicSortFilter(true);
     this->filter->setFilterKeyColumn(0);  // We only have the 0-column
     this->filter->setFilterRegExp(".*");
-    this->filter->setSourceModel(this->dataStore);
+    this->filter->setSourceModel(mDataStore);
 
     // Create the notifier, disabled by default (enabled automatically when the
     // app is brought to the background)
@@ -57,9 +57,13 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
     this->viewer->showExpanded();
 #endif
 
+    // Get the leagues
+    mDataSource->getLeagues(&mLeaguesList);
+
     // Connect the QML and the C++ bits, and add an event filter to catch
     // switches between foreground and background.
     this->viewer->rootContext()->setContextProperty("listData", this->filter);
+    this->viewer->rootContext()->setContextProperty("leagueList", QVariant::fromValue(mLeaguesList));
     QObject *rootObject = viewer->rootObject();
     connect(rootObject, SIGNAL(viewChanged(QString)), this, SLOT(updateView(QString)));
     connect(rootObject, SIGNAL(leagueChanged(QString)), this, SLOT(updateLeague(QString)));
@@ -72,13 +76,13 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
         Logger& logger = Logger::getInstance();
         logger.log(Logger::DEBUG, "LiveScores::LiveScores(): Couldn't find the 'overviewPage' QML object, updates in progress will not be shown.");
     } else {
-        connect(dataSource, SIGNAL(updateStarted()), overviewPage, SLOT(startUpdateIndicator()));
-        connect(dataSource, SIGNAL(updateFinished()), overviewPage, SLOT(stopUpdateIndicator()));
+        connect(mDataSource, SIGNAL(updateStarted()), overviewPage, SLOT(startUpdateIndicator()));
+        connect(mDataSource, SIGNAL(updateFinished()), overviewPage, SLOT(stopUpdateIndicator()));
     }
 
     // Trigger an update after all the GUI signals have been connected.
     // currentId is "NULL" by default.
-    this->dataSource->update(this->currentId);
+    mDataSource->update(this->currentId);
 
     // Create a timer that periodically fires to update the data, defaults to 5 mins
     Config& config = Config::getInstance();
@@ -98,13 +102,13 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
 // Called when the user switches from the summaries to the details view
 // TODO: Maybe we should trigger a busy indicator here too?
 void LiveScores::updateView(QString id) {
-    GameData *game = dataStore->getGame(id);
+    GameData *game = mDataStore->getGame(id);
     this->currentId = id;
 
     if(this->current != NULL) {
         // Set the game id in the totomat & force update
-        connect(this->dataSource, SIGNAL(gameDetailsUpdated(QList<GameEvent *>, QVariantList)), game, SLOT(updateEvents(QList<GameEvent *>, QVariantList)));
-        this->dataSource->getGameDetails(id);
+        connect(mDataSource, SIGNAL(gameDetailsUpdated(QList<GameEvent *>, QVariantList)), game, SLOT(updateEvents(QList<GameEvent *>, QVariantList)));
+        mDataSource->getGameDetails(id);
 
         // Get the context since we'll be invoking it a couple of times
 #ifdef PLATFORM_SFOS
@@ -124,7 +128,7 @@ void LiveScores::updateLeague(QString leagueId) {
     if(!leagueId.compare("0")) {
         this->filter->setFilterRegExp(".*");
     } else {
-        this->filter->setFilterRegExp(leagueId);
+        this->filter->setFilterRegExp("^" + leagueId + "$");
     }
 }
 
@@ -159,7 +163,7 @@ bool LiveScores::eventFilter(QObject* obj, QEvent* event) {
 void LiveScores::updateData() {
     Logger& logger = Logger::getInstance();
     logger.log(Logger::DEBUG, "LiveScores::updateData(): called for a data update.");
-    this->dataSource->update(this->currentId);
+    mDataSource->update(this->currentId);
 }
 
 LiveScores::~LiveScores(void) {
