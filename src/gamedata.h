@@ -1,3 +1,22 @@
+/*
+ * Copyright 2017 Roland Hostettler
+ *
+ * This file is part of swisshockey.
+ *
+ * swisshockey is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option)
+ * any later version.
+ *
+ * swisshockey is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * swisshockey. If not, see http://www.gnu.org/licenses/.
+ */
+
 #ifndef GAMEDATA_H
 #define GAMEDATA_H
 
@@ -23,38 +42,34 @@ class GameData : public QAbstractListModel {
     Q_PROPERTY(int gameStatus READ getGameStatus NOTIFY statusChanged)
 
     private:
-        QString gameId;
-        QString league;
+        QString mGameId;
+        QString mLeagueId;
 
-        QHash<int, QByteArray> roles;
+        QHash<int, QByteArray> mDataRoleNames;
 
         // Home- and away team names & IDs
-        QString hometeam;
-        qulonglong hometeamId;
-        QString awayteam;
-        qulonglong awayteamId;
+        QString mHometeamName;
+        qulonglong mHometeamId;
+        QString mAwayteamName;
+        qulonglong mAwayteamId;
 
         // Time
-        QString startTime;
+        QString mStartTime;
 
         // Score
-        QMap<QString, QString> score;
+        QMap<QString, QString> mScore;
 
         // List of events
-        QList<GameEvent *> events;
+        QList<GameEvent *> mGameEvents;
 
         // List of players
         QMap<quint32, QString> players;
 
         // Status
-        int status;
-
-        // Flag that indicates whether the game has changed or not
-        bool m_scoreChanged;
-        bool m_statusChanged;
+        int mGameStatus;
 
         //
-        static QStringList gameStatusTexts;
+        static QStringList mGameStatusTexts;
 
     public:
         explicit GameData(QVariantMap data, QObject *parent = 0);
@@ -99,7 +114,7 @@ class GameData : public QAbstractListModel {
         void statusChanged(void);
 
     public slots:
-        void updateEvents(QList<GameEvent *> events, QVariantList players);
+        void updateEvents(QList<GameEvent *> mGameEvents, QVariantList players);
 };
 
 #endif // GAMEDATA_H

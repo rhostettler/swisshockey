@@ -1,8 +1,27 @@
+/*
+ * Copyright 2017 Roland Hostettler
+ *
+ * This file is part of swisshockey.
+ *
+ * swisshockey is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option)
+ * any later version.
+ *
+ * swisshockey is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * swisshockey. If not, see http://www.gnu.org/licenses/.
+ */
+
 #include "gamedata.h"
 #include "logger.h"
 
 // The list of game status texts
-QStringList GameData::gameStatusTexts = QStringList()
+QStringList GameData::mGameStatusTexts = QStringList()
     << QString("Not Started")    // 0
     << QString("First Period")
     << QString("End of First")
@@ -19,97 +38,88 @@ QStringList GameData::gameStatusTexts = QStringList()
 
 // Initialize the game
 GameData::GameData(QVariantMap data, QObject *parent) : QAbstractListModel(parent) {
-    // Get the league
-    this->league = data["league"].toString();
+    // Set the basic game info: League & game IDs, teams, etc.
+    mLeagueId = data["league"].toString();
+    mGameId = data["gameId"].toString();
+    mHometeamName = data["hometeam"].toString();
+    mHometeamId = data["hometeamId"].toLongLong();
+    mAwayteamName = data["awayteam"].toString();
+    mAwayteamId = data["awayteamId"].toLongLong();
+    // TODO: Parse this and store it as a QDateTime object in UTC
+    mStartTime = data["time"].toString();
 
-    // Get the game ID
-    this->gameId = data["gameId"].toString();
-
-    // Set the teams for this game
-    this->hometeam = data["hometeam"].toString(); // parseTeam(teams[0].remove(teams[0].length()-1, 1));
-    this->hometeamId = data["hometeamId"].toLongLong();
-    this->awayteam = data["awayteam"].toString(); //parseTeam(teams[1].remove(0, 1));
-    this->awayteamId = data["awayteamId"].toLongLong();
+    // TODO: Set infos such as place, attendance, refs, etc.
 
     // Forward the rest and update the result
     updateSummary(data);
 
-    // Reset the changed flag to prevent notifications on application startup
-    this->m_scoreChanged = false;
-    this->m_statusChanged = false;
-
     // Set the data roles
-    this->roles[TeamRole] = "eventteam";
-    this->roles[TimeRole] = "eventtime";
-    this->roles[PlayerRole] = "eventplayer";
-    this->roles[AdditionalInfoRole] = "eventinfo";
-    this->roles[EventRole] = "eventtext";
-    this->roles[EventSubtextRole] = "eventsubtext";
+    // TODO: Consider renaming the roles at some point
+    mDataRoleNames[TeamRole] = "eventteam";
+    mDataRoleNames[TimeRole] = "eventtime";
+    mDataRoleNames[PlayerRole] = "eventplayer";
+    mDataRoleNames[AdditionalInfoRole] = "eventinfo";
+    mDataRoleNames[EventRole] = "eventtext";
+    mDataRoleNames[EventSubtextRole] = "eventsubtext";
 #ifndef PLATFORM_SFOS
     setRoleNames(this->roles);
 #endif
 }
 
-// TODO: This has to be re-written such that we take a Game(Data) object and compare the two.
-// Update the game score
+// Update the game score/summary
 void GameData::updateSummary(QVariantMap data) {
-    // Store the total score before the update
-    QMap<QString, QString> oldScore = this->score;
-    int oldStatus = this->status;
-
-    // Update score per period
+    // Update the score and trigger a signal if it changed
+    QMap<QString, QString> oldScore = mScore;
     QVariantMap newScore = data["score"].toMap();
-    this->score["first"] = newScore.value("first", "-:-").toString();
-    this->score["second"] = newScore.value("second", "-:-").toString();
-    this->score["third"] =  newScore.value("third", "-:-").toString();
+    mScore["first"] = newScore.value("first", "-:-").toString();
+    mScore["second"] = newScore.value("second", "-:-").toString();
+    mScore["third"] =  newScore.value("third", "-:-").toString();
     if(newScore.contains("overtime")) {
-        this->score["overtime"] =  newScore.value("overtime", "-:-").toString();
+        mScore["overtime"] =  newScore.value("overtime", "-:-").toString();
     }
-    this->score["total"] = newScore["total"].toString();
-
-    // Update game starting time and status
-    this->startTime = data["time"].toString();
-    this->status = data["status"].toInt();
-
-    // Check if the total score changed and trigger an UI update
-    if(this->score != oldScore) {
+    mScore["total"] = newScore["total"].toString();
+    if(mScore != oldScore) {
         emit scoreChanged();
     }
 
-    // Check if the game status has changed and signal it
-    if(this->status != oldStatus) {
+    // Update the game status and trigger a signal if it changed
+    int oldStatus = mGameStatus;
+    mGameStatus = data["status"].toInt();
+    if(this->mGameStatus != oldStatus) {
         emit statusChanged();
     }
 }
 
 // TODO: Event handling is OK now, players not yet.
+// TODO: These should be split into two slots: updateEvents, updatePlayers and the data source should have two signals.
 void GameData::updateEvents(QList<GameEvent *> events, QVariantList players) {
     Logger& logger = Logger::getInstance();
     logger.log(Logger::DEBUG, "GameData::updateEvents(): Updating game events.");
 
     // Clear all events
     beginResetModel();
-    this->events.clear();
+    mGameEvents.clear();
     endResetModel();
 
     // Update the list of events (if there are any)
     QListIterator<GameEvent *> iter(events);
     while(iter.hasNext()) {
         beginInsertRows(QModelIndex(), rowCount(), rowCount());
-        this->events.append(iter.next());
+        mGameEvents.append(iter.next());
         endInsertRows();
-
-        // Parse the players, goals, and fouls
-        this->updatePlayerList(players);
     }
-    logger.log(Logger::DEBUG, "GameData::updateEvents(): Added " + QString::number(this->players.size()) + " players and " + QString::number(this->events.size()) + " events.");
+
+    // Parse the players
+    updatePlayerList(players);
+    logger.log(Logger::DEBUG, "GameData::updateEvents(): Added " + QString::number(this->players.size()) + " players and " + QString::number(this->mGameEvents.size()) + " events.");
 
     // Sort the events
     layoutAboutToBeChanged();
-    qSort(this->events.begin(), this->events.end(), GameEvent::greaterThan);
+    qSort(mGameEvents.begin(), mGameEvents.end(), GameEvent::greaterThan);
     layoutChanged();
 }
 
+// TODO: This is going to be rewritten.
 // Parses the player list and adds them to the local list of players where we
 // have a player license <=> player name map
 void GameData::updatePlayerList(QVariantList players) {
@@ -127,79 +137,51 @@ void GameData::updatePlayerList(QVariantList players) {
     }
 }
 
-// Return the status of the game (changed/the same) since last read. Resets the
-// flags!
-// DEPRECATED
-bool GameData::hasChanged(void) {
-    bool changed = this->m_scoreChanged || this->m_statusChanged;
-    this->m_scoreChanged = false;
-    this->m_statusChanged = false;
-    return changed;
-}
-
-// Check and reset whether the field "type" changed
-// DEPRECATED
-bool GameData::hasChanged(QString type) {
-    bool changed = false;
-
-    if(type.compare("score")) {
-        changed = this->m_scoreChanged;
-        this->m_scoreChanged = false;
-    }
-
-    if(type.compare("status")) {
-        changed = this->m_statusChanged;
-        this->m_statusChanged = false;
-    }
-
-    return changed;
-}
-
 QString GameData::getLeague() {
-    return this->league;
+    return this->mLeagueId;
 }
 
 QString GameData::getHometeam() {
-    return this->hometeam;
+    return this->mHometeamName;
 }
 
 QString GameData::getHometeamId() {
-    return QString::number(this->hometeamId);
+    return QString::number(this->mHometeamId);
 }
 
 QString GameData::getAwayteam() {
-    return this->awayteam;
+    return this->mAwayteamName;
 }
 
 QString GameData::getAwayteamId() {
-    return QString::number(this->awayteamId);
+    return QString::number(this->mAwayteamId);
 }
 
 QString GameData::getTotalScore() {
-    return this->score["total"];
+    return this->mScore["total"];
 }
 
 QString GameData::getPeriodsScore() {
-    QString score = this->score.value("first") + ", " +
-        this->score.value("second") + ", " + this->score.value("third");
+    QString score = this->mScore.value("first") + ", " +
+        this->mScore.value("second") + ", " + this->mScore.value("third");
 
-    if(this->score.contains("overtime")) {
-        score.append(", " + this->score.value("overtime"));
+    if(this->mScore.contains("overtime")) {
+        score.append(", " + this->mScore.value("overtime"));
     }
 
     return score;
 }
 
 int GameData::getGameStatus() {
-    return this->status;
+    return this->mGameStatus;
 }
 
 QString GameData::getGameStatusText() {
     QString text;
-    if(this->status == 0) {
-        text = "Starts " + this->startTime;
+    if(this->mGameStatus == 0) {
+        text = "Starts " + this->mStartTime;
     } else {
-        text = GameData::gameStatusTexts.value(this->status, "Unknown status");
+        text = GameData::mGameStatusTexts.value(this->mGameStatus, "Unknown status");
     }
 
     return text;
@@ -208,14 +190,14 @@ QString GameData::getGameStatusText() {
 // Implementation of the QAbstractListModel methods
 // Returns the number of rows in the list
 int GameData::rowCount(const QModelIndex &parent) const {
-    return this->events.count();
+    return this->mGameEvents.count();
 }
 
 // Returns the data requested by the view
 QVariant GameData::data(const QModelIndex &index, int role) const {
     QVariant data;
     int key = index.row();
-    GameEvent *event = this->events[key];
+    GameEvent *event = this->mGameEvents[key];
 
     switch(role) {
         case TeamRole:
@@ -296,6 +278,6 @@ QVariant GameData::headerData(int section, Qt::Orientation orientation, int role
 // Role names for QML
 #ifdef PLATFORM_SFOS
 QHash<int, QByteArray> GameData::roleNames() const {
-    return this->roles;
+    return this->mDataRoleNames;
 }
 #endif

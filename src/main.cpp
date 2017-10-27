@@ -1,5 +1,5 @@
 /*
- *  Copyright 2017 Roland Hostettler
+ * Copyright 2017 Roland Hostettler
  *
  * This file is part of swisshockey.
  *
