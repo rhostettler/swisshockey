@@ -6,7 +6,6 @@ Page {
     SilicaListView{
         id: leagueListView
         anchors.fill: parent
-        // TODO: This needs to be loaded dynamically, really
         model: leagueList
 
         header: PageHeader {

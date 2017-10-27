@@ -10,6 +10,7 @@
 #include "gamedaydata.h"
 #include "jsondecoder.h"
 #include "league.h"
+#include "player.h"
 
 class SIHFDataSource : public DataSource {
     Q_OBJECT
@@ -23,6 +24,7 @@ class SIHFDataSource : public DataSource {
 
         // Private helper functions
         QVariantMap parseGame(QVariantList indata);
+        QList<Player *> parsePlayers(QVariantList data);
         QList<GameEvent *> parseGoals(QVariantList data);
         QList<GameEvent *> parsePenalties(QVariantList data);
         QList<GameEvent *> parseGoalkeepers(QVariantList data);

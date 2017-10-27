@@ -30,7 +30,7 @@
 
 #include "gamedata.h"
 #include "gameevent.h"
-
+#include "player.h"
 
 class GameData : public QAbstractListModel {
     Q_OBJECT
@@ -113,8 +113,8 @@ class GameData : public QAbstractListModel {
         void statusChanged(void);
 
     public slots:
-        void updateEvents(QList<GameEvent *> mGameEvents);
-        void updatePlayers(QVariantList players);
+        void updateEvents(QList<GameEvent *> gameEvents);
+        void updateRosters(QList<Player *> players);
 };
 
 #endif // GAMEDATA_H

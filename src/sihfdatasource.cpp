@@ -218,10 +218,9 @@ void SIHFDataSource::parseGameDetails(void) {
     // Parse all the players; this is done before parsing the events to make
     // that the players can be found when the events are rendered in the UI
     // TODO: We might want to think about how we handle the players in the future
-    //QList<Player> players;
-    QVariantList players;
+    QList<Player *> players;
     if(parsedRawdata.contains("players")) {
-        players.append(parsedRawdata["players"].toList());
+        players.append(parsePlayers(parsedRawdata["players"].toList()));
         emit playersUpdated(players);
     } else {
         logger.log(Logger::ERROR, "SIHFDataSource::parseStatsResponse(): No player data found!");
@@ -247,6 +246,36 @@ void SIHFDataSource::parseGameDetails(void) {
     }
     emit eventsUpdated(events);
 
+}
+
+// Parse the players
+// TODO: Parse the stats as well
+QList<Player *> SIHFDataSource::parsePlayers(QVariantList data) {
+    QList<Player *> players;
+//    Logger& logger = Logger::getInstance();
+
+    QListIterator<QVariant> iterator(data);
+    while(iterator.hasNext()) {
+        QVariantMap tmp = iterator.next().toMap();
+
+        // Get basics
+        qulonglong teamId = tmp.value("teamId").toULongLong();
+        quint32 id = tmp.value("id").toUInt();
+        QString name = tmp.value("fullName").toString();
+
+        // Get name
+        int index = name.lastIndexOf(" ");
+        QString lastName = name.left(index);
+        QString firstName = name.right(name.length()-index-1);//.at(index+1);
+
+        //QString name = firstName + ". " + lastName;
+        //this->players.insert(playerId, name);
+
+        players.append(new Player(id, firstName, lastName, teamId));
+    }
+
+//    logger.log(Logger::DEBUG, "GameData::updatePlayers(): Added " + QString::number(this->players.size()) + " players and " + QString::number(this->mGameEvents.size()) + " events.");
+    return players;
 }
 
 // Parses the goals data and returns an unsorted QList<GameEvent>

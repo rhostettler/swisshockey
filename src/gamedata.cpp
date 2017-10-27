@@ -92,7 +92,7 @@ void GameData::updateSummary(QVariantMap data) {
 
 // TODO: Event handling is OK now, players not yet.
 // TODO: These should be split into two slots: updateEvents, updatePlayers and the data source should have two signals.
-void GameData::updateEvents(QList<GameEvent *> events) {
+void GameData::updateEvents(QList<GameEvent *> gameEvents) {
     Logger& logger = Logger::getInstance();
     logger.log(Logger::DEBUG, "GameData::updateEvents(): Updating game events.");
 
@@ -102,7 +102,7 @@ void GameData::updateEvents(QList<GameEvent *> events) {
     endResetModel();
 
     // Update the list of events (if there are any)
-    QListIterator<GameEvent *> iter(events);
+    QListIterator<GameEvent *> iter(gameEvents);
     while(iter.hasNext()) {
         beginInsertRows(QModelIndex(), rowCount(), rowCount());
         mGameEvents.append(iter.next());
@@ -115,10 +115,11 @@ void GameData::updateEvents(QList<GameEvent *> events) {
     layoutChanged();
 }
 
-// TODO: This is going to be rewritten.
 // Parses the player list and adds them to the local list of players where we
 // have a player license <=> player name map
-void GameData::updatePlayers(QVariantList players) {
+// TODO: Rewrite
+void GameData::updateRosters(QList<Player *> players) {
+#if 0
     Logger& logger = Logger::getInstance();
 
     QListIterator<QVariant> iterator(players);
@@ -134,6 +135,7 @@ void GameData::updatePlayers(QVariantList players) {
     }
 
     logger.log(Logger::DEBUG, "GameData::updatePlayers(): Added " + QString::number(this->players.size()) + " players and " + QString::number(this->mGameEvents.size()) + " events.");
+#endif
 }
 
 QString GameData::getLeague() {

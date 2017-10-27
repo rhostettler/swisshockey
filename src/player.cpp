@@ -17,33 +17,11 @@
  * swisshockey. If not, see http://www.gnu.org/licenses/.
  */
 
-#ifndef DATASOURCE_H
-#define DATASOURCE_H
-
-#include <QObject>
-#include <QVariantMap>
-
-#include "gameevent.h"
 #include "player.h"
 
-class DataSource : public QObject {
-    Q_OBJECT
-
-    public:
-        explicit DataSource(QObject *parent = 0);
-
-        virtual void update(QString id) = 0;
-
-    signals:
-        void summaryUpdated(QVariantMap data);
-        void eventsUpdated(QList<GameEvent *> events);
-        void playersUpdated(QList<Player *> players);
-        void updateError(QString message);
-        void updateStarted();
-        void updateFinished();
-
-    public slots:
-    
-};
-
-#endif // DATASOURCE_H
+Player::Player(quint32 id, QString firstName, QString lastName, qulonglong teamId, QObject *parent) : QObject(parent) {
+    mId = id;
+    mFirstName = firstName;
+    mLastName = lastName;
+    mTeamId = teamId;
+}
