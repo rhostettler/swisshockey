@@ -43,7 +43,7 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
     // Create the data store and setup the data provider
     mDataStore = new GamedayData(this);
     mDataSource = new SIHFDataSource(this);
-    connect(mDataSource, SIGNAL(gameSummaryUpdated(QVariantMap)), mDataStore, SLOT(updateData(QVariantMap)));
+    connect(mDataSource, SIGNAL(summaryUpdated(QVariantMap)), mDataStore, SLOT(updateData(QVariantMap)));
 
     // Create a filter for the league, acts as a proxy between the view and the
     // data store
@@ -126,7 +126,8 @@ void LiveScores::updateView(QString id) {
 
     if(game != NULL) {
         // Set the game id in the totomat & force update
-        connect(mDataSource, SIGNAL(gameDetailsUpdated(QList<GameEvent *>, QVariantList)), game, SLOT(updateEvents(QList<GameEvent *>, QVariantList)));
+        connect(mDataSource, SIGNAL(eventsUpdated(QList<GameEvent *>)), game, SLOT(updateEvents(QList<GameEvent *>)));
+        connect(mDataSource, SIGNAL(playersUpdated(QVariantList)), game, SLOT(updatePlayers(QVariantList)));
         mDataSource->getGameDetails(id);
 
         // Set the details data models

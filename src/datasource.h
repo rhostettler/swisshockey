@@ -34,8 +34,9 @@ class DataSource : public QObject {
         virtual void update(QString id) = 0;
 
     signals:
-        void gameSummaryUpdated(QVariantMap data);
-        void gameDetailsUpdated(QList<GameEvent *> events, QVariantList players);
+        void summaryUpdated(QVariantMap data);
+        void eventsUpdated(QList<GameEvent *> events);
+        void playersUpdated(QVariantList players);
         void updateError(QString message);
         void updateStarted();
         void updateFinished();

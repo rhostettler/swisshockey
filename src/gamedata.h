@@ -74,7 +74,6 @@ class GameData : public QAbstractListModel {
     public:
         explicit GameData(QVariantMap data, QObject *parent = 0);
         void updateSummary(QVariantMap data);
-        void updatePlayerList(QVariantList players);
         void updateGoals(QVariantList goals);
         void updateFouls(QVariantList fouls);
         bool hasChanged(void);
@@ -114,7 +113,8 @@ class GameData : public QAbstractListModel {
         void statusChanged(void);
 
     public slots:
-        void updateEvents(QList<GameEvent *> mGameEvents, QVariantList players);
+        void updateEvents(QList<GameEvent *> mGameEvents);
+        void updatePlayers(QVariantList players);
 };
 
 #endif // GAMEDATA_H

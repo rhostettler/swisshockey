@@ -92,7 +92,7 @@ void GameData::updateSummary(QVariantMap data) {
 
 // TODO: Event handling is OK now, players not yet.
 // TODO: These should be split into two slots: updateEvents, updatePlayers and the data source should have two signals.
-void GameData::updateEvents(QList<GameEvent *> events, QVariantList players) {
+void GameData::updateEvents(QList<GameEvent *> events) {
     Logger& logger = Logger::getInstance();
     logger.log(Logger::DEBUG, "GameData::updateEvents(): Updating game events.");
 
@@ -109,10 +109,6 @@ void GameData::updateEvents(QList<GameEvent *> events, QVariantList players) {
         endInsertRows();
     }
 
-    // Parse the players
-    updatePlayerList(players);
-    logger.log(Logger::DEBUG, "GameData::updateEvents(): Added " + QString::number(this->players.size()) + " players and " + QString::number(this->mGameEvents.size()) + " events.");
-
     // Sort the events
     layoutAboutToBeChanged();
     qSort(mGameEvents.begin(), mGameEvents.end(), GameEvent::greaterThan);
@@ -122,9 +118,10 @@ void GameData::updateEvents(QList<GameEvent *> events, QVariantList players) {
 // TODO: This is going to be rewritten.
 // Parses the player list and adds them to the local list of players where we
 // have a player license <=> player name map
-void GameData::updatePlayerList(QVariantList players) {
-    QListIterator<QVariant> iterator(players);
+void GameData::updatePlayers(QVariantList players) {
+    Logger& logger = Logger::getInstance();
 
+    QListIterator<QVariant> iterator(players);
     while(iterator.hasNext()) {
         QVariantMap player = iterator.next().toMap();
         quint32 playerId = player.value("id").toUInt();
@@ -135,6 +132,8 @@ void GameData::updatePlayerList(QVariantList players) {
         QString name = firstName + ". " + lastName;
         this->players.insert(playerId, name);
     }
+
+    logger.log(Logger::DEBUG, "GameData::updatePlayers(): Added " + QString::number(this->players.size()) + " players and " + QString::number(this->mGameEvents.size()) + " events.");
 }
 
 QString GameData::getLeague() {

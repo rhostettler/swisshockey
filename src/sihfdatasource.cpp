@@ -55,7 +55,7 @@ void SIHFDataSource::parseGameSummaries() {
             QVariantMap gamedata = this->parseGame(iter.next().toList());
 
             if(gamedata.size() > 0) {
-                emit gameSummaryUpdated(gamedata);
+                emit summaryUpdated(gamedata);
             } else {
                 // NOP?
             }
@@ -214,6 +214,20 @@ void SIHFDataSource::parseGameDetails(void) {
 
     // Convert from JSON to a map, then parse the game details
     QVariantMap parsedRawdata = this->decoder->decode(rawdata);
+
+    // Parse all the players; this is done before parsing the events to make
+    // that the players can be found when the events are rendered in the UI
+    // TODO: We might want to think about how we handle the players in the future
+    //QList<Player> players;
+    QVariantList players;
+    if(parsedRawdata.contains("players")) {
+        players.append(parsedRawdata["players"].toList());
+        emit playersUpdated(players);
+    } else {
+        logger.log(Logger::ERROR, "SIHFDataSource::parseStatsResponse(): No player data found!");
+    }
+
+    // Parse all the game events
     QList<GameEvent *> events;
     if(parsedRawdata.contains("summary")) {
         QVariantMap summary = parsedRawdata["summary"].toMap();
@@ -231,19 +245,8 @@ void SIHFDataSource::parseGameDetails(void) {
     } else {
         logger.log(Logger::ERROR, "SIHFDataSource::parseStatsResponse(): No game events data found!");
     }
+    emit eventsUpdated(events);
 
-    // TODO: We might want to think about how we handle the players in the future
-    // Extract the players
-    //QList<Player> players;
-    QVariantList players;
-    if(parsedRawdata.contains("players")) {
-        players.append(parsedRawdata["players"].toList());
-    } else {
-        logger.log(Logger::ERROR, "SIHFDataSource::parseStatsResponse(): No player data found!");
-    }
-
-    // If a game for the details was set, update it too
-    emit gameDetailsUpdated(events, players);
 }
 
 // Parses the goals data and returns an unsorted QList<GameEvent>
