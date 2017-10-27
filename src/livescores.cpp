@@ -1,3 +1,22 @@
+/*
+ *  Copyright 2017 Roland Hostettler
+ *
+ * This file is part of swisshockey.
+ *
+ * swisshockey is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option)
+ * any later version.
+ *
+ * swisshockey is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * swisshockey. If not, see http://www.gnu.org/licenses/.
+ */
+
 #include "livescores.h"
 
 #ifdef PLATFORM_SFOS
@@ -28,12 +47,12 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
 
     // Create a filter for the league, acts as a proxy between the view and the
     // data store
-    this->filter = new QSortFilterProxyModel(this);
-    this->filter->setFilterRole(GamedayData::LeagueRole);
-    this->filter->setDynamicSortFilter(true);
-    this->filter->setFilterKeyColumn(0);  // We only have the 0-column
-    this->filter->setFilterRegExp(".*");
-    this->filter->setSourceModel(mDataStore);
+    mLeagueFilter = new QSortFilterProxyModel(this);
+    mLeagueFilter->setFilterRole(GamedayData::LeagueRole);
+    mLeagueFilter->setDynamicSortFilter(true);
+    mLeagueFilter->setFilterKeyColumn(0);  // We only have the 0-column
+    mLeagueFilter->setFilterRegExp(".*");
+    mLeagueFilter->setSourceModel(mDataStore);
 
     // Create the notifier, disabled by default (enabled automatically when the
     // app is brought to the background)
@@ -47,14 +66,14 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
 
     // Load and show the QML
 #ifdef PLATFORM_SFOS
-    this->viewer = SailfishApp::createView();
-    this->viewer->setSource(SailfishApp::pathTo("sailfishos/harbour-swisshockey.qml"));  // TODO: Adjust once the qml is sorted out
-    this->viewer->show();
+    mQmlViewer = SailfishApp::createView();
+    mQmlViewer->setSource(SailfishApp::pathTo("sailfishos/harbour-swisshockey.qml"));
+    mQmlViewer->show();
 #else
-    this->viewer = new QmlApplicationViewer();
-    this->viewer->setOrientation(QmlApplicationViewer::ScreenOrientationAuto);
-    this->viewer->setMainQmlFile(QLatin1String("harmattan/main.qml"));
-    this->viewer->showExpanded();
+    mQmlViewer = new QmlApplicationViewer();
+    mQmlViewer->setOrientation(QmlApplicationViewer::ScreenOrientationAuto);
+    mQmlViewer->setMainQmlFile(QLatin1String("harmattan/main.qml"));
+    mQmliewer->showExpanded();
 #endif
 
     // Get the leagues
@@ -62,9 +81,9 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
 
     // Connect the QML and the C++ bits, and add an event filter to catch
     // switches between foreground and background.
-    this->viewer->rootContext()->setContextProperty("listData", this->filter);
-    this->viewer->rootContext()->setContextProperty("leagueList", QVariant::fromValue(mLeaguesList));
-    QObject *rootObject = viewer->rootObject();
+    mQmlViewer->rootContext()->setContextProperty("listData", this->mLeagueFilter);
+    mQmlViewer->rootContext()->setContextProperty("leagueList", QVariant::fromValue(mLeaguesList));
+    QObject *rootObject = mQmlViewer->rootObject();
     connect(rootObject, SIGNAL(viewChanged(QString)), this, SLOT(updateView(QString)));
     connect(rootObject, SIGNAL(leagueChanged(QString)), this, SLOT(updateLeague(QString)));
     connect(rootObject, SIGNAL(updateTriggered()), this, SLOT(updateData()));  // Manually trigger update
@@ -82,18 +101,18 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
 
     // Trigger an update after all the GUI signals have been connected.
     // currentId is "NULL" by default.
-    mDataSource->update(this->currentId);
+    mDataSource->update(mSelectedGameId);
 
     // Create a timer that periodically fires to update the data, defaults to 5 mins
     Config& config = Config::getInstance();
     int updateInterval = config.getValue("updateInterval", 2).toInt();
-    this->timer = new QTimer(this);
-    this->timer->setSingleShot(false);
-    connect(this->timer, SIGNAL(timeout()), this, SLOT(updateData()));
-    this->timer->start(updateInterval*60*1000);
+    mUpdateTimer = new QTimer(this);
+    mUpdateTimer->setSingleShot(false);
+    connect(mUpdateTimer, SIGNAL(timeout()), this, SLOT(updateData()));
+    mUpdateTimer->start(updateInterval*60*1000);
 
 #if 0
-    // TODO: Use this code to show the info banner from C++.
+    // TODO: Use this code to show the info banner from C++ (Harmattan).
     QVariant msg = "Hello from C++";
     QMetaObject::invokeMethod(rootObject, "showInfo", Q_ARG(QVariant, msg));
 #endif
@@ -103,21 +122,22 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
 // TODO: Maybe we should trigger a busy indicator here too?
 void LiveScores::updateView(QString id) {
     GameData *game = mDataStore->getGame(id);
-    this->currentId = id;
+    mSelectedGameId = id;
 
-    if(this->current != NULL) {
+    if(game != NULL) {
         // Set the game id in the totomat & force update
         connect(mDataSource, SIGNAL(gameDetailsUpdated(QList<GameEvent *>, QVariantList)), game, SLOT(updateEvents(QList<GameEvent *>, QVariantList)));
         mDataSource->getGameDetails(id);
 
-        // Get the context since we'll be invoking it a couple of times
+        // Set the details data models
 #ifdef PLATFORM_SFOS
-        QQmlContext *context = viewer->rootContext();
+        QQmlContext *context = mQmlViewer->rootContext();
 #else
         QDeclarativeContext *context = viewer->rootContext();
 #endif
         context->setContextProperty("gameDetailsData", game);
         context->setContextProperty("gameEventsData", game);
+        // TODO: Set home & away team rosters here
     }
 }
 
@@ -126,9 +146,9 @@ void LiveScores::updateLeague(QString leagueId) {
     Logger& logger = Logger::getInstance();
     logger.log(Logger::DEBUG, "LiveScores::updateLeague(): Changing league filter to " + leagueId);
     if(!leagueId.compare("0")) {
-        this->filter->setFilterRegExp(".*");
+        mLeagueFilter->setFilterRegExp(".*");
     } else {
-        this->filter->setFilterRegExp("^" + leagueId + "$");
+        mLeagueFilter->setFilterRegExp("^" + leagueId + "$");
     }
 }
 
@@ -163,12 +183,12 @@ bool LiveScores::eventFilter(QObject* obj, QEvent* event) {
 void LiveScores::updateData() {
     Logger& logger = Logger::getInstance();
     logger.log(Logger::DEBUG, "LiveScores::updateData(): called for a data update.");
-    mDataSource->update(this->currentId);
+    mDataSource->update(mSelectedGameId);
 }
 
 LiveScores::~LiveScores(void) {
     // Remove the ones that are not deleted automagically
-    delete viewer;
+    delete mQmlViewer;
 #ifndef PLATFORM_SFOS
     delete notifier;
 #endif
