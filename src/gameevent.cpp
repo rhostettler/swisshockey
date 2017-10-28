@@ -1,20 +1,20 @@
 /*
- * GameEvent Class Implementation
+ * Copyright 2014-2017 Roland Hostettler
  *
- * The GameEvent class encapsulates all the data and functionality associated
- * with events that happen throughout the game. Events are one of the
- * following:
+ * This file is part of swisshockey.
  *
- *  * Goals
- *  * Penalties
- *  * Penalty shots
- *  * Goalkeeper in/out
+ * swisshockey is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option)
+ * any later version.
  *
- * Copyright (C) 2014-2016 Roland Hostettler
+ * swisshockey is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- * This software is distributed under the GNU General Public License (version 3
- * or later); please refer to the file LICENSE, included with the software, for
- * details.
+ * You should have received a copy of the GNU General Public License along with
+ * swisshockey. If not, see http://www.gnu.org/licenses/.
  */
 
 #include "gameevent.h"
