@@ -1,3 +1,22 @@
+/*
+ * Copyright 2017 Roland Hostettler
+ *
+ * This file is part of swisshockey.
+ *
+ * swisshockey is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option)
+ * any later version.
+ *
+ * swisshockey is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * swisshockey. If not, see http://www.gnu.org/licenses/.
+ */
+
 #include <cmath>
 
 #include "sihfdatasource.h"
@@ -217,7 +236,6 @@ void SIHFDataSource::parseGameDetails(void) {
 
     // Parse all the players; this is done before parsing the events to make
     // that the players can be found when the events are rendered in the UI
-    // TODO: We might want to think about how we handle the players in the future
     QList<Player *> players;
     if(parsedRawdata.contains("players")) {
         players.append(parsePlayers(parsedRawdata["players"].toList()));
@@ -252,7 +270,8 @@ void SIHFDataSource::parseGameDetails(void) {
 // TODO: Parse the stats as well
 QList<Player *> SIHFDataSource::parsePlayers(QVariantList data) {
     QList<Player *> players;
-//    Logger& logger = Logger::getInstance();
+    Logger& logger = Logger::getInstance();
+    logger.log(Logger::DEBUG, "SIHFDataSource::parsePlayers(): Parsing player data.");
 
     QListIterator<QVariant> iterator(data);
     while(iterator.hasNext()) {
@@ -274,7 +293,7 @@ QList<Player *> SIHFDataSource::parsePlayers(QVariantList data) {
         players.append(new Player(id, firstName, lastName, teamId));
     }
 
-//    logger.log(Logger::DEBUG, "GameData::updatePlayers(): Added " + QString::number(this->players.size()) + " players and " + QString::number(this->mGameEvents.size()) + " events.");
+    logger.log(Logger::DEBUG, "SIHFDataSource::parsePlayers(): Found " + QString::number(players.size()) + " players.");
     return players;
 }
 

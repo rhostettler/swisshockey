@@ -25,3 +25,11 @@ Player::Player(quint32 id, QString firstName, QString lastName, qulonglong teamI
     mLastName = lastName;
     mTeamId = teamId;
 }
+
+quint32 Player::getId() {
+    return mId;
+}
+
+QString Player::getName() {
+    return QString(mFirstName.at(0)) + ". " + mLastName;
+}

@@ -34,6 +34,9 @@ class Player : public QObject {
     public:
         explicit Player(quint32 id, QString firstName, QString lastName, qulonglong teamId, QObject *parent = 0);
 
+        quint32 getId();
+        QString getName();
+
     signals:
 
     public slots:

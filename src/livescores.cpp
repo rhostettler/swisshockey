@@ -127,7 +127,7 @@ void LiveScores::updateView(QString id) {
     if(game != NULL) {
         // Set the game id in the totomat & force update
         connect(mDataSource, SIGNAL(eventsUpdated(QList<GameEvent *>)), game, SLOT(updateEvents(QList<GameEvent *>)));
-        connect(mDataSource, SIGNAL(playersUpdated(QVariantList)), game, SLOT(updateRosters(QList<Players *>)));
+        connect(mDataSource, SIGNAL(playersUpdated(QList<Player *>)), game, SLOT(updateRosters(QList<Player *>)));
         mDataSource->getGameDetails(id);
 
         // Set the details data models

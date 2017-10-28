@@ -59,13 +59,12 @@ class GameData : public QAbstractListModel {
         // Score
         QMap<QString, QString> mScore;
 
-        // List of events
+        // List of events and rosters
         QList<GameEvent *> mGameEvents;
-
-        // List of players
-        QMap<quint32, QString> players;
+        QMap<quint32, Player *> mRoster;
 
         // Status
+        // TODO: There should be a (public) enum with statuses, which are rendered in the UI to plain text
         int mGameStatus;
 
         //

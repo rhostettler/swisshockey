@@ -92,7 +92,7 @@ void GameData::updateSummary(QVariantMap data) {
 
 // TODO: Event handling is OK now, players not yet.
 // TODO: These should be split into two slots: updateEvents, updatePlayers and the data source should have two signals.
-void GameData::updateEvents(QList<GameEvent *> gameEvents) {
+void GameData::updateEvents(QList<GameEvent *> events) {
     Logger& logger = Logger::getInstance();
     logger.log(Logger::DEBUG, "GameData::updateEvents(): Updating game events.");
 
@@ -102,7 +102,7 @@ void GameData::updateEvents(QList<GameEvent *> gameEvents) {
     endResetModel();
 
     // Update the list of events (if there are any)
-    QListIterator<GameEvent *> iter(gameEvents);
+    QListIterator<GameEvent *> iter(events);
     while(iter.hasNext()) {
         beginInsertRows(QModelIndex(), rowCount(), rowCount());
         mGameEvents.append(iter.next());
@@ -113,29 +113,23 @@ void GameData::updateEvents(QList<GameEvent *> gameEvents) {
     layoutAboutToBeChanged();
     qSort(mGameEvents.begin(), mGameEvents.end(), GameEvent::greaterThan);
     layoutChanged();
+    logger.log(Logger::DEBUG, "GameData::updateEvents(): Added " + QString::number(mGameEvents.size()) + " events.");
 }
 
 // Parses the player list and adds them to the local list of players where we
 // have a player license <=> player name map
-// TODO: Rewrite
 void GameData::updateRosters(QList<Player *> players) {
-#if 0
     Logger& logger = Logger::getInstance();
+    logger.log(Logger::DEBUG, "GameData:updateRosters(): Updating rosters.");
 
-    QListIterator<QVariant> iterator(players);
-    while(iterator.hasNext()) {
-        QVariantMap player = iterator.next().toMap();
-        quint32 playerId = player.value("id").toUInt();
-        QString playerName = player.value("fullName").toString();
-        int index = playerName.lastIndexOf(" ");
-        QString lastName = playerName.left(index);
-        QString firstName = playerName.at(index+1);
-        QString name = firstName + ". " + lastName;
-        this->players.insert(playerId, name);
+    mRoster.clear();
+    QListIterator<Player *> iter(players);
+    while(iter.hasNext()) {
+        Player *player = iter.next();
+        mRoster.insert(player->getId(), player);
     }
 
-    logger.log(Logger::DEBUG, "GameData::updatePlayers(): Added " + QString::number(this->players.size()) + " players and " + QString::number(this->mGameEvents.size()) + " events.");
-#endif
+    logger.log(Logger::DEBUG, "GameData::updateRosters(): Added " + QString::number(mRoster.size()) + " players to roster.");
 }
 
 QString GameData::getLeague() {
@@ -217,7 +211,12 @@ QVariant GameData::data(const QModelIndex &index, int role) const {
 
         case PlayerRole: {
                 quint32 id = event->getPlayer();
-                data = this->players.value(id, "");
+                Player *player = mRoster.value(id, NULL);
+                if(player != NULL) {
+                    data = player->getName();
+                } else {
+                    data = "";
+                }
             }
             break;
 
@@ -225,10 +224,14 @@ QVariant GameData::data(const QModelIndex &index, int role) const {
                 int type = event->getType();
                 switch(type) {
                     case GameEvent::GOAL: {
-                            QString text = this->players.value(event->getPlayer(GameEvent::FIRST_ASSIST), "");
-                            QString tmp = this->players.value(event->getPlayer(GameEvent::SECOND_ASSIST), "");
-                            if(tmp != "") {
-                                text.append(", " + tmp);
+                            QString text = "";
+                            Player *player = mRoster.value(event->getPlayer(GameEvent::FIRST_ASSIST), NULL);
+                            if(player != NULL) {
+                                text.append(player->getName());
+                            }
+                            player = mRoster.value(event->getPlayer(GameEvent::SECOND_ASSIST), NULL);
+                            if(player != NULL) {
+                                text.append(", " + player->getName());
                             }
                             data = text;
                         }
@@ -247,7 +250,7 @@ QVariant GameData::data(const QModelIndex &index, int role) const {
                         break;
 
                     case GameEvent::PENALTY_SHOT:
-                        data = "Goalkeeper: " + this->players.value(event->getPlayer(GameEvent::GOALKEEPER), "");
+                        data = "Goalkeeper: "; //+ this->players.value(event->getPlayer(GameEvent::GOALKEEPER), "");
                         break;
 
                     default:
