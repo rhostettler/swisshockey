@@ -17,6 +17,9 @@
  * swisshockey. If not, see http://www.gnu.org/licenses/.
  */
 
+#include <QDir>
+#include <QStandardPaths>
+
 #include "logger.h"
 
 Logger& Logger::getInstance() {
@@ -64,5 +67,20 @@ void Logger::log(int level, QString message) {
         // TODO: Add some fancy pants stuff ([$LEVEL], timestamp, etc.)
     } else {
         // Discard the message
+    }
+}
+
+void Logger::dump(QString filename, QString data) {
+    if(this->loglevel >= Logger::DEBUG) {
+        QDir datapath(QStandardPaths::writableLocation(QStandardPaths::DataLocation));
+        QFile dumpfile(datapath.canonicalPath() + '/' + filename);
+
+        if(dumpfile.open(QIODevice::Append)) {
+            QTextStream *stream = new QTextStream(&dumpfile);
+            *(stream) << data << endl;
+            stream->flush();
+            delete stream;
+            dumpfile.close();
+        }
     }
 }

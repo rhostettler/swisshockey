@@ -61,8 +61,9 @@ void SIHFDataSource::parseGameSummaries() {
 
     // Log the raw data for debugging
     Logger& logger = Logger::getInstance();
-    logger.log(Logger::DEBUG, "SIHFDataSource::parseSummariesResponse(): Received the following raw data:");
-    logger.log(Logger::DEBUG, rawdata);
+    QString dumpfile("dump-summaries-" + QDateTime::currentDateTime().toString("yyyy-MM-ddTHHmmss") + ".json");
+    logger.log(Logger::DEBUG, "SIHFDataSource::parseGameSummaries(): Dumping response data to " + dumpfile + ".");
+    logger.dump(dumpfile, rawdata);
 
     // Parse the response
     QVariantMap parsedRawdata = this->decoder->decode(rawdata);
@@ -215,8 +216,10 @@ void SIHFDataSource::parseGameDetails(void) {
 
     // Log the raw data for debugging
     Logger& logger = Logger::getInstance();
+#if 0
     logger.log(Logger::DEBUG, "SIHFDataSource::parseStatsResponse(): Received the following raw data:");
     logger.log(Logger::DEBUG, rawdata);
+#endif
 
     // The API is inconsitent: Apparently, if a game hasn't started, they
     // automatically include the callback function so we have to strip that
@@ -227,9 +230,11 @@ void SIHFDataSource::parseGameDetails(void) {
         rawdata.remove(0, callbackString.length());
         rawdata.chop(2);
 
-        logger.log(Logger::DEBUG, "SIFHDataSource::parseStatsResponse(): Removed callback string:");
-        logger.log(Logger::DEBUG, rawdata);
     }
+
+    QString dumpfile("dump-details-" + QDateTime::currentDateTime().toString("yyyy-MM-ddTHHmmss") + ".json");
+    logger.log(Logger::DEBUG, "SIFHDataSource::parseGameDetails(): Dumping details data in " + dumpfile + ".");
+    logger.dump(dumpfile, rawdata);
 
     // Convert from JSON to a map, then parse the game details
     QVariantMap parsedRawdata = this->decoder->decode(rawdata);

@@ -49,6 +49,7 @@ class Logger {
         void close();
         void setLevel(int);
         void log(int, QString);
+        void dump(QString, QString);
 
     private:
         Logger() {};
