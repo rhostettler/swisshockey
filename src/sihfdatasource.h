@@ -1,3 +1,22 @@
+/*
+ * Copyright 2014-2017 Roland Hostettler
+ *
+ * This file is part of swisshockey.
+ *
+ * swisshockey is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option)
+ * any later version.
+ *
+ * swisshockey is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * swisshockey. If not, see http://www.gnu.org/licenses/.
+ */
+
 #ifndef SIHFDATASOURCE_H
 #define SIHFDATASOURCE_H
 
@@ -8,35 +27,51 @@
 
 #include "datasource.h"
 #include "gamedaydata.h"
-
 #include "jsondecoder.h"
+#include "league.h"
+#include "player.h"
 
 class SIHFDataSource : public DataSource {
     Q_OBJECT
 
     private:
         QNetworkAccessManager *nam;
-        QNetworkReply *totomatReply;  // TODO: Rename
-        QNetworkReply *statsReply;    // TODO: Rename
+        QNetworkReply *summariesReply;
+        QNetworkReply *detailsReply;
         JsonDecoder *decoder;
-        QString gameId;               // TODO: Hmmm?
+        QString gameId; // TODO: Should this be here?
 
-        QVariantMap parseGameSummary(QVariantList indata);
+        // Private helper functions
+        QVariantMap parseGame(QVariantList indata);
+        QList<Player *> parsePlayers(QVariantList data);
+        QList<GameEvent *> parseGoals(QVariantList data);
+        QList<GameEvent *> parsePenalties(QVariantList data);
+        QList<GameEvent *> parseGoalkeepers(QVariantList data);
+        QList<GameEvent *> parseShootout(QVariantList data);
+
+        static QMap<uint, League *> mLeaguesMap;
+
+        static const QString SCORES_URL;
+        static const QString DETAILS_URL;
 
     public:
         explicit SIHFDataSource(QObject *parent = 0);
         void update(QString id);
         void setGameId(QString gameId);
-        void queryScores(void);
-        void queryStats(QString gameId);            // TODO: Rename
+        void getGameSummaries(void);
+        void getGameDetails(QString gameId);
+
+        // League stuff
+        void getLeagues(QList<QObject *> *leagueList);
+        QString getLeagueId(QString abbreviation);
+        static const QMap<uint, League *> initLeagueList(void);
 
     signals:
 
     public slots:
-        void parseScoresResponse();
-        void parseStatsResponse();
+        void parseGameSummaries();
+        void parseGameDetails();
         void handleNetworkError(QNetworkReply::NetworkError error);
-        //void update();
 };
 
 #endif // SIHFDATASOURCE_H

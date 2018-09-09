@@ -17,30 +17,22 @@
  * swisshockey. If not, see http://www.gnu.org/licenses/.
  */
 
-#include "jsondecoder.h"
+#include "league.h"
 
-JsonDecoder::JsonDecoder(QObject *parent) : QObject(parent) {
+League::League(uint id, QString abbreviation, QString name, QObject *parent) : QObject(parent) {
+    mId = id;
+    mAbbreviation = abbreviation;
+    mName = name;
 }
 
-#ifdef PLATFORM_SFOS
-QMap<QString, QVariant> JsonDecoder::decode(QByteArray json) {
-    QMap<QString, QVariant> map;
-    QJsonDocument document = QJsonDocument::fromJson(json);
-
-    if(document.isObject()) {
-        map = document.object().toVariantMap();
-    } else if(document.isArray()) {
-        //map = document.array().to
-    }
-
-    return map;
+QString League::getId(void) {
+    return QString::number(mId);
 }
 
-#else
-QMap<QString, QVariant> JsonDecoder::decode(QByteArray json) {
-    Json decoder;
-    QString jsonStr = json.data();
-
-    return decoder.decode(jsonStr);
+QString League::getAbbreviation(void) {
+    return mAbbreviation;
 }
-#endif
+
+QString League::getName(void) {
+    return mName;
+}

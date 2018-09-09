@@ -1,16 +1,31 @@
+/*
+ * Copyright 2014-2017 Roland Hostettler
+ *
+ * This file is part of swisshockey.
+ *
+ * swisshockey is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option)
+ * any later version.
+ *
+ * swisshockey is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * swisshockey. If not, see http://www.gnu.org/licenses/.
+ */
+
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+
+import "utils.js" as Utils
 
 Page {
     SilicaListView {
         id: gameEvents
         width: parent.width
-/*        anchors {
-            top: gameSummary.bottom
-            left: parent.left
-            //right: parent.right
-            bottom: parent.bottom
-        }*/
         anchors.fill: parent
         model: gameEventsData
 
@@ -87,6 +102,7 @@ Page {
                 width: 96
                 fillMode: Image.PreserveAspectFit
                 source: "../../icons/" + gameDetailsData.hometeamId + ".png"
+                onStatusChanged: Utils.checkIcon(detailsHomeLogo, gameDetailsData.hometeamId)
             }
 
             // Awayteam logo: to the right
@@ -103,6 +119,7 @@ Page {
                 width: 96
                 fillMode: Image.PreserveAspectFit
                 source: "../../icons/" + gameDetailsData.awayteamId + ".png"
+                onStatusChanged: Utils.checkIcon(detailsAwayLogo, gameDetailsData.awayteamId)
             }
         }
 
@@ -119,8 +136,6 @@ Page {
                     left: parent.left
                     bottom: parent.verticalCenter
                     leftMargin: Theme.horizontalPageMargin
-                    //leftMargin: 10
-                    //horizontalCenter: parent.Center
                 }
                 font {
                     family: Theme.fontFamilyHeading
@@ -134,7 +149,6 @@ Page {
             Label {
                 id: player
                 anchors {
-                    //horizontalCenter: parent.left
                     left: time.right
                     bottom: parent.verticalCenter
                 }
@@ -163,9 +177,6 @@ Page {
             // Label containing the score or the penalty
             Label {
                 id: eventText
-                //width: 96    //////// TODO
-                //height: parent.height
-                //verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.Right
                 anchors {
                     right: parent.right
@@ -182,22 +193,21 @@ Page {
             }
 
             // Additional text under the score/penalty
-/*            Label {
+            Label {
                 id: eventSubtext
-                width: 96
                 horizontalAlignment: Text.Center
                 anchors {
                     horizontalCenter: eventText.horizontalCenter
+                    rightMargin: Theme.horizontalPageMargin
                     top: parent.verticalCenter
                 }
 
                 font {
-                    family: "Nokia Pure Light"
-                    pointSize: 18
+                    pixelSize: Theme.fontSizeMedium
                 }
-
+                color: Theme.secondaryColor
                 text: eventsubtext
-            }*/
+            }
         }
 
         VerticalScrollDecorator {}

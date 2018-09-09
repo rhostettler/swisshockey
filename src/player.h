@@ -17,30 +17,29 @@
  * swisshockey. If not, see http://www.gnu.org/licenses/.
  */
 
-#include "jsondecoder.h"
+#ifndef PLAYER_H
+#define PLAYER_H
 
-JsonDecoder::JsonDecoder(QObject *parent) : QObject(parent) {
-}
+#include <QObject>
 
-#ifdef PLATFORM_SFOS
-QMap<QString, QVariant> JsonDecoder::decode(QByteArray json) {
-    QMap<QString, QVariant> map;
-    QJsonDocument document = QJsonDocument::fromJson(json);
+class Player : public QObject {
+    Q_OBJECT
 
-    if(document.isObject()) {
-        map = document.object().toVariantMap();
-    } else if(document.isArray()) {
-        //map = document.array().to
-    }
+    private:
+        qulonglong mTeamId;
+        quint32 mId;
+        QString mFirstName;
+        QString mLastName;
 
-    return map;
-}
+    public:
+        explicit Player(quint32 id, QString firstName, QString lastName, qulonglong teamId, QObject *parent = 0);
 
-#else
-QMap<QString, QVariant> JsonDecoder::decode(QByteArray json) {
-    Json decoder;
-    QString jsonStr = json.data();
+        quint32 getId();
+        QString getName();
 
-    return decoder.decode(jsonStr);
-}
-#endif
+    signals:
+
+    public slots:
+};
+
+#endif // PLAYER_H

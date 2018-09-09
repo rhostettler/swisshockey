@@ -1,3 +1,22 @@
+/*
+ * Copyright 2014-2017 Roland Hostettler
+ *
+ * This file is part of swisshockey.
+ *
+ * swisshockey is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option)
+ * any later version.
+ *
+ * swisshockey is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * swisshockey. If not, see http://www.gnu.org/licenses/.
+ */
+
 #ifndef LIVESCORES_H
 #define LIVESCORES_H
 
@@ -8,7 +27,6 @@
 #include <QSortFilterProxyModel>
 
 #ifdef PLATFORM_SFOS
-// here we'll add the sailfishapp thing
     #include <QQuickView>
     #include <sailfishapp.h>
 #else
@@ -24,17 +42,17 @@ class LiveScores : public QObject {
 
     private:
 #ifdef PLATFORM_SFOS
-        QQuickView *viewer;
+        QQuickView *mQmlViewer;
 #else
         Notifier *notifier;
-        QmlApplicationViewer *viewer;
+        QmlApplicationViewer *mQmlViewer;
 #endif
-        GamedayData *dataStore;
-        QSortFilterProxyModel *filter;
-        GameData *current;
-        SIHFDataSource *dataSource;
-        QTimer *timer;
-        QString currentId;
+        GamedayData *mDataStore;
+        QSortFilterProxyModel *mLeagueFilter;
+        SIHFDataSource *mDataSource;
+        QTimer *mUpdateTimer;
+        QString mSelectedGameId;
+        QList<QObject *> mLeaguesList;
 
     public:
         explicit LiveScores(QObject *parent = 0);
@@ -46,7 +64,7 @@ class LiveScores : public QObject {
     public slots:
         void updateData();
         void updateView(QString view);
-        void updateLeague(QString league);
+        void updateLeague(QString leagueId);
 };
 
 #endif // LIVESCORES_H
