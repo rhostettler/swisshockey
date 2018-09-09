@@ -90,8 +90,6 @@ void GameData::updateSummary(QVariantMap data) {
     }
 }
 
-// TODO: Event handling is OK now, players not yet.
-// TODO: These should be split into two slots: updateEvents, updatePlayers and the data source should have two signals.
 void GameData::updateEvents(QList<GameEvent *> events) {
     Logger& logger = Logger::getInstance();
     logger.log(Logger::DEBUG, "GameData::updateEvents(): Updating game events.");
