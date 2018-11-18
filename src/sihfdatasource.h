@@ -54,6 +54,21 @@ class SIHFDataSource : public DataSource {
         static const QString SCORES_URL;
         static const QString DETAILS_URL;
 
+        enum GAME_SUMMARY_FIELDS {
+            GS_LEAGUE_NAME = 0,
+            GS_TIME,
+            GS_HOMETEAM,
+            GS_AWAYTEAM,
+            GS_PHASE,
+            GS_TOTALSCORE,
+            GS_PERIODSSCORE,
+            GS_OTINDICATOR,
+            GS_META,
+            GS_DETAILS,
+            GS_BROADCASTS,
+            GS_LENGTH
+        };
+
     public:
         explicit SIHFDataSource(QObject *parent = 0);
         void update(QString id);

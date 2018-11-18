@@ -102,7 +102,8 @@ Page {
                 width: 96
                 fillMode: Image.PreserveAspectFit
                 source: "../../icons/" + gameDetailsData.hometeamId + ".png"
-                onStatusChanged: Utils.checkIcon(detailsHomeLogo, gameDetailsData.hometeamId)
+                //onSourceChanged: Utils.checkIcon(detailsHomeLogo, gameDetailsData.hometeamId)
+                //onStatusChanged: Utils.checkIcon(detailsHomeLogo, gameDetailsData.hometeamId)
             }
 
             // Awayteam logo: to the right
@@ -119,7 +120,8 @@ Page {
                 width: 96
                 fillMode: Image.PreserveAspectFit
                 source: "../../icons/" + gameDetailsData.awayteamId + ".png"
-                onStatusChanged: Utils.checkIcon(detailsAwayLogo, gameDetailsData.awayteamId)
+                //onSourceChanged: Utils.checkIcon(detailsAwayLogo, gameDetailsData.awayteamId)
+                //onStatusChanged: Utils.checkIcon(detailsAwayLogo, gameDetailsData.awayteamId)
             }
         }
 
