@@ -51,7 +51,7 @@ void SIHFDataSource::getGameSummaries(void) {
 
     // Log the request
     Logger& logger = Logger::getInstance();
-    logger.log(Logger::INFO, "SIHFDataSource::queryScores(): Query sent to server.");
+    logger.log(Logger::INFO, QString(Q_FUNC_INFO).append(": Query sent to server."));
 }
 
 // Parse the response from the HTTP Request

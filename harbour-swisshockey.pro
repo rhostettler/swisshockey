@@ -5,8 +5,11 @@ TARGET = harbour-swisshockey
 # the harmattan files)
 CONFIG += sailfishapp_no_deploy_qml
 CONFIG += sailfishapp
-PKGCONFIG += mlite5
 QT += core network
+QT += dbus
+PKGCONFIG += mlite5
+PKGCONFIG += nemonotifications-qt5
+
 
 # QML files & icons
 qml.files = qml/sailfishos
@@ -17,6 +20,9 @@ INSTALLS += qml app_icons
 
 # Define the platform for platform-specific code
 DEFINES += "PLATFORM_SFOS"
+
+#DEFINES += APP_VERSION=\$${VERSION}\\
+DEFINES += "APP_NAME='\"Swiss Ice Hockey\"'"
 
 SOURCES += \
     src/main.cpp \
@@ -30,7 +36,8 @@ SOURCES += \
     src/sihfdatasource.cpp \
     src/jsondecoder.cpp \
     src/league.cpp \
-    src/player.cpp
+    src/player.cpp \
+    src/notifier.cpp
 
 # Add QML files to Qt Creator
 OTHER_FILES += qml/sailfishos/harbour-swisshockey.qml \
@@ -69,4 +76,5 @@ HEADERS += \
     src/sihfdatasource.h \
     src/jsondecoder.h \
     src/league.h \
-    src/player.h
+    src/player.h \
+    src/notifier.h

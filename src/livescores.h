@@ -25,28 +25,23 @@
 #include <QTimer>
 #include <QEvent>
 #include <QSortFilterProxyModel>
-
-#ifdef PLATFORM_SFOS
-    #include <QQuickView>
-    #include <sailfishapp.h>
-#else
-    #include "qmlapplicationviewer.h"
-    #include "notifier.h"
-#endif // PLATFORM_SFOS
+#include <QQuickView>
+#include <sailfishapp.h>
 
 #include "sihfdatasource.h"
 #include "gamedaydata.h"
+#include "notifier.h"
 
 class LiveScores : public QObject {
     Q_OBJECT
+    Q_PROPERTY(QString appVersion READ getAppVersion)
+    Q_PROPERTY(QString appName READ getAppName)
 
     private:
-#ifdef PLATFORM_SFOS
+        QString mAppName;
+        QString mAppVersion;
         QQuickView *mQmlViewer;
-#else
-        Notifier *notifier;
-        QmlApplicationViewer *mQmlViewer;
-#endif
+        Notifier *mNotifier;
         GamedayData *mDataStore;
         QSortFilterProxyModel *mLeagueFilter;
         SIHFDataSource *mDataSource;
@@ -56,6 +51,8 @@ class LiveScores : public QObject {
 
     public:
         explicit LiveScores(QObject *parent = 0);
+        QString getAppName() const;
+        QString getAppVersion() const;
         bool eventFilter(QObject *, QEvent *);
         ~LiveScores(void);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 Roland Hostettler
+ * Copyright 2014-2018 Roland Hostettler
  *
  * This file is part of swisshockey.
  *
@@ -39,6 +39,10 @@ Page {
         id: leagueSelectionDialog
     }
 
+    PreferencesDialog {
+        id: preferencesDialog
+    }
+
 /*    // A spinning busy indicator shown while the data is loading upon
     // application start
     BusyIndicator {
@@ -66,84 +70,8 @@ Page {
         model: listData
         anchors.fill: parent
 
-        delegate: ListItem {
+        delegate: GameOverviewDelegate {
             id: gameDelegate
-            width: gameList.width
-            contentHeight: Theme.itemSizeExtraLarge
-
-            onClicked: {
-                appWindow.viewChanged(gameid);
-                pageStack.push(detailsPage);
-            }
-
-            // Label containing the total score
-            Label {
-                id: totalScore
-                anchors {
-                    horizontalCenter: parent.horizontalCenter
-                    bottom: periodsScore.top
-                }
-                font {
-                    family: Theme.fontFamilyHeading
-                    pixelSize: Theme.fontSizeMedium
-                }
-                color: gameDelegate.highlighted ? Theme.highlightColor : Theme.primaryColor
-                text: totalscore
-            }
-
-            // Label containing the per-period score
-            Label {
-                id: periodsScore
-                anchors {
-                    horizontalCenter: parent.horizontalCenter
-                    verticalCenter: homeLogo.verticalCenter
-                }
-                font.pixelSize: Theme.fontSizeSmall
-                color: gameDelegate.highlighted ? Theme.secondaryHighlightColor : Theme.secondaryColor
-                text: "(" + periodsscore + ")"
-            }
-
-            // Label indicating the status of the game
-            Label {
-                id: gameStatus
-                anchors {
-                    horizontalCenter: parent.horizontalCenter
-                    top: periodsScore.bottom
-                }
-                font.pixelSize: Theme.fontSizeSmall
-                color: gameDelegate.highlighted ? Theme.secondaryHighlightColor : Theme.secondaryColor
-                text: gamestatus
-            }
-
-            // Hometeam logo: to the left
-            Image {
-                id: homeLogo
-                anchors {
-                    verticalCenter: parent.verticalCenter
-                    left: parent.left
-                    leftMargin: Theme.horizontalPageMargin
-                }
-                height: 96
-                width: 96
-                fillMode: Image.PreserveAspectFit
-                source: "../../icons/" + hometeamId + ".png"
-                onStatusChanged: Utils.checkIcon(homeLogo, hometeamId)
-            }
-
-            // Awayteam logo: to the right
-            Image {
-                id: awayLogo
-                anchors {
-                    verticalCenter: parent.verticalCenter
-                    right: parent.right
-                    rightMargin: Theme.horizontalPageMargin
-                }
-                height: 96
-                width: 96
-                fillMode: Image.PreserveAspectFit
-                source: "../../icons/" + awayteamId + ".png"
-                onStatusChanged: Utils.checkIcon(awayLogo, awayteamId)
-            }
         }
 
         VerticalScrollDecorator{}
@@ -152,15 +80,19 @@ Page {
             id: pulleyMenu
             property string leagueName: "All"
 
+            /*
+            MenuItem {
+                text: qsTr("Preferences")
+                onClicked: pageStack.push(preferencesDialog)
+            }*/
+
             MenuItem {
                 text: qsTr("Update")
                 onClicked: appWindow.updateTriggered()
             }
             MenuItem {
                 text: qsTr("League: ") + leagueName
-                onClicked: {
-                    pageStack.push(leagueSelectionDialog)
-                }
+                onClicked: pageStack.push(leagueSelectionDialog)
             }
         }
     }

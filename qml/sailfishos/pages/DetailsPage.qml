@@ -125,93 +125,9 @@ Page {
             }
         }
 
-        delegate: Item{
-            width: gameEvents.width
-            height: Theme.itemSizeLarge
-
-            // The time to the very left
-            Label {
-                id: time
-                width: 96
-                //x: Theme.horizontalPageMargin
-                anchors {
-                    left: parent.left
-                    bottom: parent.verticalCenter
-                    leftMargin: Theme.horizontalPageMargin
-                }
-                font {
-                    family: Theme.fontFamilyHeading
-                    pixelSize: Theme.fontSizeMedium
-                }
-                color: Theme.highlightColor
-                text: eventtime
-            }
-
-            // Label containing the player
-            Label {
-                id: player
-                anchors {
-                    left: time.right
-                    bottom: parent.verticalCenter
-                }
-                font {
-                    family: Theme.fontFamilyHeading
-                    pixelSize: Theme.fontSizeMedium
-                }
-                color: Theme.highlightColor
-                text: eventplayer
-            }
-
-            // Label containing the assist or penalty type
-            Label {
-                id: additionalInfo
-                anchors {
-                    left: time.right
-                    top: parent.verticalCenter
-                }
-                font {
-                    pixelSize: Theme.fontSizeMedium
-                }
-                color: Theme.secondaryColor
-                text: eventinfo
-            }
-
-            // Label containing the score or the penalty
-            Label {
-                id: eventText
-                horizontalAlignment: Text.Right
-                anchors {
-                    right: parent.right
-                    rightMargin: Theme.horizontalPageMargin
-                    bottom: parent.verticalCenter
-                    //verticalCenter: parent.verticalCenter
-                }
-                font {
-                    family: Theme.fontFamilyHeading
-                    pixelSize: Theme.fontSizeMedium
-                }
-                color: Theme.highlightColor
-                text: eventtext
-            }
-
-            // Additional text under the score/penalty
-            Label {
-                id: eventSubtext
-                horizontalAlignment: Text.Center
-                anchors {
-                    horizontalCenter: eventText.horizontalCenter
-                    rightMargin: Theme.horizontalPageMargin
-                    top: parent.verticalCenter
-                }
-
-                font {
-                    pixelSize: Theme.fontSizeMedium
-                }
-                color: Theme.secondaryColor
-                text: eventsubtext
-            }
+        delegate: GameDetailsDelegate {
+            id: gameDetailsDelegate
         }
-
         VerticalScrollDecorator {}
     }
 }

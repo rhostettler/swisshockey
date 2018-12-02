@@ -19,17 +19,12 @@
 
 #include "livescores.h"
 
-#ifdef PLATFORM_SFOS
-    #include <QQmlContext>
-    #include <QQuickItem>
-#else
-    #include <QDeclarativeView>
-    #include <QDeclarativeContext>
-    #include <QGraphicsObject>
-#endif
+#include <QQmlContext>
+#include <QQuickItem>
 
 #include "logger.h"
 #include "config.h"
+#include "notifier.h"
 
 // SailfishApp::main() will display "qml/template.qml", if you need more
 // control over initialization, you can use:
@@ -40,6 +35,9 @@
 //
 // To display the view, call "show()" (will show fullscreen on device).
 LiveScores::LiveScores(QObject *parent) : QObject(parent) {
+    //mAppVersion.append(APP_VERSION);
+    mAppName.append(APP_NAME);
+
     // Create the data store and setup the data provider
     mDataStore = new GamedayData(this);
     mDataSource = new SIHFDataSource(this);
@@ -56,25 +54,14 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
 
     // Create the notifier, disabled by default (enabled automatically when the
     // app is brought to the background)
-    // TODO: Enable on SFOS
-#ifdef PLATFORM_SFOS
-    // Not yet implemented for SFOS
-#else
-    this->notifier = new Notifier(dataStore);
-    this->notifier->disableNotifications();
-#endif
+    // TODO: Consider having on-screen notification banner when in foreground
+    mNotifier = new Notifier(mDataStore, this);
+//    mNotifier->disableNotifications();
 
     // Load and show the QML
-#ifdef PLATFORM_SFOS
     mQmlViewer = SailfishApp::createView();
     mQmlViewer->setSource(SailfishApp::pathTo("sailfishos/harbour-swisshockey.qml"));
     mQmlViewer->show();
-#else
-    mQmlViewer = new QmlApplicationViewer();
-    mQmlViewer->setOrientation(QmlApplicationViewer::ScreenOrientationAuto);
-    mQmlViewer->setMainQmlFile(QLatin1String("harmattan/main.qml"));
-    mQmliewer->showExpanded();
-#endif
 
     // Get the leagues
     mDataSource->getLeagues(&mLeaguesList);
@@ -93,7 +80,7 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
     QObject *overviewPage = rootObject->findChild<QObject*>("overviewPage");
     if(overviewPage == 0) {
         Logger& logger = Logger::getInstance();
-        logger.log(Logger::DEBUG, "LiveScores::LiveScores(): Couldn't find the 'overviewPage' QML object, updates in progress will not be shown.");
+        logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append("LiveScores::LiveScores(): Couldn't find the 'overviewPage' QML object, updates in progress will not be shown."));
     } else {
         connect(mDataSource, SIGNAL(updateStarted()), overviewPage, SLOT(startUpdateIndicator()));
         connect(mDataSource, SIGNAL(updateFinished()), overviewPage, SLOT(stopUpdateIndicator()));
@@ -105,8 +92,9 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
 
     // Create a timer that periodically fires to update the data, defaults to 5 mins
     Config& config = Config::getInstance();
-    int updateInterval = config.getValue("updateInterval", 2).toInt();
+    int updateInterval = config.getValue("updateInterval", 0.5).toInt();
     mUpdateTimer = new QTimer(this);
+    mUpdateTimer->setTimerType(Qt::PreciseTimer);
     mUpdateTimer->setSingleShot(false);
     connect(mUpdateTimer, SIGNAL(timeout()), this, SLOT(updateData()));
     mUpdateTimer->start(updateInterval*60*1000);
@@ -118,12 +106,23 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
 #endif
 }
 
+// App name
+QString LiveScores::getAppName() const {
+    return mAppName;
+}
+
+// App version
+QString LiveScores::getAppVersion() const {
+    return mAppVersion;
+}
+
 // Called when the user switches from the summaries to the details view
 // TODO: Maybe we should trigger a busy indicator here too?
 void LiveScores::updateView(QString id) {
-    GameData *game = mDataStore->getGame(id);
     mSelectedGameId = id;
+    mNotifier->setGameId(id);
 
+    GameData *game = mDataStore->getGame(id);
     if(game != NULL) {
         // Set the game id in the totomat & force update
         connect(mDataSource, SIGNAL(eventsUpdated(QList<GameEvent *>)), game, SLOT(updateEvents(QList<GameEvent *>)));
@@ -131,11 +130,7 @@ void LiveScores::updateView(QString id) {
         mDataSource->getGameDetails(id);
 
         // Set the details data models
-#ifdef PLATFORM_SFOS
         QQmlContext *context = mQmlViewer->rootContext();
-#else
-        QDeclarativeContext *context = viewer->rootContext();
-#endif
         context->setContextProperty("gameDetailsData", game);
         context->setContextProperty("gameEventsData", game);
         // TODO: Set home & away team rosters here
@@ -190,7 +185,5 @@ void LiveScores::updateData() {
 LiveScores::~LiveScores(void) {
     // Remove the ones that are not deleted automagically
     delete mQmlViewer;
-#ifndef PLATFORM_SFOS
-    delete notifier;
-#endif
+    delete mNotifier;
 }

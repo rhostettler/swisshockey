@@ -61,9 +61,6 @@ GameData::GameData(QVariantMap data, QObject *parent) : QAbstractListModel(paren
     mDataRoleNames[AdditionalInfoRole] = "eventinfo";
     mDataRoleNames[EventRole] = "eventtext";
     mDataRoleNames[EventSubtextRole] = "eventsubtext";
-#ifndef PLATFORM_SFOS
-    setRoleNames(this->roles);
-#endif
 }
 
 // Update the game score/summary
@@ -78,7 +75,7 @@ void GameData::updateSummary(QVariantMap data) {
         mScore["overtime"] =  newScore.value("overtime", "-:-").toString();
     }
     mScore["total"] = newScore["total"].toString();
-    if(mScore != oldScore) {
+    if(mScore != oldScore && oldScore["total"] != "-:-") {
         emit scoreChanged();
     }
 
@@ -92,7 +89,7 @@ void GameData::updateSummary(QVariantMap data) {
 
 void GameData::updateEvents(QList<GameEvent *> events) {
     Logger& logger = Logger::getInstance();
-    logger.log(Logger::DEBUG, "GameData::updateEvents(): Updating game events.");
+    logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Updating game events."));
 
     // Clear all events
     beginResetModel();
@@ -108,17 +105,18 @@ void GameData::updateEvents(QList<GameEvent *> events) {
     }
 
     // Sort the events
+    // TODO: Consider sorting upside down when the game is in progress and increasing when the game is finished
     layoutAboutToBeChanged();
     qSort(mGameEvents.begin(), mGameEvents.end(), GameEvent::greaterThan);
     layoutChanged();
-    logger.log(Logger::DEBUG, "GameData::updateEvents(): Added " + QString::number(mGameEvents.size()) + " events.");
+    logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Added " + QString::number(mGameEvents.size()) + " events."));
 }
 
 // Parses the player list and adds them to the local list of players where we
 // have a player license <=> player name map
 void GameData::updateRosters(QList<Player *> players) {
     Logger& logger = Logger::getInstance();
-    logger.log(Logger::DEBUG, "GameData:updateRosters(): Updating rosters.");
+    logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Updating rosters."));
 
     mRoster.clear();
     QListIterator<Player *> iter(players);
@@ -127,7 +125,11 @@ void GameData::updateRosters(QList<Player *> players) {
         mRoster.insert(player->getId(), player);
     }
 
-    logger.log(Logger::DEBUG, "GameData::updateRosters(): Added " + QString::number(mRoster.size()) + " players to roster.");
+    logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Added " + QString::number(mRoster.size()) + " players to roster."));
+}
+
+QString GameData::getGameId(void){
+    return mGameId;
 }
 
 QString GameData::getLeague() {
@@ -278,8 +280,6 @@ QVariant GameData::headerData(int section, Qt::Orientation orientation, int role
 }
 
 // Role names for QML
-#ifdef PLATFORM_SFOS
 QHash<int, QByteArray> GameData::roleNames() const {
     return this->mDataRoleNames;
 }
-#endif
