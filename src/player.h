@@ -17,7 +17,29 @@
  * swisshockey. If not, see http://www.gnu.org/licenses/.
  */
 
-#include "datasource.h"
+#ifndef PLAYER_H
+#define PLAYER_H
 
-DataSource::DataSource(QObject *parent) : QObject(parent) {
-}
+#include <QObject>
+
+class Player : public QObject {
+    Q_OBJECT
+
+    private:
+        qulonglong mTeamId;
+        quint32 mId;
+        QString mFirstName;
+        QString mLastName;
+
+    public:
+        explicit Player(quint32 id, QString firstName, QString lastName, qulonglong teamId, QObject *parent = 0);
+
+        quint32 getId();
+        QString getName();
+
+    signals:
+
+    public slots:
+};
+
+#endif // PLAYER_H

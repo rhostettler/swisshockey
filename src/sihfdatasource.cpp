@@ -1,8 +1,31 @@
-#include <QDateTime>
+/*
+ * Copyright 2014-2017 Roland Hostettler
+ *
+ * This file is part of swisshockey.
+ *
+ * swisshockey is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option)
+ * any later version.
+ *
+ * swisshockey is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * swisshockey. If not, see http://www.gnu.org/licenses/.
+ */
+
 #include <cmath>
 
 #include "sihfdatasource.h"
 #include "logger.h"
+#include "league.h"
+
+// TODO: I should only store the base URLs and then add the parameters dynamically. In particular, this would be helpful if the baseurl changes
+const QString SIHFDataSource::SCORES_URL = "http://data.sihf.ch/Statistic/api/cms/table?alias=today&size=today&searchQuery=1,2,8,10,11//1,2,8,81,90&filterQuery=&orderBy=gameLeague&orderByDescending=false&take=20&filterBy=League&skip=0&language=de";
+const QString SIHFDataSource::DETAILS_URL = "http://data.sihf.ch/statistic/api/cms/gameoverview?alias=gameDetail&language=de&searchQuery=";
 
 SIHFDataSource::SIHFDataSource(QObject *parent) : DataSource(parent) {
     // Create the network access objects
@@ -10,92 +33,85 @@ SIHFDataSource::SIHFDataSource(QObject *parent) : DataSource(parent) {
     this->decoder = new JsonDecoder(this);
 }
 
-// Send a query to the National League Server
-/*
-   curl 'http://data.sihf.ch/Statistic/api/cms/table?alias=today&size=today&searchQuery=1,2,8,10,11//1,2,4,5,6,7,8,9,20,47,48,49,50,81,90&filterQuery=&orderBy=gameLeague&orderByDescending=false&take=20&filterBy=League&language=de'
-   -H 'Host: data.sihf.ch' -H 'Accept-Encoding: deflate' -H 'Referer: http://www.sihf.ch/de/game-center/' -H 'Connection: keep-alive'
-*/
-void SIHFDataSource::queryScores(void) {
+// Update the game summaries
+void SIHFDataSource::getGameSummaries(void) {
     // Notify that the update is being started
     emit updateStarted();
 
-    // Request URL / Headers
-    QString url = "http://data.sihf.ch/Statistic/api/cms/table?alias=today&size=today&searchQuery=1,2,8,10,11//1,2,81,90&filterQuery=&orderBy=gameLeague&orderByDescending=false&take=20&filterBy=League&skip=0&language=de";
+    // Request URL and headers
     QNetworkRequest request;
-    request.setUrl(QUrl(url));
+    request.setUrl(QUrl(SIHFDataSource::SCORES_URL));
     request.setRawHeader("Accept-Encoding", "deflate");
     request.setRawHeader("Referer", "http://www.sihf.ch/de/game-center/");
 
     // Send the request and connect the finished() signal of the reply to parser
-    this->totomatReply = this->nam->get(request);
-    connect(this->totomatReply, SIGNAL(finished()), this, SLOT(parseScoresResponse()));
-    connect(this->totomatReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(handleNetworkError(QNetworkReply::NetworkError)));
+    this->summariesReply = this->nam->get(request);
+    connect(this->summariesReply, SIGNAL(finished()), this, SLOT(parseGameSummaries()));
+    connect(this->summariesReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(handleNetworkError(QNetworkReply::NetworkError)));
 
     // Log the request
     Logger& logger = Logger::getInstance();
-    logger.log(Logger::INFO, "SIHFDataSource::queryScores(): Query sent to server.");
+    logger.log(Logger::INFO, QString(Q_FUNC_INFO).append(": Query sent to server."));
 }
 
 // Parse the response from the HTTP Request
-void SIHFDataSource::parseScoresResponse() {
-    // Get all the raw data
-    QByteArray rawdata = this->totomatReply->readAll();
+void SIHFDataSource::parseGameSummaries() {
+    // Get the raw data
+    QByteArray rawdata = this->summariesReply->readAll();
 
     // Log the raw data for debugging
     Logger& logger = Logger::getInstance();
-    logger.log(Logger::DEBUG, "SIHFDataSource::parseScoresResponse(): Received the following raw data:");
-    logger.log(Logger::DEBUG, rawdata);
+    QString dumpfile("dump-summaries-" + QDateTime::currentDateTime().toString("yyyy-MM-ddTHHmmss") + ".json");
+    logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Dumping response data to " + dumpfile + "."));
+    logger.dump(dumpfile, rawdata);
 
     // Parse the response
     QVariantMap parsedRawdata = this->decoder->decode(rawdata);
     if(parsedRawdata.contains("data")) {
-        logger.log(Logger::DEBUG, "SIHFDataSource::parseScoresResponse(): Parsing data...");
+        logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Parsing data..."));
         QVariantList data = parsedRawdata.value("data").toList();
         QListIterator<QVariant> iter(data);
         while(iter.hasNext()) {
-            QVariantMap gamedata = this->parseGameSummary(iter.next().toList());
+            QVariantMap gamedata = this->parseGame(iter.next().toList());
 
             if(gamedata.size() > 0) {
-                // Signal that we have new data to consider
-                emit gameSummaryUpdated(gamedata);
+                emit summaryUpdated(gamedata);
             } else {
                 // NOP?
             }
         }
     } else {
-        logger.log(Logger::ERROR, "SIHFDataSource::parseScoresResponse(): No 'data' field in the response from the server.");
+        logger.log(Logger::ERROR, QString(Q_FUNC_INFO).append(": No 'data' field in the response from the server."));
     }
 
-    // Signal that we're done parsing the data.
     emit updateFinished();
 }
 
 // Parse the per-game JSON array from the response and put everything in an
 // associative array with predefined fields for internal data exchange between
 // data sources and data stores.
-QVariantMap SIHFDataSource::parseGameSummary(QVariantList indata) {
+QVariantMap SIHFDataSource::parseGame(QVariantList indata) {
     QVariantMap data;
-
     Logger& logger = Logger::getInstance();
 
-    // TODO: Move the constant (10) to the header
-    if(indata.size() == 10) {
+    // Check lenght of game summary data. Swiss league data may be one entry shorter; broadcast field may be missing
+    if(indata.size() == SIHFDataSource::GS_LENGTH || indata.size() == SIHFDataSource::GS_LENGTH-1) {
         // Extract all the fields for "easy" access
-        QString league = indata[0].toString();
-        QString time = indata[1].toString();
-        QVariantMap hometeam = indata[2].toMap();
-        QVariantMap awayteam = indata[3].toMap();
-        // 4 is 'Phase', e.g. regular season, etc.
-        QVariantMap totalScore = indata[5].toMap();
-        QVariantMap periodsScore = indata[6].toMap();
-        QString otIndicator = indata[7].toString();
-        QVariantMap meta = indata[8].toMap();
-        QVariantMap details = indata[9].toMap();
+        QString league = indata[SIHFDataSource::GS_LEAGUE_NAME].toString();
+        QString time = indata[SIHFDataSource::GS_TIME].toString();
+        QVariantMap hometeam = indata[SIHFDataSource::GS_HOMETEAM].toMap();
+        QVariantMap awayteam = indata[SIHFDataSource::GS_AWAYTEAM].toMap();
+        QVariantMap totalScore = indata[SIHFDataSource::GS_TOTALSCORE].toMap();
+        QVariantMap periodsScore = indata[SIHFDataSource::GS_PERIODSSCORE].toMap();
+        QString otIndicator = indata[SIHFDataSource::GS_OTINDICATOR].toString();
+        QVariantMap meta = indata[SIHFDataSource::GS_META].toMap();
+        QVariantMap details = indata[SIHFDataSource::GS_DETAILS].toMap();
 
         // Put everything into a QVariantMap that we'll use as the common
         // internal raw data representation
         // Add the basic game info
-        data.insert("league", league);
+        data.insert("league", SIHFDataSource::getLeagueId(league));
+        data.insert("time", time);
         data.insert("gameId", details.value("gameId"));
 
         // Add the team info
@@ -163,51 +179,45 @@ QVariantMap SIHFDataSource::parseGameSummary(QVariantList indata) {
             status = round(progress/100*6);
         }
         data.insert("status", status);
-        logger.log(Logger::DEBUG, "SIHFDataSource::parseGameSummary(): Game status calculated to be " + data.value("status").toString());
+        logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Game status calculated to be " + data.value("status").toString()));
     } else if(indata.size() == 1) {
-        logger.log(Logger::DEBUG, "SIHFDataSource::parseGameSummary(): It appears that the supplied data doesn't contain any game info (no games today?).");
+        logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": It appears that the supplied data doesn't contain any game info (no games today?)."));
     } else {
-        logger.log(Logger::ERROR, "SIHFDataSource::parseGameSummary(): Something is wrong with the game summary data, maybe a change in the data format?");
+        logger.log(Logger::ERROR, QString(Q_FUNC_INFO).append(": Something is wrong with the game summary data, maybe a change in the data format?"));
     }
 
     return data;
 }
 
 // Query the NL servers for the game stats
-/*
-    curl 'http://data.sihf.ch/statistic/api/cms/gameoverview?alias=gameDetail&searchQuery=20161105071221&language=de'
-    -H 'Accept-Encoding: deflate' -H 'Host: data.sihf.ch' -H 'Referer: http://www.sihf.ch/de/game-center/game/'
- */
-void SIHFDataSource::queryStats(QString gameId) {
-    // STATUS:
-    //  * Request should be OK
-    //  * updateStarted() signal missing
-    // Request URL / Headers
-    QString url = "http://data.sihf.ch/statistic/api/cms/gameoverview?alias=gameDetail&language=de&searchQuery=";
-    url.append(gameId);
+void SIHFDataSource::getGameDetails(QString gameId) {
+    // TODO: Uses the same signal as getGameSummaries(), might consider using its
+    emit updateStarted();
 
+    // Request URL and eaders
     QNetworkRequest request;
-    request.setUrl(QUrl(url));
+    request.setUrl(QUrl(SIHFDataSource::DETAILS_URL + gameId));
     request.setRawHeader("Accept-Encoding", "deflate");
     request.setRawHeader("Referer", "http://www.sihf.ch/de/game-center/game/");
-    request.setRawHeader("Host", "data.sihf.ch");
+    //request.setRawHeader("Host", "data.sihf.ch");
 
     // Send the request and connect the finished() signal of the reply to parser
-    this->statsReply = this->nam->get(request);
-    connect(statsReply, SIGNAL(finished()), this, SLOT(parseStatsResponse()));
-    connect(statsReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(handleNetworkError()));
+    this->detailsReply = this->nam->get(request);
+    connect(detailsReply, SIGNAL(finished()), this, SLOT(parseGameDetails()));
+    connect(detailsReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(handleNetworkError()));
 }
 
-// TODO: There's still major work to be done regarding how we should handle
-// the game events. As it is now, having three separate lists seems unpractical.
-void SIHFDataSource::parseStatsResponse(void) {
-    // Get all the raw data
-    QByteArray rawdata = this->statsReply->readAll();
+// Parse the response of a getGameDetails() request
+void SIHFDataSource::parseGameDetails(void) {
+    // Get the raw data
+    QByteArray rawdata = this->detailsReply->readAll();
 
     // Log the raw data for debugging
     Logger& logger = Logger::getInstance();
+#if 0
     logger.log(Logger::DEBUG, "SIHFDataSource::parseStatsResponse(): Received the following raw data:");
     logger.log(Logger::DEBUG, rawdata);
+#endif
 
     // The API is inconsitent: Apparently, if a game hasn't started, they
     // automatically include the callback function so we have to strip that
@@ -218,53 +228,175 @@ void SIHFDataSource::parseStatsResponse(void) {
         rawdata.remove(0, callbackString.length());
         rawdata.chop(2);
 
-        logger.log(Logger::DEBUG, "SIFHDataSource::parseStatsResponse(): Removed callback string:");
-        logger.log(Logger::DEBUG, rawdata);
     }
 
-    // Convert from JSON to a map
+    QString dumpfile("dump-details-" + QDateTime::currentDateTime().toString("yyyy-MM-ddTHHmmss") + ".json");
+    logger.log(Logger::DEBUG, "SIFHDataSource::parseGameDetails(): Dumping details data in " + dumpfile + ".");
+    logger.dump(dumpfile, rawdata);
+
+    // Convert from JSON to a map, then parse the game details
     QVariantMap parsedRawdata = this->decoder->decode(rawdata);
 
-    // Extract the game events
-    QVariantList goals;
-    QVariantList fouls;
-    QVariantList goalkeepers; // TODO: Not implemented yet.
+    // Parse all the players; this is done before parsing the events to make
+    // that the players can be found when the events are rendered in the UI
+    QList<Player *> players;
+    if(parsedRawdata.contains("players")) {
+        players.append(parsePlayers(parsedRawdata["players"].toList()));
+        emit playersUpdated(players);
+    } else {
+        logger.log(Logger::ERROR, "SIHFDataSource::parseStatsResponse(): No player data found!");
+    }
+
+    // Parse all the game events
+    QList<GameEvent *> events;
     if(parsedRawdata.contains("summary")) {
         QVariantMap summary = parsedRawdata["summary"].toMap();
         QVariantList periods = summary["periods"].toList();
         QListIterator<QVariant> iter(periods);
         while(iter.hasNext()) {
             QVariantMap period = iter.next().toMap();
-            goals.append(period["goals"].toList());
-            fouls.append(period["fouls"].toList());
+            events.append(this->parseGoals(period["goals"].toList()));
+            events.append(this->parsePenalties(period["fouls"].toList()));
+            events.append(this->parseGoalkeepers(period["goalkeepers"].toList()));
         }
-        logger.log(Logger::DEBUG, "SIHFDataSource::parseStatsResponse(): Number of goals: " + QString::number(goals.size()));
-        logger.log(Logger::DEBUG, "SIHFDataSource::parseStatsResponse(): Number of fouls: " + QString::number(fouls.size()));
+        QVariantMap shootout = summary["shootout"].toMap();
+        events.append(this->parseShootout(shootout["shoots"].toList()));
+        logger.log(Logger::DEBUG, "SIHFDataSource::parseStatsResponse(): Number of parsed events: " + QString::number(events.size()));
     } else {
         logger.log(Logger::ERROR, "SIHFDataSource::parseStatsResponse(): No game events data found!");
     }
+    emit eventsUpdated(events);
 
-    // Extract the players
-    QVariantList players;
-    if(parsedRawdata.contains("players")) {
-        players.append(parsedRawdata["players"].toList());
-    } else {
-        logger.log(Logger::ERROR, "SIHFDataSource::parseStatsResponse(): No player data found!");
+}
+
+// Parse the players
+// TODO: Parse the stats as well
+QList<Player *> SIHFDataSource::parsePlayers(QVariantList data) {
+    QList<Player *> players;
+    Logger& logger = Logger::getInstance();
+    logger.log(Logger::DEBUG, "SIHFDataSource::parsePlayers(): Parsing player data.");
+
+    QListIterator<QVariant> iterator(data);
+    while(iterator.hasNext()) {
+        QVariantMap tmp = iterator.next().toMap();
+
+        // Get basics
+        qulonglong teamId = tmp.value("teamId").toULongLong();
+        quint32 id = tmp.value("id").toUInt();
+        QString name = tmp.value("fullName").toString();
+
+        // Get name
+        int index = name.lastIndexOf(" ");
+        QString lastName = name.left(index);
+        QString firstName = name.right(name.length()-index-1);//.at(index+1);
+
+        //QString name = firstName + ". " + lastName;
+        //this->players.insert(playerId, name);
+
+        players.append(new Player(id, firstName, lastName, teamId));
     }
 
-    // If a game for the details was set, update it too
-    emit gameDetailsUpdated(goals, fouls, players);
+    logger.log(Logger::DEBUG, "SIHFDataSource::parsePlayers(): Found " + QString::number(players.size()) + " players.");
+    return players;
+}
+
+// Parses the goals data and returns an unsorted QList<GameEvent>
+QList<GameEvent *> SIHFDataSource::parseGoals(QVariantList data) {
+    QList<GameEvent *> events;
+    QListIterator<QVariant> iterator(data);
+    while(iterator.hasNext()) {
+        QVariantMap goal = iterator.next().toMap();
+        GameEvent *event = new GameEvent(GameEvent::GOAL);
+        event->setTime(goal.value("time").toString());
+        event->setTeam(goal.value("teamId").toUInt());
+
+        // Parse the goal text to extract the score and play (PP1 / EQ / etc.).
+        // The format is '**EQ,GWG** / **0:1** - <Player Names>'.
+        QString haystack = goal.value("text").toString();
+        QRegExp typeNeedle("(\\w+)");
+        typeNeedle.indexIn(haystack);
+        QString type = typeNeedle.cap(1);
+        QRegExp scoreNeedle("(\\d+:\\d+)");
+        scoreNeedle.indexIn(haystack);
+        QString score = scoreNeedle.cap(1);
+        event->setScore(score, type);
+        event->addPlayer(GameEvent::SCORER, goal.value("scorerLicenceNr").toUInt());
+        event->addPlayer(GameEvent::FIRST_ASSIST, goal.value("assist1LicenceNr").toUInt());
+        event->addPlayer(GameEvent::SECOND_ASSIST, goal.value("assist2LicenceNr").toUInt());
+        events.append(event);
+    }
+
+    return events;
+}
+
+// Parses the penalties data and returns an unsorted QList<GameEvent>
+QList<GameEvent *> SIHFDataSource::parsePenalties(QVariantList data) {
+    QList<GameEvent *> events;
+    QListIterator<QVariant> iterator(data);
+    while(iterator.hasNext()) {
+        QVariantMap penalty = iterator.next().toMap();
+        GameEvent *event = new GameEvent(GameEvent::PENALTY);
+        event->setTime(penalty.value("time").toString());
+        event->setTeam(penalty.value("teamId").toLongLong());
+        event->addPlayer(GameEvent::PENALIZED, penalty.value("playerLicenceNr").toUInt());
+        event->setPenalty(penalty.value("id").toInt(), penalty.value("minutes").toString() + "'");
+        events.append(event);
+    }
+
+    return events;
+}
+
+// Parses the GK events
+QList<GameEvent *> SIHFDataSource::parseGoalkeepers(QVariantList data) {
+    QList<GameEvent *> events;
+    QListIterator<QVariant> iterator(data);
+    while(iterator.hasNext()) {
+        QVariantMap tmp = iterator.next().toMap();
+        // Parse the action from the human readable data since it isn't provided in the data
+        // The format is '<Player Name> (ACTION)'. where ACTION is either IN or OUT
+        int type = GameEvent::GOALKEEPER_OUT;
+        QString haystack = tmp.value("text").toString();
+        QRegExp needle("\\(IN\\)");
+        if(needle.indexIn(haystack) != -1) {
+            type = GameEvent::GOALKEEPER_IN;
+        }
+        GameEvent *event = new GameEvent(type);
+        event->setTime(tmp.value("time").toString());
+        event->setTeam(tmp.value("teamId").toLongLong());
+        event->addPlayer(GameEvent::GOALKEEPER, tmp.value("playerLicenceNr").toUInt());
+        events.append(event);
+    }
+
+    return events;
+}
+
+// Parse shootout
+QList<GameEvent *> SIHFDataSource::parseShootout(QVariantList data) {
+    Logger& logger = Logger::getInstance();
+    logger.log(Logger::DEBUG, "SIHFDataSource:parseShootout(): Parsing shootout, " + QString::number(data.size()) + " shots.");
+
+    QList<GameEvent *> events;
+    QListIterator<QVariant> iterator(data);
+    while(iterator.hasNext()) {
+        QVariantMap tmp = iterator.next().toMap();
+        GameEvent *event = new GameEvent(GameEvent::PENALTY_SHOT);
+        event->setTime("65:00." + tmp["number"].toString());
+        event->setPenaltyShot(tmp["scored"].toBool());
+        //event->setTeam(); <- Team is not set here :(
+        event->addPlayer(GameEvent::SCORER, tmp["scorerLicenceNr"].toUInt());
+        event->addPlayer(GameEvent::GOALKEEPER, tmp["goalkeeperLiceneNr"].toUInt());
+        events.append(event);
+    }
+
+    return events;
 }
 
 // Update the data from this source
-// TODO: Implement so that we either can update the summaries or the details
 void SIHFDataSource::update(QString id) {
     // Query the website and update
-    this->queryScores();
-
-    // TODO: Doesn't update the stats periodically yet
+    this->getGameSummaries();
     if(id != NULL) {
-        this->queryStats(id);
+        this->getGameDetails(id);
     }
 }
 
@@ -272,4 +404,40 @@ void SIHFDataSource::update(QString id) {
 void SIHFDataSource::handleNetworkError(QNetworkReply::NetworkError error) {
     Logger& logger = Logger::getInstance();
     logger.log(Logger::ERROR, "SIHFDataSource::handleNetworkError(): Network error occured.");
+}
+
+void SIHFDataSource::getLeagues(QList<QObject *> *leagueList) {
+    // Populate the list of leagues (static for this data source)
+    QMapIterator<uint, League *> iLeague(mLeaguesMap);
+    while(iLeague.hasNext()) {
+        leagueList->append(iLeague.next().value());
+    }
+}
+
+// League list initialization and access
+QMap<uint, League *> SIHFDataSource::mLeaguesMap = initLeagueList();
+const QMap<uint, League *> SIHFDataSource::initLeagueList() {
+    QMap<uint, League *> map;
+    map.insert(0, new League(0, "All", "All"));
+    map.insert(1, new League(1, "NL", "National League"));
+    map.insert(2, new League(2, "SL", "Swiss League"));
+    map.insert(8, new League(8, "Länderspiel A", "Men's National Team")); // TODO: What's the correct key for this (i.e. "Länderspiel A")
+    map.insert(89, new League(89, "SIHC", "Cup"));
+    map.insert(90, new League(90, "CHL", "CHL"));
+    return map;
+}
+
+// Retrieves the league ID from the list of leagues
+QString SIHFDataSource::getLeagueId(QString abbreviation) {
+    bool found = false;
+    QString id = "-1";
+    QMapIterator<uint, League *> iLeague(mLeaguesMap);
+    while(iLeague.hasNext() && !found) {
+        League *league = iLeague.next().value();
+        if(abbreviation.compare(league->getAbbreviation()) == 0) {
+            id = league->getId();
+            found = true;
+        }
+    }
+    return id;
 }

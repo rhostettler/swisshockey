@@ -5,6 +5,13 @@
 # * date Author's Name <author's email> version-release
 # - Summary of changes
 
+* Sun Dec 02 2018 Roland Hostettler <r.hostettler@gmx.ch> 0.4.0-1
+- Updated data handling due to interface changes.
+- Updated artwork for 2018/2019 season.
+- Added basic notification support.
+- Minor UI changes (league filter, status indicators).
+- Major backend changes.
+
 * Tue Sep 12 2017 Roland Hostettler <r.hostettler@gmx.ch> 0.3.2-1
 - Fixed bug due to changed data format.
 - Updated branding for 2017/2018 season.

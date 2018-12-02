@@ -1,71 +1,168 @@
+/*
+ * Copyright 2014-2017 Roland Hostettler
+ *
+ * This file is part of swisshockey.
+ *
+ * swisshockey is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option)
+ * any later version.
+ *
+ * swisshockey is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * swisshockey. If not, see http://www.gnu.org/licenses/.
+ */
+
 #include "gameevent.h"
 #include "logger.h"
 
-#include <QTime>
-#include <QTextStream>
-
-GameEvent::GameEvent(QString time, QString player, QString additionalInfo,
-                     QString event, QObject *parent) : QObject(parent) {
-
-    this->time = time;
-    this->player = player;
-    this->additionalInfo = additionalInfo;
-    this->event = event;
+GameEvent::GameEvent(int type) {
+    this->type = type;
 }
 
-QString GameEvent::getTime(void) const {
+int GameEvent::getType(void) {
+    return this->type;
+}
+
+void GameEvent::setTime(QString time) {
+    QStringList split = time.split(":");
+    if(split.size() == 2) {
+        this->time = 60*split[0].toFloat() + split[1].toFloat();
+    } else {
+        this->time = 0;
+    }
+}
+
+float GameEvent::getTime(void) const {
     return this->time;
 }
 
-QString GameEvent::getPlayer(void) const {
-    return this->player;
+void GameEvent::setTeam(qlonglong team) {
+    this->team = team;
 }
 
+qlonglong GameEvent::getTeam(void) {
+    return this->team;
+}
+
+void GameEvent::addPlayer(int role, quint32 playerId){
+    this->players[role] = playerId;
+}
+
+void GameEvent::setScore(QString score, QString type) {
+    if(this->type == GameEvent::GOAL) {
+        this->score = score;
+        this->scoreType = type;
+    }
+}
+
+void GameEvent::setPenalty(int id, QString type) {
+    if(this->type == GameEvent::PENALTY) {
+        this->penaltyId = id;
+        this->penaltyType = type;
+    }
+}
+
+int GameEvent::getPenalty(void) {
+    return this->penaltyId;
+}
+
+void GameEvent::setPenaltyShot(bool scored) {
+    this->penaltyShot = scored;
+}
+
+quint32 GameEvent::getPlayer(void) const {
+    int role = -1;
+    switch(this->type) {
+        case GameEvent::GOAL:
+            role = GameEvent::SCORER;
+            break;
+
+        case GameEvent::PENALTY:
+            role = GameEvent::PENALIZED;
+            break;
+
+        case GameEvent::GOALKEEPER_IN:
+            role = GameEvent::GOALKEEPER;
+            break;
+
+        case GameEvent::GOALKEEPER_OUT:
+            role = GameEvent::GOALKEEPER;
+            break;
+
+        case GameEvent::PENALTY_SHOT:
+            role = GameEvent::SCORER;
+            break;
+
+        default:
+            role = -1;
+            break;
+    }
+    return this->players[role];
+}
+
+quint32 GameEvent::getPlayer(int role) const {
+    return this->players[role];
+}
+
+// TODO: These things should be done in the GameData class, really. Kept for
+// convenience for now.
 QString GameEvent::getAdditionalInfo(void) const {
-    return this->additionalInfo;
+    QString info("Temporary regression.");
+    switch(this->type) {
+        case GameEvent::GOAL:
+            break;
+        case GameEvent::PENALTY:
+            break;
+        default:
+            break;
+    }
+
+    return info;
 }
 
 QString GameEvent::getEvent(void) const {
-    return this->event;
+    QString event("");
+    switch(this->type) {
+        case GameEvent::GOAL:
+            event = this->score;
+            break;
+        case GameEvent::PENALTY:
+            event = this->penaltyType;
+            break;
+        case GameEvent::PENALTY_SHOT:
+            if(this->penaltyShot) {
+                event = "X";
+            } else {
+                event = "O";
+            }
+            break;
+        default:
+            break;
+    }
+
+    return event;
 }
 
 QString GameEvent::getEventSubtext(void) const {
-    return "";
+    QString info;
+    if(this->type == GameEvent::GOAL) {
+        info = this->scoreType;
+    }
+
+    return info;
 }
 
-// Compares two events e1 and e2
+// Compares if e1 > e2
 bool GameEvent::greaterThan(const GameEvent *e1, const GameEvent *e2) {
-    bool less = false;
-
-    QString t1 = e1->getTime();
-    if(!QString::compare(t1.at(0), "6")) {
-        t1.replace(0, 1, "0");
-        t1.prepend("1:");
-    } else {
-        t1.prepend("0:");
-    }
-
-    QString t2 = e2->getTime();
-    if(!QString::compare(t2.at(0), "6")) {
-        t2.replace(0, 1, "0");
-        t2.prepend("1:");
-    } else {
-        t2.prepend("0:");
-    }
-
-    // Calculate the time difference between the two events
-    QTime time1 = QTime::fromString(t1, "h:mm:ss");
-    QTime time2 = QTime::fromString(t2, "h:mm:ss");
-    int deltaTime = time1.secsTo(time2);
-
-    // Positive delta => time2-time1 > 0 => time1 < time2
-    if(deltaTime >= 0) {
-        less = true;
-    } else {
-        less = false;
-    }
-
-    return !less;
+    float t1 = e1->getTime();
+    float t2 = e2->getTime();
+    bool greater = (t1 - t2) > 0;
+    return greater;
 }
 
 QList<QString> GameEvent::penaltyTexts = QList<QString>()

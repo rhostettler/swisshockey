@@ -3,13 +3,14 @@ TARGET = harbour-swisshockey
 
 # Disable qml b/c we don't want to ship the whole qml directory (i.e. exclude
 # the harmattan files)
-CONFIG += sailfishapp_no_deploy_qml
+#CONFIG += sailfishapp_no_deploy_qml
 CONFIG += sailfishapp
-PKGCONFIG += mlite5
-QT += core network
+QT += core network dbus
+PKGCONFIG += mlite5 nemonotifications-qt5
+
 
 # QML files & icons
-qml.files = qml/sailfishos
+qml.files = qml
 qml.path = /usr/share/$${TARGET}
 app_icons.files = qml/icons
 app_icons.path = /usr/share/$${TARGET}
@@ -17,6 +18,9 @@ INSTALLS += qml app_icons
 
 # Define the platform for platform-specific code
 DEFINES += "PLATFORM_SFOS"
+
+#DEFINES += APP_VERSION=\$${VERSION}\\
+DEFINES += "APP_NAME='\"Swiss Ice Hockey\"'"
 
 SOURCES += \
     src/main.cpp \
@@ -28,14 +32,20 @@ SOURCES += \
     src/gameevent.cpp \
     src/logger.cpp \
     src/sihfdatasource.cpp \
-    src/jsondecoder.cpp
+    src/jsondecoder.cpp \
+    src/league.cpp \
+    src/player.cpp \
+    src/notifier.cpp
 
 # Add QML files to Qt Creator
-OTHER_FILES += qml/sailfishos/harbour-swisshockey.qml \
-    qml/sailfishos/cover/CoverPage.qml \
-    qml/sailfishos/pages/OverviewPage.qml \
-    qml/sailfishos/pages/LeagueSelectionDialog.qml \
-    qml/sailfishos/pages/DetailsPage.qml
+OTHER_FILES += qml/harbour-swisshockey.qml \
+    qml/cover/CoverPage.qml \
+    qml/pages/OverviewPage.qml \
+    qml/pages/GameOverviewDelegate.qml \
+    qml/pages/LeagueSelectionDialog.qml \
+    qml/pages/DetailsPage.qml \
+    qml/pages/GameDetailsDelegate.qml \
+    qml/pages/utils.js
 
 # Add other files to Qt Creator
 OTHER_FILES += rpm/harbour-swisshockey.changes \
@@ -64,4 +74,7 @@ HEADERS += \
     src/gameevent.h \
     src/logger.h \
     src/sihfdatasource.h \
-    src/jsondecoder.h
+    src/jsondecoder.h \
+    src/league.h \
+    src/player.h \
+    src/notifier.h

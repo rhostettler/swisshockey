@@ -1,158 +1,158 @@
+/*
+ * Copyright 2014-2018 Roland Hostettler
+ *
+ * This file is part of swisshockey.
+ *
+ * swisshockey is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option)
+ * any later version.
+ *
+ * swisshockey is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * swisshockey. If not, see http://www.gnu.org/licenses/.
+ */
+
 #include "notifier.h"
-#include <MNotification>
-//#include <gconfitem.h>
-
 #include "config.h"
+#include "gamedata.h"
+#include "logger.h"
 
-// TODO: Instead of havin a map from team-name to team abbreviation and looking
-// things up that way, I should preferrably use the team id as gconf keys and
-// check if the notifications are enabled in that way. This will make the
-// 'teams'-list unnecessary and everything much more generic.
-// TODO: In accordance with the above, I might want to write my own CP applet
-// that allows for better configuration as well as a Config signleton that can
-// be used throughout the app for easy access to the config values.
-Notifier::Notifier(GamedayData *model, QWidget *parent) : QObject(parent) {
-    // TODO: Connect to dbus and create a dbus interface like so:
-    /* DEFAULT_NAME = 'com.tgalal.meego.MNotificationManager'
-    DEFAULT_PATH = '/MNotificationManager'
-    DEFAULT_INTF = 'com.tgalal.meego.MNotificationManager'
-
-    def __init__(self,source_name, source_display_name, on_data_received=None):
-        dbus_main_loop = dbus.glib.DBusGMainLoop(set_as_default=True)
-        session_bus = dbus.SessionBus(dbus_main_loop)
-        self.userId = 0#os.geteuid();
-
-        self.local_name = '.'.join([self.DEFAULT_NAME, source_name])
-        print  self.local_name
-        bus_name = dbus.service.BusName(self.local_name, bus=session_bus)
-
-        dbus.service.Object.__init__(self,object_path=self.DEFAULT_PATH,bus_name=bus_name)
-
-
-
-        self.next_action_id = 1
-        self.actions = {}
-        self.source_name = source_name
-        self.source_display_name = source_display_name
-        self.on_data_received = on_data_received
-
-        o = session_bus.get_object(self.INTERFACE, self.PATH)
-        self.proxy = dbus.Interface(o, self.INTERFACE)
-
-        self.userId = self.proxy.notificationUserId()
-
-
-    And then we can use something like:
-@dbus.service.method(DEFAULT_INTF)
-    def ReceiveActionCallback(self, action_id):
-
-        action_id = int(action_id)
-        callable = self.actions[action_id]
-        callable()
-*/
-
-
-    // Add all the teams to the teams->GConf key map
-    // NLA
-    teams.insert("HC Ambri-Piotta", "hcap");
-    teams.insert("SC Bern", "scb");
-    teams.insert("EHC Biel", "ehcb");
-    teams.insert("HC Davos", "hcd");
-    teams.insert("Fribourg-Gottéron", "hcfg");
-    teams.insert("Genève-Servette HC", "hcgs");
-    teams.insert("Kloten Flyers", "ehck"); // TODO: Name in data needs to be verified
-    teams.insert("Lausanne HC", "lhc");
-    teams.insert("ZSC Lions", "zsc");      // TODO: Name in data needs to be verified
-    teams.insert("HC Lugano", "hcl");
-    teams.insert("SCL Tigers", "scl");
-    teams.insert("EV Zug", "evz");
-    // NLB
-    teams.insert("EHC Winterthur", "ehcw");
-    teams.insert("EHC Visp", "ehcv");
-    teams.insert("SC Langenthal", "sclangenthal");
-    teams.insert("GCK Lions", "gck");
-    teams.insert("HC Red Ice", "hcri");
-    teams.insert("EHC Olten", "ehco");
-    teams.insert("HC Ajoie", "hca");
-    teams.insert("SC Rapperswil-Jona Lakers", "scrj");
-    teams.insert("HC La Chaux-de-Fonds", "hccf");
-    teams.insert("Hockey Thurgau", "ht");
-
-    // Disable the notifier by default (assuming that we go to FG directly upon
-    // start)
-    this->enabled = false;
-
-    // Set the model and connect the observer
-    this->model = model;
-    connect(this->model, SIGNAL(dataChanged(QModelIndex, QModelIndex)), this, SLOT(dataChanged(QModelIndex, QModelIndex)));
+Notifier::Notifier(GamedayData *games, QObject *parent) : QObject(parent) {
+    mGames = games;
+    mGame = NULL;
+#if 0
+    connect(mGames, SIGNAL(dataChanged(QModelIndex, QModelIndex)), this, SLOT(dataChanged(QModelIndex, QModelIndex)));
+#endif
+    //mEnabled = false;
+    mEnabled = true;
 }
 
+// Update the game to send notifications for
+void Notifier::setGameId(QString id) {
+    if(mGame != NULL) {
+        bool status = disconnect(mGame, SIGNAL(scoreChanged()), this, SLOT(scoreChanged()));
+    }
+    if(id != NULL) {
+        mGame = mGames->getGame(id);
+        // TODO: What if getGame() doesn't return a game?
+        bool status = connect(mGame, SIGNAL(scoreChanged()), this, SLOT(scoreChanged()));
+    }
+}
+
+// Enable notifications
 void Notifier::enableNotifications(void) {
-    this->enabled = true;
+    this->mEnabled = true;
 }
 
+// Disable notifications
 void Notifier::disableNotifications(void) {
-    this->enabled = false;
+    this->mEnabled = false;
 }
 
+// Remove all notifications
 void Notifier::clearNotifications(void) {
-    // Remove all the notificationss
-    MNotification *notification;
-    QList<MNotification *> notifications = MNotification::notifications();
-    QListIterator<MNotification *> iter(notifications);
+    Notification *notification;
+    QList<QObject *> notifications = Notification::notifications();
+    QListIterator<QObject *> iter(notifications);
     while(iter.hasNext()) {
-        notification = iter.next();
-        notification->remove();
+        notification = (Notification *)iter.next();
+        notification->close();
         delete(notification);
     }
 }
 
-void Notifier::dataChanged(const QModelIndex & topLeft, const QModelIndex & bottomRight) {
-    // BUG: As of now, this will also fire a notification when the game status is updated. I need to fix that somehow.
-
-    // Get the necessary information for the notification and assemble the notification string
-    QString hometeam = this->model->data(topLeft, GamedayData::HometeamRole).toString();
-    QString awayteam = this->model->data(topLeft, GamedayData::AwayteamRole).toString();
-    QString score = this->model->data(topLeft, GamedayData::TotalScoreRole).toString();
-    QString gameId = this->model->data(topLeft, GamedayData::GameIdRole).toString();
-
-    // Check if notifications for the changed team are enabled and create/update
-    // a notification if so
-    if((this->notificationEnabled(hometeam) || this->notificationEnabled(awayteam)) && this->enabled) {
+void Notifier::sendNotification(GameData *game) {
+    if(mEnabled && mGame != NULL) {
         // Notification body
-        QString body = hometeam.append(" - ").append(awayteam).append(" ").append(score);
+        // TODO: Should use team abbreviations in summary, otherwise the text is too long
+        QString summary(mGame->getHometeam() + " - " + mGame->getAwayteam() + " " + mGame->getTotalScore());
+
+        // TODO: Implement preview. Not yet possible since scoreChanged() is triggered by the parseSummary()
+        // rather than parseEvents(). Requires some rethinking.
+#if 0
+        QString preview("XX:YY N. N. (N. N., N. N.)");
+#endif
 
         // Try to find an existing notification for the game first in order to
         // update that one
         bool found = false;
-        MNotification *notification;
-        QList<MNotification *> notifications = MNotification::notifications();
-        QListIterator<MNotification *> iter(notifications);
+        Notification *notification;
+        QList<QObject *> notifications = Notification::notifications();
+        QListIterator<QObject *> iter(notifications);
         while(iter.hasNext() && !found) {
-            notification = iter.next();
-            if(gameId.compare(notification->identifier()) == 0) {
+            notification = (Notification *)iter.next();
+            if(mGame->getGameId().toULong() == notification->replacesId()) {
+                // TODO: It appears like this branch is broken, i.e. the 'RelacesId'-part doesn't work yet
                 found = true;
-                notification->setBody(body);
-                notification->setCount(notification->count()+1);
+                notification->setPreviewSummary(summary);
+                notification->setSummary(summary);
+#if 0
+                notification->setPreviewBody(preview);
+#endif
+                notification->setHintValue("x-nemo-feedback", "chat,chat_exists"); // <- only sounds when not in lock screen
+                notification->setHintValue("x-nemo-priority", 100);
+                notification->setHintValue("x-nemo-display-on", true);
+                notification->setHintValue("x-nemo-led-disabled-without-body-and-summary", false);
+                notification->setItemCount(notification->itemCount()+1);
             }
         }
 
         // If no existing notification was found, we'll create a new one
         if(!found) {
-            notification = new MNotification("livescores.score.update", "Live Scores", body);
-            notification->setIdentifier(gameId);
+            notification = new Notification(this);
+            notification->setAppName(APP_NAME);
+            notification->setPreviewSummary(summary);
+            notification->setSummary(summary);
+#if 0
+            notification->setPreviewBody(preview);
+#endif
+            notification->setHintValue("x-nemo-feedback", "chat,chat_exists");
+            notification->setHintValue("x-nemo-priority", 100);
+            notification->setHintValue("x-nemo-display-on", true);
+            notification->setHintValue("x-nemo-led-disabled-without-body-and-summary", false);
+            notification->setReplacesId(mGame->getGameId().toULong());
         }
 
-        // Add the callback action
+        // TODO: Add the callback action
 
         // Publish / update the notification
         notification->publish();
     }
 }
 
+// Notification when the score changed
+void Notifier::scoreChanged(void) {
+    this->sendNotification(mGame);
+}
+
+// TODO: This should be removed eventually
+void Notifier::dataChanged(const QModelIndex & topLeft, const QModelIndex & bottomRight) {
+#if 0
+    // Get the necessary information for the notification and assemble the notification string
+    QString gameId = mGames->data(topLeft, GamedayData::GameIdRole).toString();
+    GameData *game = mGames->getGame(gameId);
+    this->sendNotification(game);
+#endif
+}
+
 // Check if the notification for a given team is enabled
 bool Notifier::notificationEnabled(QString team) {
+    // TODO: Re-implement this, requires config stuff (actually, remove once we have the new GamedayData structure in place)
+#if 0
     QString key = teams[team];
     Config& config = Config::getInstance();
     return config.getValue(key, false).toBool();
+#endif
+    return true;
+}
+
+// Destructor
+Notifier::~Notifier(void) {
+    // Clear all notifications when exiting
+    this->clearNotifications();
 }

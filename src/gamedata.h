@@ -1,3 +1,22 @@
+/*
+ * Copyright 2014-2017 Roland Hostettler
+ *
+ * This file is part of swisshockey.
+ *
+ * swisshockey is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option)
+ * any later version.
+ *
+ * swisshockey is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * swisshockey. If not, see http://www.gnu.org/licenses/.
+ */
+
 #ifndef GAMEDATA_H
 #define GAMEDATA_H
 
@@ -11,7 +30,7 @@
 
 #include "gamedata.h"
 #include "gameevent.h"
-
+#include "player.h"
 
 class GameData : public QAbstractListModel {
     Q_OBJECT
@@ -23,45 +42,43 @@ class GameData : public QAbstractListModel {
     Q_PROPERTY(int gameStatus READ getGameStatus NOTIFY statusChanged)
 
     private:
-        QString gameId;
-        QString league;
+        QString mGameId;
+        QString mLeagueId;
 
-        QHash<int, QByteArray> roles;
+        QHash<int, QByteArray> mDataRoleNames;
 
         // Home- and away team names & IDs
-        QString hometeam;
-        qulonglong hometeamId;
-        QString awayteam;
-        qulonglong awayteamId;
+        QString mHometeamName;
+        qulonglong mHometeamId;
+        QString mAwayteamName;
+        qulonglong mAwayteamId;
+
+        // Time
+        QString mStartTime;
 
         // Score
-        QMap<QString, QString> score;
+        QMap<QString, QString> mScore;
 
-        // List of events
-        QList<GameEvent *> events;
-
-        // List of players
-        QMap<qint32, QString> players;
+        // List of events and rosters
+        QList<GameEvent *> mGameEvents;
+        QMap<quint32, Player *> mRoster;
 
         // Status
-        int status;
-
-        // Flag that indicates whether the game has changed or not
-        bool m_scoreChanged;
-        bool m_statusChanged;
+        // TODO: There should be a (public) enum with statuses, which are rendered in the UI to plain text
+        int mGameStatus;
 
         //
-        static QStringList gameStatusTexts;
+        static QStringList mGameStatusTexts;
 
     public:
         explicit GameData(QVariantMap data, QObject *parent = 0);
         void updateSummary(QVariantMap data);
-        void updatePlayerList(QVariantList players);
         void updateGoals(QVariantList goals);
         void updateFouls(QVariantList fouls);
         bool hasChanged(void);
         bool hasChanged(QString type);
 
+        QString getGameId();
         QString getLeague();
         QString getHometeam();
         QString getHometeamId();
@@ -85,9 +102,7 @@ class GameData : public QAbstractListModel {
         int rowCount(const QModelIndex & parent = QModelIndex()) const;
         QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
         QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
-#ifdef PLATFORM_SFOS
         QHash<int, QByteArray> roleNames() const;
-#endif
 
         static QString parsePlayerName(QString name);
 
@@ -96,7 +111,8 @@ class GameData : public QAbstractListModel {
         void statusChanged(void);
 
     public slots:
-        void updateEvents(QVariantList goals, QVariantList fouls, QVariantList players);
+        void updateEvents(QList<GameEvent *> gameEvents);
+        void updateRosters(QList<Player *> players);
 };
 
 #endif // GAMEDATA_H
