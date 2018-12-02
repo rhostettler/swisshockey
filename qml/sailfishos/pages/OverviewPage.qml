@@ -24,26 +24,28 @@ import "utils.js" as Utils
 
 Page {
     property alias leagueName: pulleyMenu.leagueName
+    property bool updating: true
 
     function startUpdateIndicator() {
-//        updateIndicator.running = true;
-//        updateIndicator.visible = true;
+        updating = true
     }
 
     function stopUpdateIndicator() {
-//        updateIndicator.running = false;
-//        updateIndicator.visible = false;
+        updating = false
     }
 
     LeagueSelectionDialog {
         id: leagueSelectionDialog
     }
 
+    /*
     PreferencesDialog {
         id: preferencesDialog
     }
+    */
 
-/*    // A spinning busy indicator shown while the data is loading upon
+    /*
+    // A spinning busy indicator shown while the data is loading upon
     // application start
     BusyIndicator {
         id: updateIndicator
@@ -61,7 +63,8 @@ Page {
         running: false
         //running: gameList.count == 0
         //visible: gameList.count == 0
-    }*/
+    }
+    */
 
 //    property bool bannerStart: false
 
@@ -95,17 +98,33 @@ Page {
                 onClicked: pageStack.push(leagueSelectionDialog)
             }
         }
-    }
 
-    // TODO: This should actually be inside the ListView, but that will place it
-    // strangely so we put it here and take the error.
-    ViewPlaceholder{
-        anchors {
-            horizontalCenter: parent.horizontalCenter
-            verticalCenter: parent.verticalCenter
+        // strangely so we put it here and take the error.
+        Label {
+            anchors {
+                horizontalCenter: parent.horizontalCenter
+                bottom: parent.verticalCenter
+                bottomMargin: Theme.paddingLarge
+            }
+            //anchors.centerIn: parent
+            id: placeholder
+            font.pixelSize: Theme.fontSizeLarge
+            color: Theme.highlightColor
+            visible: gameList.count === 0
+            text: updating && gameList.count === 0 ? qsTr("Loading...") : qsTr("No games today.")
+            //hintText: qsTr("")
         }
-        enabled: gameList.count === 0
-        text: qsTr("No games today.");
-        //hintText: qsTr("")
+
+        BusyIndicator {
+            id: updateIndicator
+            size: BusyIndicatorSize.Large
+            //anchors.centerIn: parent
+            anchors {
+                horizontalCenter: parent.horizontalCenter
+                top: parent.verticalCenter
+            }
+            visible: gameList.count === 0
+            running: updating && gameList.count === 0
+         }
     }
 }
