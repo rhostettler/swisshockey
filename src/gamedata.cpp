@@ -75,7 +75,7 @@ void GameData::updateSummary(QVariantMap data) {
         mScore["overtime"] =  newScore.value("overtime", "-:-").toString();
     }
     mScore["total"] = newScore["total"].toString();
-    if(mScore != oldScore && oldScore["total"] != "-:-") {
+    if(mScore["total"] != oldScore["total"] && oldScore["total"] != "-:-") {
         emit scoreChanged();
     }
 
