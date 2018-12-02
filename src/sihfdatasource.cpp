@@ -62,13 +62,13 @@ void SIHFDataSource::parseGameSummaries() {
     // Log the raw data for debugging
     Logger& logger = Logger::getInstance();
     QString dumpfile("dump-summaries-" + QDateTime::currentDateTime().toString("yyyy-MM-ddTHHmmss") + ".json");
-    logger.log(Logger::DEBUG, "SIHFDataSource::parseGameSummaries(): Dumping response data to " + dumpfile + ".");
+    logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Dumping response data to " + dumpfile + "."));
     logger.dump(dumpfile, rawdata);
 
     // Parse the response
     QVariantMap parsedRawdata = this->decoder->decode(rawdata);
     if(parsedRawdata.contains("data")) {
-        logger.log(Logger::DEBUG, "SIHFDataSource::parseSummariesResponse(): Parsing data...");
+        logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Parsing data..."));
         QVariantList data = parsedRawdata.value("data").toList();
         QListIterator<QVariant> iter(data);
         while(iter.hasNext()) {
@@ -81,7 +81,7 @@ void SIHFDataSource::parseGameSummaries() {
             }
         }
     } else {
-        logger.log(Logger::ERROR, "SIHFDataSource::parseSummariesResponse(): No 'data' field in the response from the server.");
+        logger.log(Logger::ERROR, QString(Q_FUNC_INFO).append(": No 'data' field in the response from the server."));
     }
 
     emit updateFinished();
@@ -94,7 +94,8 @@ QVariantMap SIHFDataSource::parseGame(QVariantList indata) {
     QVariantMap data;
     Logger& logger = Logger::getInstance();
 
-    if(indata.size() == SIHFDataSource::GS_LENGTH) {
+    // Check lenght of game summary data. Swiss league data may be one entry shorter; broadcast field may be missing
+    if(indata.size() == SIHFDataSource::GS_LENGTH || indata.size() == SIHFDataSource::GS_LENGTH-1) {
         // Extract all the fields for "easy" access
         QString league = indata[SIHFDataSource::GS_LEAGUE_NAME].toString();
         QString time = indata[SIHFDataSource::GS_TIME].toString();
@@ -178,11 +179,11 @@ QVariantMap SIHFDataSource::parseGame(QVariantList indata) {
             status = round(progress/100*6);
         }
         data.insert("status", status);
-        logger.log(Logger::DEBUG, "SIHFDataSource::parseGameSummary(): Game status calculated to be " + data.value("status").toString());
+        logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Game status calculated to be " + data.value("status").toString()));
     } else if(indata.size() == 1) {
-        logger.log(Logger::DEBUG, "SIHFDataSource::parseGameSummary(): It appears that the supplied data doesn't contain any game info (no games today?).");
+        logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": It appears that the supplied data doesn't contain any game info (no games today?)."));
     } else {
-        logger.log(Logger::ERROR, "SIHFDataSource::parseGameSummary(): Something is wrong with the game summary data, maybe a change in the data format?");
+        logger.log(Logger::ERROR, QString(Q_FUNC_INFO).append(": Something is wrong with the game summary data, maybe a change in the data format?"));
     }
 
     return data;
