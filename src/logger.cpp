@@ -27,7 +27,7 @@ Logger& Logger::getInstance() {
     // upon deletion of the object
     static Logger instance;
 
-    // TODO: How can I initialize safely? (log level, fp)
+    // TODO: How can we initialize safely? (log level, fp)
 
     return instance;
 }

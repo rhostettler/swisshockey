@@ -17,11 +17,7 @@
  * swisshockey. If not, see http://www.gnu.org/licenses/.
  */
 
-#ifdef PLATFORM_SFOS
-    #include <mlite5/mgconfitem.h>
-#else
-    #include <gconfitem.h>
-#endif
+#include <mlite5/mgconfitem.h>
 
 #include "config.h"
 
@@ -35,10 +31,6 @@ Config& Config::getInstance() {
 QVariant Config::getValue(QString key, QVariant def) {
     QString gconfPath = "/apps/NLLiveScores/settings/";
     QString gconfKey = gconfPath.append(key);
-#ifdef PLATFORM_SFOS
     MGConfItem item(gconfKey);
-#else
-    GConfItem item(gconfKey);
-#endif
     return item.value(def);
 }

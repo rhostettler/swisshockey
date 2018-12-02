@@ -24,13 +24,8 @@
 #include <QString>
 #include <QVariant>
 #include <QMap>
-
-#ifdef PLATFORM_SFOS
-    #include <QJsonDocument>
-    #include <QJsonObject>
-#else
-    #include "json.h"
-#endif
+#include <QJsonDocument>
+#include <QJsonObject>
 
 // Wrapper to provide a unique decoder interface to the client
 class JsonDecoder : public QObject {

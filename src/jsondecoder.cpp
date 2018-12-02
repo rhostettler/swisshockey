@@ -22,7 +22,6 @@
 JsonDecoder::JsonDecoder(QObject *parent) : QObject(parent) {
 }
 
-#ifdef PLATFORM_SFOS
 QMap<QString, QVariant> JsonDecoder::decode(QByteArray json) {
     QMap<QString, QVariant> map;
     QJsonDocument document = QJsonDocument::fromJson(json);
@@ -35,12 +34,3 @@ QMap<QString, QVariant> JsonDecoder::decode(QByteArray json) {
 
     return map;
 }
-
-#else
-QMap<QString, QVariant> JsonDecoder::decode(QByteArray json) {
-    Json decoder;
-    QString jsonStr = json.data();
-
-    return decoder.decode(jsonStr);
-}
-#endif

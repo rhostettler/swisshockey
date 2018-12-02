@@ -151,7 +151,8 @@ void LiveScores::updateLeague(QString leagueId) {
 // Observe the focus state of the app (foreground / background) and set the
 // internal state accordingly
 bool LiveScores::eventFilter(QObject* obj, QEvent* event) {
-#ifndef PLATFORM_SFOS
+    // TODO: Re-implement this
+#if 0
     Logger& logger = Logger::getInstance();
 
     switch(event->type()) {

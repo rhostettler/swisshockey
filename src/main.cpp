@@ -28,7 +28,7 @@
 #include <QDir>
 
 // Qt Modules
-#include <QTextCodec>
+//#include <QTextCodec>
 
 // Local modules
 #include "livescores.h"
@@ -39,8 +39,8 @@ int main(int argc, char *argv[]) {
     QGuiApplication *app = SailfishApp::application(argc, argv);
     app->setApplicationName(APP_NAME);
 
-#ifndef PLATFORM_SFOS
-    // TODO: Need to fix that for SFOS
+#if 0
+    // TODO: Check if this is still needed
     // Make sure UTF-8 is used internally    
     QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
 #endif
@@ -55,8 +55,8 @@ int main(int argc, char *argv[]) {
     }
     logger.setLogfile(datapath.canonicalPath() + "/debug.log");
     //logger.setLevel(config.getValue("loglevel", Logger::ERROR).toInt());  // TODO: Re-enable
-    //logger.setLevel(Logger::DEBUG);
-    logger.setLevel(Logger::ERROR);
+    logger.setLevel(Logger::DEBUG);
+    //logger.setLevel(Logger::ERROR);
 
     // Create a controller that generates the UI and connects all the necessary
     // signals, etc.
@@ -67,7 +67,8 @@ int main(int argc, char *argv[]) {
 
     // Close the log
     logger.close();
-    delete livescores;
 
+    // Free the memory and exit
+    delete livescores;
     return exitcode;
 }

@@ -33,11 +33,9 @@ GamedayData::GamedayData(QObject *parent) : QAbstractListModel(parent) {
     this->roles[GameStatusRole] = "gamestatus";
     this->roles[GameIdRole] = "gameid";
     this->roles[LeagueRole] = "league";
-#ifndef PLATFORM_SFOS
-    setRoleNames(this->roles);
-#endif
 
     // Set the date to <empty>
+    // TODO: We should probably work with DateTime instead of strings
     this->date = QDate::currentDate().toString("yyyy-MM-dd");;
 
     // Signal mapper acts as a proxy between the GameData -> GamedayData -> outside world
