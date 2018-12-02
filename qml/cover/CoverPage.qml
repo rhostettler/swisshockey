@@ -35,7 +35,7 @@ CoverBackground {
         height: Theme.fontSizeExtraLarge
         width: Theme.fontSizeExtraLarge
         fillMode: Image.PreserveAspectFit
-        source: "../../icons/" + gameDetailsData.hometeamId + ".png"
+        source: "../icons/" + gameDetailsData.hometeamId + ".png"
         onStatusChanged: Utils.checkIcon(hometeamLogo, gameDetailsData.hometeamId)
     }
 
@@ -60,7 +60,7 @@ CoverBackground {
         height: Theme.fontSizeLarge
         width: Theme.fontSizeLarge
         fillMode: Image.PreserveAspectFit
-        source: "../../icons/" + gameDetailsData.awayteamId + ".png"
+        source: "../icons/" + gameDetailsData.awayteamId + ".png"
         onStatusChanged: Utils.checkIcon(awayteamLogo, gameDetailsData.awayteamId)
     }
 

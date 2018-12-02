@@ -36,11 +36,6 @@ Page {
             //contentHeight: Theme.itemSizeExtraLarge
             //z: 1
 
-            /*Rectangle {
-                anchors.fill: parent
-                color: "white"
-            }*/
-
             // Label containing the total score
             Label {
                 id: detailsTotalScore
@@ -101,7 +96,7 @@ Page {
                 height: 96
                 width: 96
                 fillMode: Image.PreserveAspectFit
-                source: "../../icons/" + gameDetailsData.hometeamId + ".png"
+                source: "../icons/" + gameDetailsData.hometeamId + ".png"
                 //onSourceChanged: Utils.checkIcon(detailsHomeLogo, gameDetailsData.hometeamId)
                 //onStatusChanged: Utils.checkIcon(detailsHomeLogo, gameDetailsData.hometeamId)
             }
@@ -119,7 +114,7 @@ Page {
                 height: 96
                 width: 96
                 fillMode: Image.PreserveAspectFit
-                source: "../../icons/" + gameDetailsData.awayteamId + ".png"
+                source: "../icons/" + gameDetailsData.awayteamId + ".png"
                 //onSourceChanged: Utils.checkIcon(detailsAwayLogo, gameDetailsData.awayteamId)
                 //onStatusChanged: Utils.checkIcon(detailsAwayLogo, gameDetailsData.awayteamId)
             }

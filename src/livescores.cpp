@@ -60,7 +60,7 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
 
     // Load and show the QML
     mQmlViewer = SailfishApp::createView();
-    mQmlViewer->setSource(SailfishApp::pathTo("sailfishos/harbour-swisshockey.qml"));
+    mQmlViewer->setSource(SailfishApp::pathTo("qml/harbour-swisshockey.qml"));
     mQmlViewer->show();
 
     // Get the leagues

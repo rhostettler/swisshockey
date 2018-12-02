@@ -3,16 +3,14 @@ TARGET = harbour-swisshockey
 
 # Disable qml b/c we don't want to ship the whole qml directory (i.e. exclude
 # the harmattan files)
-CONFIG += sailfishapp_no_deploy_qml
+#CONFIG += sailfishapp_no_deploy_qml
 CONFIG += sailfishapp
-QT += core network
-QT += dbus
-PKGCONFIG += mlite5
-PKGCONFIG += nemonotifications-qt5
+QT += core network dbus
+PKGCONFIG += mlite5 nemonotifications-qt5
 
 
 # QML files & icons
-qml.files = qml/sailfishos
+qml.files = qml
 qml.path = /usr/share/$${TARGET}
 app_icons.files = qml/icons
 app_icons.path = /usr/share/$${TARGET}
@@ -40,12 +38,14 @@ SOURCES += \
     src/notifier.cpp
 
 # Add QML files to Qt Creator
-OTHER_FILES += qml/sailfishos/harbour-swisshockey.qml \
-    qml/sailfishos/cover/CoverPage.qml \
-    qml/sailfishos/pages/OverviewPage.qml \
-    qml/sailfishos/pages/LeagueSelectionDialog.qml \
-    qml/sailfishos/pages/DetailsPage.qml \
-    qml/sailfishos/pages/utils.js
+OTHER_FILES += qml/harbour-swisshockey.qml \
+    qml/cover/CoverPage.qml \
+    qml/pages/OverviewPage.qml \
+    qml/pages/GameOverviewDelegate.qml \
+    qml/pages/LeagueSelectionDialog.qml \
+    qml/pages/DetailsPage.qml \
+    qml/pages/GameDetailsDelegate.qml \
+    qml/pages/utils.js
 
 # Add other files to Qt Creator
 OTHER_FILES += rpm/harbour-swisshockey.changes \

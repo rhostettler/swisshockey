@@ -44,30 +44,6 @@ Page {
     }
     */
 
-    /*
-    // A spinning busy indicator shown while the data is loading upon
-    // application start
-    BusyIndicator {
-        id: updateIndicator
-        anchors {
-            right: selectorIcon.left
-            rightMargin: 32
-            verticalCenter: parent.verticalCenter
-        }
-
-        platformStyle: BusyIndicatorStyle {
-            size: "small"
-            inverted: true
-        }
-        visible: false
-        running: false
-        //running: gameList.count == 0
-        //visible: gameList.count == 0
-    }
-    */
-
-//    property bool bannerStart: false
-
     SilicaListView {
         id: gameList
         model: listData
