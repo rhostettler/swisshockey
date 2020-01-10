@@ -37,21 +37,9 @@ QStringList GameData::mGameStatusTexts = QStringList()
     << QString("Final");
 
 // Initialize the game
-GameData::GameData(QVariantMap data, QObject *parent) : QAbstractListModel(parent) {
-    // Set the basic game info: League & game IDs, teams, etc.
-    mLeagueId = data["league"].toString();
-    mGameId = data["gameId"].toString();
-    mHometeamName = data["hometeam"].toString();
-    mHometeamId = data["hometeamId"].toLongLong();
-    mAwayteamName = data["awayteam"].toString();
-    mAwayteamId = data["awayteamId"].toLongLong();
-    // TODO: Parse this and store it as a QDateTime object in UTC
-    mStartTime = data["time"].toString();
-
-    // TODO: Set infos such as place, attendance, refs, etc.
-
-    // Forward the rest and update the result
-    updateSummary(data);
+GameData::GameData(QString gameId, QObject *parent) : QAbstractListModel(parent) {
+    // Store game ID
+    mGameId = gameId;
 
     // Set the data roles
     // TODO: Consider renaming the roles at some point
@@ -132,16 +120,34 @@ QString GameData::getGameId(void){
     return mGameId;
 }
 
+void GameData::setLeague(QString leagueId) {
+    mLeagueId = leagueId;
+}
+
 QString GameData::getLeague() {
     return this->mLeagueId;
 }
 
+void GameData::setDateTime(QString time) {
+    mStartTime = time;
+}
+
+void GameData::setHometeam(QString id, QString name) {
+    mHometeamId = id.toLongLong();
+    mHometeamName = name;
+}
+
 QString GameData::getHometeam() {
-    return this->mHometeamName;
+    return mHometeamName;
 }
 
 QString GameData::getHometeamId() {
     return QString::number(this->mHometeamId);
+}
+
+void GameData::setAwayteam(QString id, QString name) {
+    mAwayteamId = id.toLongLong();
+    mAwayteamName = name;
 }
 
 QString GameData::getAwayteam() {
@@ -152,19 +158,36 @@ QString GameData::getAwayteamId() {
     return QString::number(this->mAwayteamId);
 }
 
+void GameData::setScore(QMap<QString, QString> score) {
+    // Update the score and trigger a signal if it changed
+    QMap<QString, QString> oldScore = mScore;
+    mScore = score;
+    if(mScore["total"] != oldScore["total"] && oldScore["total"] != "-:-") {
+        emit scoreChanged();
+    }
+}
+
 QString GameData::getTotalScore() {
     return this->mScore["total"];
 }
 
 QString GameData::getPeriodsScore() {
-    QString score = this->mScore.value("first") + ", " +
-        this->mScore.value("second") + ", " + this->mScore.value("third");
+    QString score = mScore.value("first") + ", " + mScore.value("second") + ", " + mScore.value("third");
 
-    if(this->mScore.contains("overtime")) {
+    if(mScore.contains("overtime")) {
         score.append(", " + this->mScore.value("overtime"));
     }
 
     return score;
+}
+
+void GameData::setStatus(int status) {
+    // Update the game status and trigger a signal if it changed
+    int oldStatus = mGameStatus;
+    mGameStatus = status;
+    if(mGameStatus != oldStatus) {
+        emit statusChanged();
+    }
 }
 
 int GameData::getGameStatus() {

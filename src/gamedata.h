@@ -36,7 +36,9 @@ class GameData : public QAbstractListModel {
     Q_OBJECT
 
     Q_PROPERTY(QString hometeamId READ getHometeamId)
+    Q_PROPERTY(QString hometeamName READ getHometeam)
     Q_PROPERTY(QString awayteamId READ getAwayteamId)
+    Q_PROPERTY(QString awayteamName READ getAwayteam)
     Q_PROPERTY(QString totalScore READ getTotalScore NOTIFY scoreChanged)
     Q_PROPERTY(QString periodsScore READ getPeriodsScore NOTIFY scoreChanged)
     Q_PROPERTY(int gameStatus READ getGameStatus NOTIFY statusChanged)
@@ -71,22 +73,35 @@ class GameData : public QAbstractListModel {
         static QStringList mGameStatusTexts;
 
     public:
-        explicit GameData(QVariantMap data, QObject *parent = 0);
+        explicit GameData(QString gameId, QObject *parent = 0);
         void updateSummary(QVariantMap data);
         void updateGoals(QVariantList goals);
         void updateFouls(QVariantList fouls);
         bool hasChanged(void);
         bool hasChanged(QString type);
 
+        // Getters and setters
         QString getGameId();
+
+        void setLeague(QString leagueId);
         QString getLeague();
+
+        void setDateTime(QString time);
+
+        void setHometeam(QString id, QString name);
         QString getHometeam();
         QString getHometeamId();
+
+        void setAwayteam(QString id, QString name);
         QString getAwayteam();
         QString getAwayteamId();
+
+        void setScore(QMap<QString, QString> score);
         QString getTotalScore();
         QString getPeriodsScore();
-        int getGameStatus();
+
+        void setStatus(int status);
+        int getGameStatus(); // TODO: Unify notation; remove the "Game" in the getters
         QString getGameStatusText();
 
         // implementations of interface QAbstractListModel

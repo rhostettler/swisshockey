@@ -27,7 +27,7 @@
 const QString SIHFDataSource::SCORES_URL = "http://data.sihf.ch/Statistic/api/cms/table?alias=today&size=today&searchQuery=1,2,8,10,11//1,2,8,81,90&filterQuery=&orderBy=gameLeague&orderByDescending=false&take=20&filterBy=League&skip=0&language=de";
 const QString SIHFDataSource::DETAILS_URL = "http://data.sihf.ch/statistic/api/cms/gameoverview?alias=gameDetail&language=de&searchQuery=";
 
-SIHFDataSource::SIHFDataSource(QObject *parent) : DataSource(parent) {
+SIHFDataSource::SIHFDataSource(GamedayData *gamesList, QObject *parent) : DataSource(gamesList, parent) {
     // Create the network access objects
     this->nam = new QNetworkAccessManager(this);
     this->decoder = new JsonDecoder(this);
@@ -72,13 +72,7 @@ void SIHFDataSource::parseGameSummaries() {
         QVariantList data = parsedRawdata.value("data").toList();
         QListIterator<QVariant> iter(data);
         while(iter.hasNext()) {
-            QVariantMap gamedata = this->parseGame(iter.next().toList());
-
-            if(gamedata.size() > 0) {
-                emit summaryUpdated(gamedata);
-            } else {
-                // NOP?
-            }
+            parseGame(iter.next().toList());
         }
     } else {
         logger.log(Logger::ERROR, QString(Q_FUNC_INFO).append(": No 'data' field in the response from the server."));
@@ -90,40 +84,56 @@ void SIHFDataSource::parseGameSummaries() {
 // Parse the per-game JSON array from the response and put everything in an
 // associative array with predefined fields for internal data exchange between
 // data sources and data stores.
-QVariantMap SIHFDataSource::parseGame(QVariantList indata) {
-    QVariantMap data;
+void SIHFDataSource::parseGame(QVariantList data) {
     Logger& logger = Logger::getInstance();
 
     // Check lenght of game summary data. Swiss league data may be one entry shorter; broadcast field may be missing
-    if(indata.size() == SIHFDataSource::GS_LENGTH || indata.size() == SIHFDataSource::GS_LENGTH-1) {
-        // Extract all the fields for "easy" access
-        QString league = indata[SIHFDataSource::GS_LEAGUE_NAME].toString();
-        QString time = indata[SIHFDataSource::GS_TIME].toString();
-        QVariantMap hometeam = indata[SIHFDataSource::GS_HOMETEAM].toMap();
-        QVariantMap awayteam = indata[SIHFDataSource::GS_AWAYTEAM].toMap();
-        QVariantMap totalScore = indata[SIHFDataSource::GS_TOTALSCORE].toMap();
-        QVariantMap periodsScore = indata[SIHFDataSource::GS_PERIODSSCORE].toMap();
-        QString otIndicator = indata[SIHFDataSource::GS_OTINDICATOR].toString();
-        QVariantMap meta = indata[SIHFDataSource::GS_META].toMap();
-        QVariantMap details = indata[SIHFDataSource::GS_DETAILS].toMap();
+    if(data.size() == SIHFDataSource::GS_LENGTH || data.size() == SIHFDataSource::GS_LENGTH-1) {
+        // Get game ID
+        QVariantMap details = data[SIHFDataSource::GS_DETAILS].toMap();
+        QString gameId = details.value("gameId").toString();
+        GameData *game = mGamesList->getGame(gameId);
 
-        // Put everything into a QVariantMap that we'll use as the common
-        // internal raw data representation
-        // Add the basic game info
-        data.insert("league", SIHFDataSource::getLeagueId(league));
-        data.insert("time", time);
-        data.insert("gameId", details.value("gameId"));
+        if(game == NULL) {
+            // Create a new game
+            game = new GameData(gameId, mGamesList);
 
-        // Add the team info
-        data.insert("hometeam", hometeam.value("name"));
-        data.insert("hometeamId", hometeam.value("id"));
-        data.insert("awayteam", awayteam.value("name"));
-        data.insert("awayteamId", awayteam.value("id"));
+            // Set game info; this is static info, so we only do it the first time
+            QString league = data[SIHFDataSource::GS_LEAGUE_NAME].toString();
+            QString time = data[SIHFDataSource::GS_TIME].toString();
+            QVariantMap hometeam = data[SIHFDataSource::GS_HOMETEAM].toMap();
+            QVariantMap awayteam = data[SIHFDataSource::GS_AWAYTEAM].toMap();
+
+            // Add the basic game info
+            game->setLeague(SIHFDataSource::getLeagueId(league));
+            game->setDateTime(time);  // TODO: Convert to QDateTime in UTC
+
+            // Add the team info
+            // TODO: This should make use of the new classe "Team" to be created
+            game->setHometeam(hometeam.value("id").toString(), hometeam.value("name").toString());
+            game->setAwayteam(awayteam.value("id").toString(), awayteam.value("name").toString());
+
+            // TODO: Set infos such as place, attendance, refs, etc. (Attendance could actually be set later on as it might change)
+
+            // Add the game to the games list
+            mGamesList->addGame(game);
+
+            // Debugging
+//            logger.log(Logger::ERROR, QString(Q_FUNC_INFO).append(": Game ID " + data["gameId"] + " not found."));
+        } else {
+            // NOP
+        }
+
+        // Get score and progress info
+        QVariantMap totalScore = data[SIHFDataSource::GS_TOTALSCORE].toMap();
+        QVariantMap periodsScore = data[SIHFDataSource::GS_PERIODSSCORE].toMap();
+        QString otIndicator = data[SIHFDataSource::GS_OTINDICATOR].toString();
+        QVariantMap meta = data[SIHFDataSource::GS_META].toMap();
 
         // Put together the score
         QVariantList homePeriodsScore = periodsScore.value("homeTeam").toList();
         QVariantList awayPeriodsScore = periodsScore.value("awayTeam").toList();
-        QVariantMap score;
+        QMap<QString, QString> score;
         score["first"] = homePeriodsScore.value(0, "-").toString() + ":" + awayPeriodsScore.value(0, "-").toString();
         score["second"] = homePeriodsScore.value(1, "-").toString() + ":" + awayPeriodsScore.value(1, "-").toString();
         score["third"] = homePeriodsScore.value(2, "-").toString() + ":" + awayPeriodsScore.value(2, "-").toString();
@@ -131,7 +141,7 @@ QVariantMap SIHFDataSource::parseGame(QVariantList indata) {
             score.insert("overtime", homePeriodsScore[3].toString() + ":" + awayPeriodsScore[3].toString());
         }
         score["total"] = totalScore.value("homeTeam").toString() + ":" + totalScore.value("awayTeam").toString();
-        data.insert("score", score);
+        game->setScore(score);
 
         // Additional info, progress, etc.
         // 0 - Not started
@@ -146,6 +156,7 @@ QVariantMap SIHFDataSource::parseGame(QVariantList indata) {
         // 100 + "Ende*"
         // 100 + "Ende"
         // Roughly corresponds to the following formula: progress/100*6 = "old status code"
+        // TODO: Remove those old status hard-coded status codes and replace them by enum-type statuses.
         double progress = meta.value("percent").toDouble();
         int status = 0;
         if(progress == 100) {
@@ -178,15 +189,13 @@ QVariantMap SIHFDataSource::parseGame(QVariantList indata) {
             // Regular, 1, ..., 6
             status = round(progress/100*6);
         }
-        data.insert("status", status);
-        logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Game status calculated to be " + data.value("status").toString()));
-    } else if(indata.size() == 1) {
+        game->setStatus(status);
+        logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Game status calculated to be " + status));
+    } else if(data.size() == 1) {
         logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": It appears that the supplied data doesn't contain any game info (no games today?)."));
     } else {
         logger.log(Logger::ERROR, QString(Q_FUNC_INFO).append(": Something is wrong with the game summary data, maybe a change in the data format?"));
     }
-
-    return data;
 }
 
 // Query the NL servers for the game stats
@@ -227,7 +236,6 @@ void SIHFDataSource::parseGameDetails(void) {
         // Remove the callback name and the trailing ");"
         rawdata.remove(0, callbackString.length());
         rawdata.chop(2);
-
     }
 
     QString dumpfile("dump-details-" + QDateTime::currentDateTime().toString("yyyy-MM-ddTHHmmss") + ".json");
@@ -237,7 +245,7 @@ void SIHFDataSource::parseGameDetails(void) {
     // Convert from JSON to a map, then parse the game details
     QVariantMap parsedRawdata = this->decoder->decode(rawdata);
 
-    // Parse all the players; this is done before parsing the events to make
+    // Parse all the players; this is done before parsing the events to ensure
     // that the players can be found when the events are rendered in the UI
     QList<Player *> players;
     if(parsedRawdata.contains("players")) {

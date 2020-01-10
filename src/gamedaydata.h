@@ -30,10 +30,10 @@ class GamedayData : public QAbstractListModel {
 
     private:
         QHash<int, QByteArray> roles;
-        QMap<qulonglong, GameData *> games;
-        QList<qulonglong> gameIndices;
-        QString date;
-        QSignalMapper *signalMapper;
+        QMap<qulonglong, GameData *> mGames;
+        QList<qulonglong> mGameIndices;
+        QString mDate; // TODO: This should be part of the Games, then we wouldn't have to bother about keeping different games. Could also add filters for the games later on.
+        QSignalMapper *mSignalMapper;
 
     public:
         explicit GamedayData(QObject *parent = 0);
@@ -41,7 +41,8 @@ class GamedayData : public QAbstractListModel {
         // date: date of the gameday, data: the list of games
         void updateGames(QString date, QVariantMap data);
 
-        GameData * getGame(QString id);
+        void addGame(GameData *game);
+        GameData * getGame(QString gameId);
 
         // implementations of interface QAbstractListModel
         enum GameRoles {
@@ -64,9 +65,8 @@ class GamedayData : public QAbstractListModel {
     signals:
 
     public slots:
-        void updateData(QVariantMap data);
+//        void updateData(QVariantMap data);
         void gamedataChanged(const QString & key);
-    
 };
 
 #endif // GAMEDAYDATA_H

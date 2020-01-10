@@ -23,14 +23,18 @@
 #include <QObject>
 #include <QVariantMap>
 
+#include "gamedaydata.h"
 #include "gameevent.h"
 #include "player.h"
 
 class DataSource : public QObject {
     Q_OBJECT
 
+    protected:
+        GamedayData *mGamesList;
+
     public:
-        explicit DataSource(QObject *parent = 0);
+        explicit DataSource(GamedayData *gamesList, QObject *parent = 0);
 
         virtual void update(QString id) = 0;
 

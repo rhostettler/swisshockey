@@ -42,7 +42,7 @@ class LiveScores : public QObject {
         QString mAppVersion;
         QQuickView *mQmlViewer;
         Notifier *mNotifier;
-        GamedayData *mDataStore;
+        GamedayData *mGamesList;
         QSortFilterProxyModel *mLeagueFilter;
         SIHFDataSource *mDataSource;
         QTimer *mUpdateTimer;

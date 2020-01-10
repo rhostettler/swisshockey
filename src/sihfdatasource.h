@@ -42,7 +42,7 @@ class SIHFDataSource : public DataSource {
         QString gameId; // TODO: Should this be here?
 
         // Private helper functions
-        QVariantMap parseGame(QVariantList indata);
+        void parseGame(QVariantList data);
         QList<Player *> parsePlayers(QVariantList data);
         QList<GameEvent *> parseGoals(QVariantList data);
         QList<GameEvent *> parsePenalties(QVariantList data);
@@ -70,7 +70,7 @@ class SIHFDataSource : public DataSource {
         };
 
     public:
-        explicit SIHFDataSource(QObject *parent = 0);
+        explicit SIHFDataSource(GamedayData *gamesList, QObject *parent = 0);
         void update(QString id);
         void setGameId(QString gameId);
         void getGameSummaries(void);

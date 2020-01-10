@@ -29,100 +29,45 @@ Page {
         anchors.fill: parent
         model: gameEventsData
 
-        header: Item {
+        header: GameDetailsHeader {
             id: gameSummary
-            width: parent.width
-            height: Theme.itemSizeExtraLarge
-            //contentHeight: Theme.itemSizeExtraLarge
-            //z: 1
-
-            // Label containing the total score
-            Label {
-                id: detailsTotalScore
-                anchors {
-                    horizontalCenter: parent.horizontalCenter
-                    bottom: detailsPeriodsScore.top
-                }
-                font {
-                    family: Theme.fontFamilyHeading
-                    pixelSize: Theme.fontSizeMedium
-                }
-                color: Theme.highlightColor
-
-                // Automagically updated because of Q_PROPERTY has NOTIFY set
-                text: gameDetailsData.totalScore
-            }
-
-            // Label containing the per-period score
-            Label {
-                id: detailsPeriodsScore
-                anchors {
-                    horizontalCenter: parent.horizontalCenter
-                    verticalCenter: detailsHomeLogo.verticalCenter
-                }
-                font {
-                    pixelSize: Theme.fontSizeMedium
-                }
-                color: Theme.secondaryColor
-
-                // Automagically updated because of Q_PROPERTY has NOTIFY set
-                text: "(" + gameDetailsData.periodsScore + ")"
-            }
-
-            // Label indicating the status of the game
-    /*        Label {
-                id: gameStatus
-                font {
-                    pixelSize: Theme.fontSizeMedium
-                }
-                anchors {
-                    horizontalCenter: parent.horizontalCenter
-                    top: periodsScore.bottom
-                }
-                color: Theme.secondaryColor
-                text: gamestatus
-            }*/
-
-            // Hometeam logo: to the left
-            Image {
-                id: detailsHomeLogo
-
-                anchors {
-                    verticalCenter: parent.verticalCenter
-                    left: parent.left
-                    leftMargin: Theme.horizontalPageMargin
-                }
-
-                height: 96
-                width: 96
-                fillMode: Image.PreserveAspectFit
-                source: "../icons/" + gameDetailsData.hometeamId + ".png"
-                //onSourceChanged: Utils.checkIcon(detailsHomeLogo, gameDetailsData.hometeamId)
-                //onStatusChanged: Utils.checkIcon(detailsHomeLogo, gameDetailsData.hometeamId)
-            }
-
-            // Awayteam logo: to the right
-            Image {
-                id: detailsAwayLogo
-
-                anchors {
-                    verticalCenter: parent.verticalCenter
-                    right: parent.right
-                    rightMargin: Theme.horizontalPageMargin
-                }
-
-                height: 96
-                width: 96
-                fillMode: Image.PreserveAspectFit
-                source: "../icons/" + gameDetailsData.awayteamId + ".png"
-                //onSourceChanged: Utils.checkIcon(detailsAwayLogo, gameDetailsData.awayteamId)
-                //onStatusChanged: Utils.checkIcon(detailsAwayLogo, gameDetailsData.awayteamId)
-            }
         }
 
-        delegate: GameDetailsDelegate {
-            id: gameDetailsDelegate
+        delegate: Component {
+            Loader {
+                source: "GameDetailsDelegate.qml"
+            }
+            //GameDetailsDelegate {
+            //id: gameDetailsDelegate
         }
+
         VerticalScrollDecorator {}
+
+        PullDownMenu {
+            // TODO:
+            // * Each item should only be visible if the corresponding view is not selected.
+            id: detailsPulleyMenu
+
+            MenuItem {
+                text: qsTr("Statistics")
+                //onClicked: dostuff
+            }
+
+            MenuItem {
+                text: qsTr("Roster ") + gameDetailsData.awayteamName
+            }
+
+            MenuItem {
+                text: qsTr("Roster ") + gameDetailsData.hometeamName
+                //onClicked: dootherstuff
+                //visible: detailsView == STUFF_FROM_ENUM
+            }
+
+            MenuItem {
+                text: qsTr("Play by play")
+                //onClicked: appWindow.updateTriggered()
+                //visible: detailsView == STUFF_FROM_ENUM
+            }
+        }
     }
 }

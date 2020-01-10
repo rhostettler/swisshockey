@@ -39,9 +39,10 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
     mAppName.append(APP_NAME);
 
     // Create the data store and setup the data provider
-    mDataStore = new GamedayData(this);
-    mDataSource = new SIHFDataSource(this);
-    connect(mDataSource, SIGNAL(summaryUpdated(QVariantMap)), mDataStore, SLOT(updateData(QVariantMap)));
+    mGamesList = new GamedayData(this);
+    mDataSource = new SIHFDataSource(mGamesList, this);
+    // TODO: Remove this line, from old update structure.
+//    connect(mDataSource, SIGNAL(summaryUpdated(QVariantMap)), mDataStore, SLOT(updateData(QVariantMap)));
 
     // Create a filter for the league, acts as a proxy between the view and the
     // data store
@@ -50,12 +51,12 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
     mLeagueFilter->setDynamicSortFilter(true);
     mLeagueFilter->setFilterKeyColumn(0);  // We only have the 0-column
     mLeagueFilter->setFilterRegExp(".*");
-    mLeagueFilter->setSourceModel(mDataStore);
+    mLeagueFilter->setSourceModel(mGamesList);
 
     // Create the notifier, disabled by default (enabled automatically when the
     // app is brought to the background)
     // TODO: Consider having on-screen notification banner when in foreground
-    mNotifier = new Notifier(mDataStore, this);
+    mNotifier = new Notifier(mGamesList, this);
 //    mNotifier->disableNotifications();
 
     // Load and show the QML
@@ -122,7 +123,7 @@ void LiveScores::updateView(QString id) {
     mSelectedGameId = id;
     mNotifier->setGameId(id);
 
-    GameData *game = mDataStore->getGame(id);
+    GameData *game = mGamesList->getGame(id);
     if(game != NULL) {
         // Set the game id in the totomat & force update
         connect(mDataSource, SIGNAL(eventsUpdated(QList<GameEvent *>)), game, SLOT(updateEvents(QList<GameEvent *>)));
