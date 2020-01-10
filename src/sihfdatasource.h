@@ -35,11 +35,10 @@ class SIHFDataSource : public DataSource {
     Q_OBJECT
 
     private:
-        QNetworkAccessManager *nam;
-        QNetworkReply *summariesReply;
-        QNetworkReply *detailsReply;
-        JsonDecoder *decoder;
-        QString gameId; // TODO: Should this be here?
+        QNetworkAccessManager *mNetworkManager;
+        QNetworkReply *mSummariesReply;
+        QNetworkReply *mDetailsReply;
+        JsonDecoder *mJSONDecoder;
 
         // Private helper functions
         void parseGame(QVariantList data);
@@ -72,7 +71,6 @@ class SIHFDataSource : public DataSource {
     public:
         explicit SIHFDataSource(GamedayData *gamesList, QObject *parent = 0);
         void update(QString id);
-        void setGameId(QString gameId);
         void getGameSummaries(void);
         void getGameDetails(QString gameId);
 

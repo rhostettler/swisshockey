@@ -41,8 +41,6 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
     // Create the data store and setup the data provider
     mGamesList = new GamedayData(this);
     mDataSource = new SIHFDataSource(mGamesList, this);
-    // TODO: Remove this line, from old update structure.
-//    connect(mDataSource, SIGNAL(summaryUpdated(QVariantMap)), mDataStore, SLOT(updateData(QVariantMap)));
 
     // Create a filter for the league, acts as a proxy between the view and the
     // data store
@@ -81,14 +79,15 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
     QObject *overviewPage = rootObject->findChild<QObject*>("overviewPage");
     if(overviewPage == 0) {
         Logger& logger = Logger::getInstance();
-        logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append("LiveScores::LiveScores(): Couldn't find the 'overviewPage' QML object, updates in progress will not be shown."));
+        logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Couldn't find the 'overviewPage' QML object, updates in progress will not be shown."));
     } else {
         connect(mDataSource, SIGNAL(updateStarted()), overviewPage, SLOT(startUpdateIndicator()));
         connect(mDataSource, SIGNAL(updateFinished()), overviewPage, SLOT(stopUpdateIndicator()));
     }
 
     // Trigger an update after all the GUI signals have been connected.
-    // currentId is "NULL" by default.
+    // mSelectedGameId is "NULL" by default.
+    // TODO: Split "update" into "updateSummaries" and "updateGame"?
     mDataSource->update(mSelectedGameId);
 
     // Create a timer that periodically fires to update the data, defaults to 5 mins
@@ -125,7 +124,10 @@ void LiveScores::updateView(QString id) {
 
     GameData *game = mGamesList->getGame(id);
     if(game != NULL) {
-        // Set the game id in the totomat & force update
+        // Set the game id in the DataSource & force update
+        // TODO: These signal connections should be removed: Since we're providing the game id to DataSource,
+        // the data source should know which game the details belong to. In fact, the game details response should
+        // include the game id as well and we should be able to set the game details using that.
         connect(mDataSource, SIGNAL(eventsUpdated(QList<GameEvent *>)), game, SLOT(updateEvents(QList<GameEvent *>)));
         connect(mDataSource, SIGNAL(playersUpdated(QList<Player *>)), game, SLOT(updateRosters(QList<Player *>)));
         mDataSource->getGameDetails(id);
