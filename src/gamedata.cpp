@@ -110,7 +110,7 @@ void GameData::updateRosters(QList<Player *> players) {
     QListIterator<Player *> iter(players);
     while(iter.hasNext()) {
         Player *player = iter.next();
-        mRoster.insert(player->getId(), player);
+        mRoster.insert(player->getPlayerId(), player);
     }
 
     logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Added " + QString::number(mRoster.size()) + " players to roster."));

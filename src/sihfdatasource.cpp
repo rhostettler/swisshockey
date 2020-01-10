@@ -213,7 +213,7 @@ void SIHFDataSource::getGameDetails(QString gameId) {
     // Send the request and connect the finished() signal of the reply to parser
     mDetailsReply = mNetworkManager->get(request);
     connect(mDetailsReply, SIGNAL(finished()), this, SLOT(parseGameDetails()));
-    connect(mDetailsReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(handleNetworkError()));
+    connect(mDetailsReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(handleNetworkError(QNetworkReply::NetworkError)));
 }
 
 // Parse the response of a getGameDetails() request
@@ -238,41 +238,46 @@ void SIHFDataSource::parseGameDetails(void) {
     logger.dump(dumpfile, rawdata);
 
     // Convert from JSON to a map, then parse the game details
-    QVariantMap parsedRawdata = mJSONDecoder->decode(rawdata);
+    QVariantMap data = mJSONDecoder->decode(rawdata);
+    QString gameId = data["gameId"].toString();
+    GameData *game = mGamesList->getGame(gameId);
+    if(game != NULL) {
+        // Parse all the players; this is done before parsing the events to ensure
+        // that the players can be found when the events are rendered in the UI
+        QList<Player *> players;
+        if(data.contains("players")) {
+            players.append(parsePlayers(data["players"].toList()));
 
-    // Parse all the players; this is done before parsing the events to ensure
-    // that the players can be found when the events are rendered in the UI
-    QList<Player *> players;
-    if(parsedRawdata.contains("players")) {
-        players.append(parsePlayers(parsedRawdata["players"].toList()));
-
-        // TODO: Instead of emitting a signal here, simply add the players to the game
-        emit playersUpdated(players);
-    } else {
-        logger.log(Logger::ERROR, QString(Q_FUNC_INFO).append(": No player data found!"));
-    }
-
-    // Parse all the game events
-    QList<GameEvent *> events;
-    if(parsedRawdata.contains("summary")) {
-        QVariantMap summary = parsedRawdata["summary"].toMap();
-        QVariantList periods = summary["periods"].toList();
-        QListIterator<QVariant> iter(periods);
-        while(iter.hasNext()) {
-            QVariantMap period = iter.next().toMap();
-            events.append(parseGoals(period["goals"].toList()));
-            events.append(parsePenalties(period["fouls"].toList()));
-            events.append(parseGoalkeepers(period["goalkeepers"].toList()));
+            // TODO: Instead of emitting a signal here, simply add the players to the game
+            emit playersUpdated(players);
+        } else {
+            logger.log(Logger::ERROR, QString(Q_FUNC_INFO).append(": No player data found!"));
         }
-        QVariantMap shootout = summary["shootout"].toMap();
-        events.append(parseShootout(shootout["shoots"].toList()));
-        logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Number of parsed events: " + QString::number(events.size())));
-    } else {
-        logger.log(Logger::ERROR, QString(Q_FUNC_INFO).append(": No game events data found!"));
-    }
 
-    // TODO: Instead of callung "eventsUpdated" here, we would simply add the events to the corresponding game.
-    emit eventsUpdated(events);
+        // Parse all the game events
+        QList<GameEvent *> events;
+        if(data.contains("summary")) {
+            QVariantMap summary = data["summary"].toMap();
+            QVariantList periods = summary["periods"].toList();
+            QListIterator<QVariant> iter(periods);
+            while(iter.hasNext()) {
+                QVariantMap period = iter.next().toMap();
+                events.append(parseGoals(period["goals"].toList()));
+                events.append(parsePenalties(period["fouls"].toList()));
+                events.append(parseGoalkeepers(period["goalkeepers"].toList()));
+            }
+            QVariantMap shootout = summary["shootout"].toMap();
+            events.append(parseShootout(shootout["shoots"].toList()));
+            logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Number of parsed events: " + QString::number(events.size())));
+        } else {
+            logger.log(Logger::ERROR, QString(Q_FUNC_INFO).append(": No game events data found!"));
+        }
+
+        // TODO: Instead of callung "eventsUpdated" here, we would simply add the events to the corresponding game.
+        emit eventsUpdated(events);
+    } else {
+        logger.log(Logger::ERROR, QString(Q_FUNC_INFO).append(": Game with ID " + gameId + " not found, skipping update."));
+    }
 }
 
 // Parse the players
@@ -280,26 +285,30 @@ void SIHFDataSource::parseGameDetails(void) {
 QList<Player *> SIHFDataSource::parsePlayers(QVariantList data) {
     QList<Player *> players;
     Logger& logger = Logger::getInstance();
-    logger.log(Logger::DEBUG, "SIHFDataSource::parsePlayers(): Parsing player data.");
+    logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Parsing player data."));
 
     QListIterator<QVariant> iterator(data);
+    Player *player;
     while(iterator.hasNext()) {
         QVariantMap tmp = iterator.next().toMap();
 
         // Get basics
         qulonglong teamId = tmp.value("teamId").toULongLong();
-        quint32 id = tmp.value("id").toUInt();
-        QString name = tmp.value("fullName").toString();
+        quint32 playerId = tmp.value("id").toUInt();
 
         // Get name
+        QString name = tmp.value("fullName").toString();
         int index = name.lastIndexOf(" ");
         QString lastName = name.left(index);
         QString firstName = name.right(name.length()-index-1);//.at(index+1);
 
-        //QString name = firstName + ". " + lastName;
+        // Create the player
+        player = new Player(teamId, playerId);
+        player->setName(firstName, lastName);
+        player->setJerseyNumber(tmp.value("jerseyNumber").toUInt());
         //this->players.insert(playerId, name);
 
-        players.append(new Player(id, firstName, lastName, teamId));
+        players.append(player);
     }
 
     logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Found " + QString::number(players.size()) + " players."));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 Roland Hostettler
+ * Copyright 2014-present Roland Hostettler
  *
  * This file is part of swisshockey.
  *
@@ -19,17 +19,36 @@
 
 #include "player.h"
 
-Player::Player(quint32 id, QString firstName, QString lastName, qulonglong teamId, QObject *parent) : QObject(parent) {
-    mId = id;
+Player::Player(qulonglong teamId, quint32 id, QObject *parent) : QObject(parent), mTeamId(teamId), mPlayerId(id) {
+    //mPlayerId = id;
+    //mTeamId = teamId;
+}
+
+quint32 Player::getPlayerId() const {
+    return mPlayerId;
+}
+
+void Player::setName(QString firstName, QString lastName) {
     mFirstName = firstName;
     mLastName = lastName;
-    mTeamId = teamId;
 }
 
-quint32 Player::getId() {
-    return mId;
-}
-
-QString Player::getName() {
+QString Player::getName() const {
     return QString(mFirstName.at(0)) + ". " + mLastName;
+}
+
+void Player::setJerseyNumber(quint8 jerseyNumber) {
+    mJerseyNumber = jerseyNumber;
+}
+
+quint8 Player::getJerseyNumber() const {
+    return mJerseyNumber;
+}
+
+bool Player::operator ==(Player const &other) const {
+    return (mPlayerId == other.getPlayerId());
+}
+
+bool Player::operator !=(Player const &other) const {
+    return !(*this == other);
 }
