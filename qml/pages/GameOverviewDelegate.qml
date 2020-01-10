@@ -62,7 +62,7 @@ ListItem {
         height: 96
         width: 96
         fillMode: Image.PreserveAspectFit
-        source: "../icons/" + hometeamId + ".png"
+        source: "../icons/" + model.hometeamId + ".png"
         onStatusChanged: Utils.checkIcon(homeLogo, hometeamId)
     }
 
@@ -77,7 +77,7 @@ ListItem {
         height: 96
         width: 96
         fillMode: Image.PreserveAspectFit
-        source: "../icons/" + awayteamId + ".png"
+        source: "../icons/" + model.awayteamId + ".png"
         onStatusChanged: Utils.checkIcon(awayLogo, awayteamId)
     }
 }

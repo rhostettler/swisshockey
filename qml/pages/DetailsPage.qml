@@ -33,12 +33,8 @@ Page {
             id: gameSummary
         }
 
-        delegate: Component {
-            Loader {
-                source: "GameDetailsDelegate.qml"
-            }
-            //GameDetailsDelegate {
-            //id: gameDetailsDelegate
+        delegate: GameDetailsDelegate {
+            id: gameDetailsDelegate
         }
 
         VerticalScrollDecorator {}
