@@ -100,6 +100,7 @@ void GameData::updateEvents(QList<GameEvent *> events) {
     logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Added " + QString::number(mGameEvents.size()) + " events."));
 }
 
+#if 0
 // Parses the player list and adds them to the local list of players where we
 // have a player license <=> player name map
 void GameData::updateRosters(QList<Player *> players) {
@@ -115,6 +116,7 @@ void GameData::updateRosters(QList<Player *> players) {
 
     logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Added " + QString::number(mRoster.size()) + " players to roster."));
 }
+#endif
 
 QString GameData::getGameId(void){
     return mGameId;
@@ -205,6 +207,11 @@ QString GameData::getGameStatusText() {
     return text;
 }
 
+QMap<quint32, Player *> *GameData::getRoster() {
+    return &mRoster;
+}
+
+
 // Implementation of the QAbstractListModel methods
 // Returns the number of rows in the list
 int GameData::rowCount(const QModelIndex &parent) const {
@@ -235,6 +242,7 @@ QVariant GameData::data(const QModelIndex &index, int role) const {
         case PlayerRole: {
                 quint32 id = event->getPlayer();
                 Player *player = mRoster.value(id, NULL);
+//                Player *player
                 if(player != NULL) {
                     data = player->getName();
                 } else {

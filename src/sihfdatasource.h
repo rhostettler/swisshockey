@@ -43,6 +43,7 @@ class SIHFDataSource : public DataSource {
         // Private helper functions
         void parseGame(QVariantList data);
         QList<Player *> parsePlayers(QVariantList data);
+        void parsePlayers(GameData *game, QVariantList data);
         QList<GameEvent *> parseGoals(QVariantList data);
         QList<GameEvent *> parsePenalties(QVariantList data);
         QList<GameEvent *> parseGoalkeepers(QVariantList data);

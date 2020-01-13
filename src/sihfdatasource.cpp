@@ -244,6 +244,13 @@ void SIHFDataSource::parseGameDetails(void) {
     if(game != NULL) {
         // Parse all the players; this is done before parsing the events to ensure
         // that the players can be found when the events are rendered in the UI
+        if(data.contains("players")) {
+            parsePlayers(game, data["players"].toList());
+        } else {
+            logger.log(Logger::ERROR, QString(Q_FUNC_INFO).append(": No player data found!"));
+        }
+
+#if 0
         QList<Player *> players;
         if(data.contains("players")) {
             players.append(parsePlayers(data["players"].toList()));
@@ -253,6 +260,7 @@ void SIHFDataSource::parseGameDetails(void) {
         } else {
             logger.log(Logger::ERROR, QString(Q_FUNC_INFO).append(": No player data found!"));
         }
+#endif
 
         // Parse all the game events
         QList<GameEvent *> events;
@@ -313,6 +321,46 @@ QList<Player *> SIHFDataSource::parsePlayers(QVariantList data) {
 
     logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Found " + QString::number(players.size()) + " players."));
     return players;
+}
+
+void SIHFDataSource::parsePlayers(GameData *game, QVariantList data) {
+    Logger& logger = Logger::getInstance();
+    logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Parsing player data."));
+
+    QMap<quint32, Player *> *players = game->getRoster();
+    QListIterator<QVariant> iterator(data);
+    Player *player;
+    while(iterator.hasNext()) {
+        QVariantMap tmp = iterator.next().toMap();
+
+        // Get basics
+        qulonglong teamId = tmp.value("teamId").toULongLong();
+        quint32 playerId = tmp.value("id").toUInt();
+
+        // Get name
+        QString name = tmp.value("fullName").toString();
+        int index = name.lastIndexOf(" ");
+        QString lastName = name.left(index);
+        QString firstName = name.right(name.length()-index-1);//.at(index+1);
+
+        // Create the player
+        player = new Player(teamId, playerId, game);
+        player->setName(firstName, lastName);
+        player->setJerseyNumber(tmp.value("jerseyNumber").toUInt());
+
+        // Add the player to the list of players
+        players->insert(playerId, player);
+#if 0
+        int playerIndex = players->indexOf(player);
+        if(playerIndex == -1) {
+            players->append(player);
+        } else {
+            players->replace(playerIndex, player);
+        }
+#endif
+    }
+
+    logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Found " + QString::number(players->size()) + " players."));
 }
 
 // Parses the goals data and returns an unsorted QList<GameEvent>

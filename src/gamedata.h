@@ -64,6 +64,7 @@ class GameData : public QAbstractListModel {
         // List of events and rosters
         QList<GameEvent *> mGameEvents;
         QMap<quint32, Player *> mRoster;
+        //QVector<Player *> mRoster;
 
         // Status
         // TODO: There should be a (public) enum with statuses, which are rendered in the UI to plain text
@@ -104,6 +105,9 @@ class GameData : public QAbstractListModel {
         int getGameStatus(); // TODO: Unify notation; remove the "Game" in the getters
         QString getGameStatusText();
 
+        //QVector<Player *> *getRoster(void) const; // TODO: Split into hometeam and awayteam.
+        QMap<quint32, Player *> *getRoster(void); // TODO: Split into hometeam and awayteam.
+
         // implementations of interface QAbstractListModel
         enum EventRoles {
             TeamRole = Qt::UserRole + 1,
@@ -127,7 +131,7 @@ class GameData : public QAbstractListModel {
 
     public slots:
         void updateEvents(QList<GameEvent *> gameEvents);
-        void updateRosters(QList<Player *> players);
+        //void updateRosters(QList<Player *> players);
 };
 
 #endif // GAMEDATA_H

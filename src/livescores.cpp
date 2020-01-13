@@ -129,7 +129,6 @@ void LiveScores::updateView(QString id) {
         // the data source should know which game the details belong to. In fact, the game details response should
         // include the game id as well and we should be able to set the game details using that.
         connect(mDataSource, SIGNAL(eventsUpdated(QList<GameEvent *>)), game, SLOT(updateEvents(QList<GameEvent *>)));
-        connect(mDataSource, SIGNAL(playersUpdated(QList<Player *>)), game, SLOT(updateRosters(QList<Player *>)));
         mDataSource->getGameDetails(id);
 
         // Set the details data models
