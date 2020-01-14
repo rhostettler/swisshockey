@@ -9,7 +9,7 @@ ListItem {
 
     onClicked: {
         appWindow.viewChanged(gameid);
-        pageStack.push(detailsPage);
+        pageStack.push(eventsPage);
     }
 
     // Label containing the total score

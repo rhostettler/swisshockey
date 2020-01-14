@@ -39,7 +39,7 @@ ApplicationWindow
         objectName: "overviewPage"
     }
 
-    DetailsPage {
-        id: detailsPage
+   EventsPage {
+        id: eventsPage
     }
 }

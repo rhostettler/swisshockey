@@ -43,8 +43,8 @@ OTHER_FILES += qml/harbour-swisshockey.qml \
     qml/pages/OverviewPage.qml \
     qml/pages/GameOverviewDelegate.qml \
     qml/pages/LeagueSelectionDialog.qml \
-    qml/pages/DetailsPage.qml \
-    qml/pages/GameDetailsDelegate.qml \
+    qml/pages/EventsPage.qml \
+    qml/pages/GameEventDelegate.qml \
     qml/pages/GameDetailsHeader.qml \
     qml/pages/utils.js
 
@@ -79,3 +79,7 @@ HEADERS += \
     src/league.h \
     src/player.h \
     src/notifier.h
+
+DISTFILES += \
+    qml/pages/EventsPage.qml \
+    qml/pages/GameEventDelegate.qml

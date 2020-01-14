@@ -33,7 +33,7 @@ Page {
             id: gameSummary
         }
 
-        delegate: GameDetailsDelegate {
+        delegate: GameEventDelegate {
             id: gameDetailsDelegate
         }
 
