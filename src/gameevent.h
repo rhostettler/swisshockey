@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 Roland Hostettler
+ * Copyright 2014-present Roland Hostettler
  *
  * This file is part of swisshockey.
  *
@@ -25,8 +25,15 @@
 #include <QList>
 #include <QMap>
 
+/* TODO:
+ * * This class is quite a mess still, there's plenty of confusion and no separation of concerns between gamedata, gameevent and the details page
+ */
+
 class GameEvent : public QObject {
     Q_OBJECT
+
+    //Q_PROPERTY(QString time READ getEventTime)
+    //Q_PROPERTY(QString player READ getPlayer)
 
     public:
         enum EventType {
@@ -85,6 +92,13 @@ class GameEvent : public QObject {
         void setPenalty(int id, QString type);
         int getPenalty(void);
         void setPenaltyShot(bool scored);
+
+
+        // TODO: Need to code these
+        // Property getters/setters
+        //QString getEventTime(void) const;
+        //QString getPlayer(void) const;  // TODO: There's already a getPlayer further down; how do they relate? I think the problem is that we only store a license number in the gameevent but we want to return a string to the view. not sure what the best solution is to this.
+
 
         // TODO: These are convenience methods and are to disappear/change in
         // future versions

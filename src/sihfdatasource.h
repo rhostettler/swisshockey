@@ -21,6 +21,7 @@
 #define SIHFDATASOURCE_H
 
 #include <QString>
+#include <QMap>
 #include <QVariantList>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
@@ -41,9 +42,11 @@ class SIHFDataSource : public DataSource {
         JsonDecoder *mJSONDecoder;
 
         // Private helper functions
-        void parseGame(QVariantList data);
+        void parseGame(const QVariantList &data);
         QList<Player *> parsePlayers(QVariantList data);
-        void parsePlayers(GameData *game, QVariantList data);
+        void parsePlayers(GameData *game, const QVariantMap &data);
+        void parseLineup(QMap<quint32, Player *> *players, const QVariantMap &data);
+        void parsePosition(QMap<quint32, Player *> *players, const QVariantList &data, const quint8 position);
         QList<GameEvent *> parseGoals(QVariantList data);
         QList<GameEvent *> parsePenalties(QVariantList data);
         QList<GameEvent *> parseGoalkeepers(QVariantList data);

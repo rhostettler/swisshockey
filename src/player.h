@@ -41,11 +41,12 @@ class Player : public QObject {
 
     public:
         enum PLAYER_POSITION {
-            POSITION_GOALKEEPER,
-            POSITION_DEFENCE,
-            POSITION_LEFT_WING,
-            POSITION_RIGHT_WING,
-            POSITION_CENTER
+            POSITION_GK,
+            POSITION_LD,
+            POSITION_RD,
+            POSITION_LW,
+            POSITION_RW,
+            POSITION_C
         };
 
         enum PLAYER_STATS {
@@ -76,6 +77,9 @@ class Player : public QObject {
 
         void setJerseyNumber(quint8 jerseyNumber);
         quint8 getJerseyNumber() const;
+
+        void setLineNumber(quint8 lineNumber);
+        void setPosition(quint8 position);
 
         // Comparison operators
         // TODO: Fix these. They are needed such that we can use QVector.indexOf(playerId) rather

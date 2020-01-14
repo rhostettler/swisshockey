@@ -45,6 +45,15 @@ quint8 Player::getJerseyNumber() const {
     return mJerseyNumber;
 }
 
+void Player::setLineNumber(quint8 lineNumber) {
+    mLineNumber = lineNumber;
+}
+
+void Player::setPosition(quint8 position) {
+    mPosition = position;
+    // TODO: Add safegaurds such that the position is valid.
+}
+
 bool Player::operator ==(Player const &other) const {
     return (mPlayerId == other.getPlayerId());
 }

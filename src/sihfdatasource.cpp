@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 Roland Hostettler
+ * Copyright 2014-present Roland Hostettler
  *
  * This file is part of swisshockey.
  *
@@ -55,7 +55,7 @@ void SIHFDataSource::getGameSummaries(void) {
 }
 
 // Parse the response from the HTTP Request
-void SIHFDataSource::parseGameSummaries() {
+void SIHFDataSource::parseGameSummaries(void) {
     // Get the raw data
     QByteArray rawdata = mSummariesReply->readAll();
 
@@ -84,7 +84,7 @@ void SIHFDataSource::parseGameSummaries() {
 // Parse the per-game JSON array from the response and put everything in an
 // associative array with predefined fields for internal data exchange between
 // data sources and data stores.
-void SIHFDataSource::parseGame(QVariantList data) {
+void SIHFDataSource::parseGame(const QVariantList &data) {
     Logger& logger = Logger::getInstance();
 
     // Check lenght of game summary data. Swiss league data may be one entry shorter; broadcast field may be missing
@@ -245,7 +245,7 @@ void SIHFDataSource::parseGameDetails(void) {
         // Parse all the players; this is done before parsing the events to ensure
         // that the players can be found when the events are rendered in the UI
         if(data.contains("players")) {
-            parsePlayers(game, data["players"].toList());
+            parsePlayers(game, data);
         } else {
             logger.log(Logger::ERROR, QString(Q_FUNC_INFO).append(": No player data found!"));
         }
@@ -288,8 +288,8 @@ void SIHFDataSource::parseGameDetails(void) {
     }
 }
 
-// Parse the players
-// TODO: Parse the player stats as well
+// Parse the players (legacy)
+// TODO: Remove
 QList<Player *> SIHFDataSource::parsePlayers(QVariantList data) {
     QList<Player *> players;
     Logger& logger = Logger::getInstance();
@@ -323,12 +323,19 @@ QList<Player *> SIHFDataSource::parsePlayers(QVariantList data) {
     return players;
 }
 
-void SIHFDataSource::parsePlayers(GameData *game, QVariantList data) {
+// TODO: New code starts here
+
+// Parse players
+void SIHFDataSource::parsePlayers(GameData *game, const QVariantMap &data) {
     Logger& logger = Logger::getInstance();
     logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Parsing player data."));
 
+    // Get/update the roster(s)
     QMap<quint32, Player *> *players = game->getRoster();
-    QListIterator<QVariant> iterator(data);
+    QMap<quint8, quint32> homeJerseyNumberMapping;
+    QMap<quint8, quint32> awayJerseyNumberMapping;
+    QVariantList playersData = data["players"].toList();
+    QListIterator<QVariant> iterator(playersData);
     Player *player;
     while(iterator.hasNext()) {
         QVariantMap tmp = iterator.next().toMap();
@@ -343,13 +350,22 @@ void SIHFDataSource::parsePlayers(GameData *game, QVariantList data) {
         QString lastName = name.left(index);
         QString firstName = name.right(name.length()-index-1);//.at(index+1);
 
+        // Jersey number
+        quint8 jerseyNumber = tmp.value("jerseyNumber").toUInt();
+
         // Create the player
         player = new Player(teamId, playerId, game);
         player->setName(firstName, lastName);
-        player->setJerseyNumber(tmp.value("jerseyNumber").toUInt());
+        player->setJerseyNumber(jerseyNumber);
 
-        // Add the player to the list of players
+        // Add the player to the list of players and to the number <=> license map
         players->insert(playerId, player);
+        if(teamId == game->getHometeamId().toULongLong()) {
+            homeJerseyNumberMapping.insert(jerseyNumber, playerId);
+        } else {
+            awayJerseyNumberMapping.insert(jerseyNumber, playerId);
+        }
+
 #if 0
         int playerIndex = players->indexOf(player);
         if(playerIndex == -1) {
@@ -359,9 +375,58 @@ void SIHFDataSource::parsePlayers(GameData *game, QVariantList data) {
         }
 #endif
     }
-
     logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Found " + QString::number(players->size()) + " players."));
+
+    // Line-ups
+    // TODO: "players" will be a hometeam and awayteam roster in the end. no big issue for now.
+    // TODO: We should add some safeguards here as well; the lineups might not be set yet.
+    QVariantMap tmp = data["lineUps"].toMap();
+    parseLineup(players, tmp["homeTeam"].toMap());
+    parseLineup(players, tmp["awayTeam"].toMap());
+
+    // TODO: Parse player stats
+
 }
+
+// The lineup is quite nested in the JSON data, hence we need to "unfold" it.
+// The actual assignments are done in "parsePosition()" below.
+void SIHFDataSource::parseLineup(QMap<quint32, Player *> *players, const QVariantMap &data) {
+    // Goalkeepers
+    QVariantList goalkeepers = data["goalkeepers"].toList();
+    parsePosition(players, goalkeepers, Player::POSITION_GK);
+
+    // Defencemen
+    QVariantMap defencemen = data["defenders"].toMap();
+    QVariantList leftDefencemen = defencemen["left"].toList();
+    parsePosition(players, leftDefencemen, Player::POSITION_LD);
+    QVariantList rightDefencemen = defencemen["right"].toList();
+    parsePosition(players, rightDefencemen, Player::POSITION_RD);
+
+    // Forwards
+    QVariantMap forwards = data["forwarders"].toMap();
+    QVariantList leftWings = forwards["left"].toList();
+    parsePosition(players, leftWings, Player::POSITION_LW);
+    QVariantList center = forwards["center"].toList();
+    parsePosition(players, center, Player::POSITION_C);
+    QVariantList rightWings = forwards["right"].toList();
+    parsePosition(players, rightWings, Player::POSITION_RW);
+}
+
+// Makes the assignment (position, line number) => player
+void SIHFDataSource::parsePosition(QMap<quint32, Player *> *players, const QVariantList &data, const quint8 position) {
+    quint32 playerId = 0;
+    Player *player = NULL;
+
+    quint8 nLines = data.size();
+    for(int iLineNumber = 0; iLineNumber < nLines; iLineNumber++) {
+        playerId = data.at(iLineNumber).toUInt();
+        player = players->value(playerId);
+        player->setPosition(position);
+        player->setLineNumber(iLineNumber);
+    }
+}
+
+// TODO: New code ends here.
 
 // Parses the goals data and returns an unsorted QList<GameEvent>
 QList<GameEvent *> SIHFDataSource::parseGoals(QVariantList data) {
