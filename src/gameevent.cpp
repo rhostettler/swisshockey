@@ -165,6 +165,11 @@ bool GameEvent::greaterThan(const GameEvent *e1, const GameEvent *e2) {
     return greater;
 }
 
+// Compares if e1 < e2
+bool GameEvent::lessThan(const GameEvent *e1, const GameEvent *e2) {
+    return !GameEvent::greaterThan(e1, e2);
+}
+
 QList<QString> GameEvent::penaltyTexts = QList<QString>()
     << QString("Other penalty")
     << QString("Abuse of officials by team officials")

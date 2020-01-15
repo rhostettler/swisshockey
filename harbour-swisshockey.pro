@@ -46,6 +46,8 @@ OTHER_FILES += qml/harbour-swisshockey.qml \
     qml/pages/EventsPage.qml \
     qml/pages/GameEventDelegate.qml \
     qml/pages/GameDetailsHeader.qml \
+    qml/pages/RosterPage.qml \
+    qml/pages/RosterDelegate.qml \
     qml/pages/utils.js
 
 # Add other files to Qt Creator

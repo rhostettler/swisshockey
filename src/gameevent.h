@@ -109,6 +109,7 @@ class GameEvent : public QObject {
         QString getEventSubtext(void) const;
 
         static bool greaterThan(const GameEvent *e1, const GameEvent *e2);
+        static bool lessThan(const GameEvent *e1, const GameEvent *e2);
         static QString getPenaltyText(int id);
 };
 

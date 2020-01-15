@@ -51,11 +51,19 @@ Page {
 
             MenuItem {
                 text: qsTr("Roster ") + gameDetailsData.awayteamName
+                onClicked: {
+                    rosterPage.hometeam = false
+                    pageStack.push(rosterPage)
+                }
             }
 
             MenuItem {
                 text: qsTr("Roster ") + gameDetailsData.hometeamName
-                //onClicked: dootherstuff
+                onClicked: {
+                    rosterPage.hometeam = true
+                    pageStack.push(rosterPage)
+                }
+
                 //visible: detailsView == STUFF_FROM_ENUM
             }
 

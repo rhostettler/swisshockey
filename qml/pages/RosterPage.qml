@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 Roland Hostettler
+ * Copyright 2014-present Roland Hostettler
  *
  * This file is part of swisshockey.
  *
@@ -19,31 +19,21 @@
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
-import "pages"
 
-ApplicationWindow
-{
-    id: appWindow
-    initialPage: overviewPage
-    cover: Qt.resolvedUrl("cover/CoverPage.qml")
-    allowedOrientations: Orientation.All
-    _defaultPageOrientations: Orientation.All
+import "utils.js" as Utils
 
-    // Emitted when one of the games is selected for details view
-    signal viewChanged(string gameId);
-    signal updateTriggered();
-    signal leagueChanged(string leagueId);
+Page {
+    property bool hometeam: true
 
-    OverviewPage {
-        id: overviewPage
-        objectName: "overviewPage"
-    }
-
-    EventsPage {
-        id: eventsPage
-    }
-
-    RosterPage {
-        id: rosterPage
+    SilicaListView {
+        id: gameRoster
+        width: parent.width
+        anchors.fill: parent
+        model: hometeam ? hometeamRoster : awayteamRoster
+        header: GameDetailsHeader {}
+        delegate: RosterDelegate {}
+        //section: bla bla
+        //sectionDelegate: bla bla
+        VerticalScrollDecorator {}
     }
 }

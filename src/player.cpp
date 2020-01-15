@@ -49,9 +49,34 @@ void Player::setLineNumber(quint8 lineNumber) {
     mLineNumber = lineNumber;
 }
 
+quint8 Player::getLineNumber(void) const {
+    return mLineNumber;
+}
+
 void Player::setPosition(quint8 position) {
     mPosition = position;
     // TODO: Add safegaurds such that the position is valid.
+}
+
+quint8 Player::getPosition(void) const {
+    return mPosition;
+}
+
+// Compares if p1 > p2
+bool Player::greaterThan(const Player *p1, const Player *p2) {
+    quint8 p1Line = p1->getLineNumber();
+    quint8 p1Position = p1->getPosition();
+    quint8 p2Line = p2->getLineNumber();
+    quint8 p2Position = p2->getPosition();
+
+    bool greater = (p1Line > p2Line) || (p1line == p2line && p1Position > p2Position);
+
+    return greater;
+}
+
+// Compares if p1 < p2
+bool Player::lessThan(const Player *p1, const Player *p2) {
+    return !Player::greaterThan(p1, p2);
 }
 
 bool Player::operator ==(Player const &other) const {

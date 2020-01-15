@@ -25,6 +25,11 @@
 class Player : public QObject {
     Q_OBJECT
 
+    Q_PROPERTY(quint8 jerseyNumber READ getJerseyNumber)
+    Q_PROPERTY(quint8 lineNumber READ getLineNumber)
+    Q_PROPERTY(QString name READ getName)
+    Q_PROPERTY(quint8 position READ getPosition)
+
     private:
         const qulonglong mTeamId;
         const quint32 mPlayerId;
@@ -79,7 +84,13 @@ class Player : public QObject {
         quint8 getJerseyNumber() const;
 
         void setLineNumber(quint8 lineNumber);
+        quint8 getLineNumber(void) const;
+
         void setPosition(quint8 position);
+        quint8 getPosition(void) const;
+
+        static bool greaterThan(const Player *p1, const Player *p2);
+        static bool lessThan(const Player *p1, const Player *p2);
 
         // Comparison operators
         // TODO: Fix these. They are needed such that we can use QVector.indexOf(playerId) rather

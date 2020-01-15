@@ -383,6 +383,7 @@ void SIHFDataSource::parsePlayers(GameData *game, const QVariantMap &data) {
     QVariantMap tmp = data["lineUps"].toMap();
     parseLineup(players, tmp["homeTeam"].toMap());
     parseLineup(players, tmp["awayTeam"].toMap());
+    qSort(players->begin(), players->end(), Player::lessThan); // TODO: Add another row for hometeam/awayteam
 
     // TODO: Parse player stats
 
@@ -422,7 +423,11 @@ void SIHFDataSource::parsePosition(QMap<quint32, Player *> *players, const QVari
         playerId = data.at(iLineNumber).toUInt();
         player = players->value(playerId);
         player->setPosition(position);
-        player->setLineNumber(iLineNumber);
+        if(position == Player::POSITION_GK) {
+            player->setLineNumber(0);
+        } else {
+            player->setLineNumber(iLineNumber+1);
+        }
     }
 }
 

@@ -135,7 +135,11 @@ void LiveScores::updateView(QString id) {
         QQmlContext *context = mQmlViewer->rootContext();
         context->setContextProperty("gameDetailsData", game);
         context->setContextProperty("gameEventsData", game);
+
         // TODO: Set home & away team rosters here
+        // TODO: Now we have a freakin' map of players, we need this to be a QList or QVector to work out of the box. Meh.
+//        QMap<quint32, Player *> *roster = game->getRoster();
+//        context->setContextProperty("hometeamRoster", roster);
     }
 }
 
