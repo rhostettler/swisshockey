@@ -26,8 +26,7 @@
 
 #include "player.h"
 
-class PlayerList : public QAbstractListModel
-{
+class PlayerList : public QAbstractListModel {
     Q_OBJECT
 
     private:
@@ -41,17 +40,19 @@ class PlayerList : public QAbstractListModel
     public:
         explicit PlayerList(QObject *parent = nullptr);
 
-        // Getters / setters
+        // Extra data access methods
         Player *getPlayer(quint32 playerId);
         Player *getPlayerByJerseyNumber(quint8 jerseyNumber);
 
-        // Basic functionality:
+        // ListModel functionality
         int rowCount(const QModelIndex &parent = QModelIndex()) const override;
         QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+
+        // Helpers
 #if 0
         void sort(int column = 0, Qt::SortOrder order = Qt::DescendingOrder);
-        void clear(void);
 #endif
+        void clear(void);
 
     public slots:
         void insert(Player *player);

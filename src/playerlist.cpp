@@ -34,17 +34,16 @@ Player *PlayerList::getPlayerByJerseyNumber(quint8 jerseyNumber){
 }
 
 int PlayerList::rowCount(const QModelIndex &parent) const {
-#if 0
     // For list models only the root node (an invalid parent) should return the list's size. For all
     // other (valid) parents, rowCount() should return 0 so that it does not become a tree model.
-    if (parent.isValid())
+    if(parent.isValid()) {
         return 0;
-#endif
+    }
     return mPlayers.size();
 }
 
-QVariant PlayerList::data(const QModelIndex &index, int role) const {
-    if (!index.isValid()) {
+QVariant PlayerList::data(const QModelIndex &index, int /* role */) const {
+    if(!index.isValid()) {
         return QVariant();
     }
     quint32 playerId = mPlayerIndices.at(index.row());
@@ -73,13 +72,13 @@ void PlayerList::sort(int column, Qt::SortOrder order) {
 }
 #endif
 
-#if 0
 void PlayerList::clear(void) {
     beginResetModel();
     mPlayers.clear();
+    mJerseyNumbers.clear();
+    mPlayerIndices.clear();
     endResetModel();
 }
-#endif
 
 QHash<int, QByteArray> PlayerList::roleNames() const {
     QHash<int, QByteArray> roles;

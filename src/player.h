@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 Roland Hostettler
+ * Copyright 2014-present Roland Hostettler
  *
  * This file is part of swisshockey.
  *
@@ -33,15 +33,11 @@ class Player : public QObject {
     private:
         const qulonglong mTeamId;
         const quint32 mPlayerId;
-
         QString mFirstName;
         QString mLastName;
-
         quint8 mJerseyNumber;
-
         quint8 mLineNumber;
         quint8 mPosition;
-
         //QVector<QString> mStats;
 
     public:
@@ -98,10 +94,6 @@ class Player : public QObject {
         // However, that does not solve the problem of finding players by their jersey number
         bool operator ==(Player const &other) const;
         bool operator !=(Player const &other) const;
-
-    signals:
-
-    public slots:
 };
 
 #endif // PLAYER_H

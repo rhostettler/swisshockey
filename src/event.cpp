@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 Roland Hostettler
+ * Copyright 2014-present Roland Hostettler
  *
  * This file is part of swisshockey.
  *
@@ -122,24 +122,6 @@ QString Event::getPlayerString(void) const {
     return player->getName();
 }
 
-#if 0
-// TODO: These things should be done in the GameData class, really. Kept for
-// convenience for now.
-QString Event::getAdditionalInfo(void) const {
-    QString info("Temporary regression.");
-    switch(this->mType) {
-        case Event::GOAL:
-            break;
-        case Event::PENALTY:
-            break;
-        default:
-            break;
-    }
-
-    return info;
-}
-#endif
-
 QString Event::getValue(void) const {
     QString event("");
     switch(this->mType) {
@@ -225,7 +207,7 @@ bool Event::lessThan(const Event *e1, const Event *e2) {
     return !Event::greaterThan(e1, e2);
 }
 
-QList<QString> Event::penaltyTexts = QList<QString>()
+QList<QString> Event::PenaltyTexts = QList<QString>()
     << QString("Other penalty")
     << QString("Abuse of officials by team officials")
     << QString("Women body check")
@@ -263,5 +245,5 @@ QList<QString> Event::penaltyTexts = QList<QString>()
     << QString("Illegal change of players");
 
 QString Event::getPenaltyText(int id) {
-    return Event::penaltyTexts.value(id, "Unknown penalty");
+    return Event::PenaltyTexts.value(id, "Unknown penalty");
 }

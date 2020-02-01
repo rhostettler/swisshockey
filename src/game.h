@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 Roland Hostettler
+ * Copyright 2014-present Roland Hostettler
  *
  * This file is part of swisshockey.
  *
@@ -17,22 +17,11 @@
  * swisshockey. If not, see http://www.gnu.org/licenses/.
  */
 
-
-/*
- * TODO:
- *  * This should not be a AbstractListModel anymore; these things are delegated to EventList and PlayerList, respectively.
- */
-
 #ifndef GAME_H
 #define GAME_H
 
 #include <QObject>
 #include <QString>
-#include <QList>
-#include <QStringList>
-#include <QVariantMap>
-#include <QMap>
-#include <QAbstractListModel>
 
 #include "eventlist.h"
 #include "event.h"
@@ -40,7 +29,7 @@
 #include "playerlist.h"
 #include "player.h"
 
-class Game : public QAbstractListModel {
+class Game : public QObject {
     Q_OBJECT
 
     Q_PROPERTY(QString hometeamId READ getHometeamId CONSTANT)
@@ -49,13 +38,11 @@ class Game : public QAbstractListModel {
     Q_PROPERTY(QString awayteamName READ getAwayteam CONSTANT)
     Q_PROPERTY(QString totalScore READ getTotalScore NOTIFY scoreChanged)
     Q_PROPERTY(QString periodsScore READ getPeriodsScore NOTIFY scoreChanged)
-    Q_PROPERTY(int gameStatus READ getGameStatus NOTIFY statusChanged)
+    Q_PROPERTY(int gameStatus READ getStatus NOTIFY statusChanged)
 
     private:
         QString mGameId;
         QString mLeagueId;
-
-        QHash<int, QByteArray> mDataRoleNames;
 
         // Home- and away team names & IDs
         QString mHometeamName;
@@ -78,14 +65,10 @@ class Game : public QAbstractListModel {
         // TODO: There should be a (public) enum with statuses, which are rendered in the UI to plain text
         int mGameStatus;
 
-        //
         static QStringList GameStatusTexts;
 
     public:
         explicit Game(QString gameId, QObject *parent = 0);
-        void updateSummary(QVariantMap data);
-        void updateGoals(QVariantList goals);
-        void updateFouls(QVariantList fouls);
         bool hasChanged(void);
         bool hasChanged(QString type);
 
@@ -110,41 +93,16 @@ class Game : public QAbstractListModel {
         QString getPeriodsScore();
 
         void setStatus(int status);
-        int getGameStatus(); // TODO: Unify notation; remove the "Game" in the getters
-        QString getGameStatusText();
+        int getStatus();
+        QString getStatusString();
 
         EventList *getEventList(void);
-
-
         PlayerList *getHometeamRoster(void);
         PlayerList *getAwayteamRoster(void);
-
-        // implementations of interface QAbstractListModel
-        enum EventRoles {
-            TeamRole = Qt::UserRole + 1,
-            TimeRole,
-            PlayerRole,
-            AdditionalInfoRole,
-            EventRole,
-            EventSubtextRole
-        };
-
-        int rowCount(const QModelIndex & parent = QModelIndex()) const;
-        QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
-        QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
-        QHash<int, QByteArray> roleNames() const;
-
-        static QString parsePlayerName(QString name);
 
     signals:
         void scoreChanged(void);
         void statusChanged(void);
-
-    public slots:
-#if 0
-        //void updateEvents(QList<Event *> gameEvents);
-        //void updateRosters(QList<Player *> players);
-#endif
 };
 
-#endif // GAMEDATA_H
+#endif // GAME_H

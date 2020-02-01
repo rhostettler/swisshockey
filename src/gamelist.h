@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 Roland Hostettler
+ * Copyright 2014-present Roland Hostettler
  *
  * This file is part of swisshockey.
  *
@@ -25,11 +25,16 @@
 
 #include "game.h"
 
+/*
+ * TODO:
+ *  * Rewrite/simplify this and remove all the unnecessary rules and make use of the Game-class' properties instead.
+ */
+
 class GameList : public QAbstractListModel {
     Q_OBJECT
 
     private:
-        QHash<int, QByteArray> roles;
+        QHash<int, QByteArray> mRoles;
         QMap<qulonglong, Game *> mGames;
         QList<qulonglong> mGameIndices;
         QString mDate; // TODO: This should be part of the Games, then we wouldn't have to bother about keeping different games. Could also add filters for the games later on.
@@ -42,7 +47,7 @@ class GameList : public QAbstractListModel {
         void updateGames(QString date, QVariantMap data);
 
         void addGame(Game *game);
-        Game * getGame(QString gameId);
+        Game *getGame(QString gameId);
 
         // implementations of interface QAbstractListModel
         enum GameRoles {
@@ -59,14 +64,10 @@ class GameList : public QAbstractListModel {
 
         int rowCount(const QModelIndex & parent = QModelIndex()) const;
         QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
-        QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
         QHash<int, QByteArray> roleNames() const;
 
-    signals:
-
     public slots:
-//        void updateData(QVariantMap data);
         void gamedataChanged(const QString & key);
 };
 
-#endif // GAMEDAYDATA_H
+#endif // GAMELIST_H

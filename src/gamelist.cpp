@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 Roland Hostettler
+ * Copyright 2014-present Roland Hostettler
  *
  * This file is part of swisshockey.
  *
@@ -24,15 +24,15 @@
 
 GameList::GameList(QObject *parent) : QAbstractListModel(parent) {
     // Initialize the different data roles that can be used by the ListView
-    this->roles[HometeamRole] = "hometeam";
-    this->roles[HometeamIdRole] = "hometeamId";
-    this->roles[AwayteamRole] = "awayteam";
-    this->roles[AwayteamIdRole] = "awayteamId";
-    this->roles[TotalScoreRole] = "totalscore";
-    this->roles[PeriodsScoreRole] = "periodsscore";
-    this->roles[GameStatusRole] = "gamestatus";
-    this->roles[GameIdRole] = "gameid";
-    this->roles[LeagueRole] = "league";
+    this->mRoles[HometeamRole] = "hometeam";
+    this->mRoles[HometeamIdRole] = "hometeamId";
+    this->mRoles[AwayteamRole] = "awayteam";
+    this->mRoles[AwayteamIdRole] = "awayteamId";
+    this->mRoles[TotalScoreRole] = "totalscore";
+    this->mRoles[PeriodsScoreRole] = "periodsscore";
+    this->mRoles[GameStatusRole] = "gamestatus";
+    this->mRoles[GameIdRole] = "gameid";
+    this->mRoles[LeagueRole] = "league";
 
     // Set the date to <empty>
     // TODO: We should probably work with DateTime instead of strings
@@ -42,31 +42,6 @@ GameList::GameList(QObject *parent) : QAbstractListModel(parent) {
     this->mSignalMapper = new QSignalMapper(this);
     connect(this->mSignalMapper, SIGNAL(mapped(const QString &)), this, SLOT(gamedataChanged(const QString &)));
 }
-
-#if 0
-void GameList::updateGames(QString date, QVariantMap data) {
-    // Check if we're updating the current game day or if we're given the
-    // data for a new day, in order not to accumulate a lot of old games when
-    // the app is kept open for over a day.
-    // TODO: This is ignored after moving the parsing part to the datasource
-    if(this->mDate.compare(date)) {
-        // Clear the whole list
-        this->mDate = date;
-        beginResetModel();
-        this->mGames.clear();
-        this->mGameIndices.clear();
-        endResetModel();
-    } else {
-        // NOP.
-    }
-}
-#endif
-
-// A re-implementation of the updateGames (?). Simply forward the request for now.
-/*void GamedayData::updateData(QVariantMap data) {
-    QString date = QDate::currentDate().toString("yyyy-MM-dd");
-    this->updateGames(date, data);
-}*/
 
 void GameList::gamedataChanged(const QString & key) {
     QModelIndex index = createIndex(this->mGameIndices.indexOf(key.toLongLong()), 0);
@@ -150,7 +125,7 @@ QVariant GameList::data(const QModelIndex &index, int role) const {
             break;
 
         case GameStatusRole:
-            data = this->mGames[key]->getGameStatusText();
+            data = this->mGames[key]->getStatusString();
             break;
 
         case GameIdRole:
@@ -168,14 +143,7 @@ QVariant GameList::data(const QModelIndex &index, int role) const {
     return data;
 }
 
-// Returns the header
-QVariant GameList::headerData(int section, Qt::Orientation orientation, int role) const {
-    return QVariant();
-}
-
 // Role names
 QHash<int, QByteArray> GameList::roleNames() const {
-    return this->roles;
+    return this->mRoles;
 }
-
-//QHash<int, QByteArray> GamedayData::roles = QHash<int, QByteArray>();

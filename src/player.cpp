@@ -20,8 +20,6 @@
 #include "player.h"
 
 Player::Player(qulonglong teamId, quint32 id, QObject *parent) : QObject(parent), mTeamId(teamId), mPlayerId(id) {
-    //mPlayerId = id;
-    //mTeamId = teamId;
 }
 
 quint32 Player::getPlayerId() const {
@@ -70,7 +68,6 @@ bool Player::greaterThan(const Player *p1, const Player *p2) {
     quint8 p2Position = p2->getPosition();
 
     bool greater = (p1Line > p2Line) || (p1Line == p2Line && p1Position > p2Position);
-
     return greater;
 }
 

@@ -87,8 +87,6 @@ class SIHFDataSource : public DataSource {
         QString getLeagueId(QString abbreviation);
         static const QMap<uint, League *> initLeagueList(void);
 
-    signals:
-
     public slots:
         void parseGameSummaries();
         void parseGameDetails();

@@ -257,39 +257,7 @@ void SIHFDataSource::parseGameDetails(void) {
             logger.log(Logger::ERROR, QString(Q_FUNC_INFO).append(": No player data found!"));
         }
 
-#if 0
-        QList<Player *> players;
-        if(data.contains("players")) {
-            players.append(parsePlayers(data["players"].toList()));
-
-            // TODO: Instead of emitting a signal here, simply add the players to the game
-            emit playersUpdated(players);
-        } else {
-            logger.log(Logger::ERROR, QString(Q_FUNC_INFO).append(": No player data found!"));
-        }
-
-        // Parse all the game events
-        QList<Event *> events;
-        if(data.contains("summary")) {
-            QVariantMap summary = data["summary"].toMap();
-            QVariantList periods = summary["periods"].toList();
-            QListIterator<QVariant> iter(periods);
-            while(iter.hasNext()) {
-                QVariantMap period = iter.next().toMap();
-                events.append(parseGoals(period["goals"].toList()));
-                events.append(parsePenalties(period["fouls"].toList()));
-                events.append(parseGoalkeepers(period["goalkeepers"].toList()));
-            }
-            QVariantMap shootout = summary["shootout"].toMap();
-            events.append(parseShootout(shootout["shoots"].toList()));
-            logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Number of parsed events: " + QString::number(events.size())));
-        } else {
-            logger.log(Logger::ERROR, QString(Q_FUNC_INFO).append(": No game events data found!"));
-        }
-
-        // TODO: Instead of callung "eventsUpdated" here, we would simply add the events to the corresponding game.
-        emit eventsUpdated(events);
-#endif
+        // Parse events
         EventList *events = game->getEventList();
         events->clear();
         if(data.contains("summary")) {
@@ -313,43 +281,6 @@ void SIHFDataSource::parseGameDetails(void) {
         logger.log(Logger::ERROR, QString(Q_FUNC_INFO).append(": Game with ID " + gameId + " not found, skipping update."));
     }
 }
-
-// Parse the players (legacy)
-// TODO: Old code, remove
-#if 0
-QList<Player *> SIHFDataSource::parsePlayers(QVariantList data) {
-    QList<Player *> players;
-    Logger& logger = Logger::getInstance();
-    logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Parsing player data."));
-
-    QListIterator<QVariant> iterator(data);
-    Player *player;
-    while(iterator.hasNext()) {
-        QVariantMap tmp = iterator.next().toMap();
-
-        // Get basics
-        qulonglong teamId = tmp.value("teamId").toULongLong();
-        quint32 playerId = tmp.value("id").toUInt();
-
-        // Get name
-        QString name = tmp.value("fullName").toString();
-        int index = name.lastIndexOf(" ");
-        QString lastName = name.left(index);
-        QString firstName = name.right(name.length()-index-1);//.at(index+1);
-
-        // Create the player
-        player = new Player(teamId, playerId);
-        player->setName(firstName, lastName);
-        player->setJerseyNumber(tmp.value("jerseyNumber").toUInt());
-        //this->players.insert(playerId, name);
-
-        players.append(player);
-    }
-
-    logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Found " + QString::number(players.size()) + " players."));
-    return players;
-}
-#endif
 
 // Parse players
 void SIHFDataSource::parsePlayers(Game *game, const QVariantMap &data) {
@@ -459,7 +390,6 @@ void SIHFDataSource::parseGoals(Game *game, QVariantList data) {
         quint32 scorerId = goal.value("scorerLicenceNr").toUInt();
         quint32 assist1Id = goal.value("assist1LicenceNr").toUInt();
         quint32 assist2Id = goal.value("assist2LicenceNr").toUInt();
-
 
         Event *event = new Event(Event::GOAL);
         event->setTime(goal.value("time").toString());

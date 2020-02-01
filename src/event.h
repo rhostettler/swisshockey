@@ -25,10 +25,6 @@
 #include <QList>
 #include <QMap>
 
-/* TODO:
- * * This class is quite a mess still, there's plenty of confusion and no separation of concerns between gamedata, gameevent and the details page
- */
-
 #include "player.h"
 
 class Event : public QObject {
@@ -50,7 +46,7 @@ class Event : public QObject {
             GOALKEEPER_IN
         };
 
-        // TODO: I should find better names for these I think.
+        // TODO: Find better names for these
         enum PlayerRole {
             SCORER = 1,
             FIRST_ASSIST,
@@ -84,7 +80,7 @@ class Event : public QObject {
         bool mPenaltyShot;
 
         // List of human-readable penalty texts
-        static QList<QString> penaltyTexts;
+        static QList<QString> PenaltyTexts;
 
     public:
         explicit Event(int mType);
@@ -98,27 +94,16 @@ class Event : public QObject {
         qlonglong getTeam(void);
 
         void addPlayer(int role, Player *player);
+
         void setScore(QString mScore, QString mType);
         void setPenalty(int id, QString mType);
         int getPenalty(void);
         void setPenaltyShot(bool scored);
 
-
-        // TODO: Need to code these
-        // Property getters/setters
-        //QString getEventTime(void) const;
-        //QString getPlayer(void) const;  // TODO: There's already a getPlayer further down; how do they relate? I think the problem is that we only store a license number in the gameevent but we want to return a string to the view. not sure what the best solution is to this.
-
-
-        // TODO: These are convenience methods and are to disappear/change in
-        // future versions
         Player *getPlayer(void) const;
         Player *getPlayer(int role) const;
-        QString getPlayerString(void) const;
 
-#if 0
-        QString getAdditionalInfo(void) const;
-#endif
+        QString getPlayerString(void) const;
         QString getValue(void) const;
         QString getInfo(void) const;
         QString getContext(void) const;
@@ -128,4 +113,4 @@ class Event : public QObject {
         static QString getPenaltyText(int id);
 };
 
-#endif // GAMEEVENT_H
+#endif // EVENT_H
