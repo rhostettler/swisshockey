@@ -26,22 +26,22 @@
 #include <QString>
 #include <nemonotifications-qt5/notification.h>
 
-#include "gamedata.h"
-#include "gamedaydata.h"
+#include "game.h"
+#include "gamelist.h"
 
 class Notifier : public QObject {
     Q_OBJECT
 
     private:
         bool mEnabled;
-        GamedayData *mGames;
-        GameData *mGame;
+        GameList *mGames;
+        Game *mGame;
 
     public:
-        explicit Notifier(GamedayData *games, QObject *parent = 0);
+        explicit Notifier(GameList *games, QObject *parent = 0);
         ~Notifier(void);
         void setGameId(QString id);
-        void sendNotification(GameData *game);
+        void sendNotification(Game *game);
         void enableNotifications(void);
         void disableNotifications(void);
         void clearNotifications(void);

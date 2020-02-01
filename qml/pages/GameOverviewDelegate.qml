@@ -63,7 +63,7 @@ ListItem {
         width: 96
         fillMode: Image.PreserveAspectFit
         source: "../icons/" + model.hometeamId + ".png"
-        onStatusChanged: Utils.checkIcon(homeLogo, hometeamId)
+        onStatusChanged: Utils.checkIcon(homeLogo, model.hometeamId)
     }
 
     // Awayteam logo: to the right
@@ -78,6 +78,6 @@ ListItem {
         width: 96
         fillMode: Image.PreserveAspectFit
         source: "../icons/" + model.awayteamId + ".png"
-        onStatusChanged: Utils.checkIcon(awayLogo, awayteamId)
+        onStatusChanged: Utils.checkIcon(awayLogo, model.awayteamId)
     }
 }

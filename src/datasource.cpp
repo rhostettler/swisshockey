@@ -19,6 +19,6 @@
 
 #include "datasource.h"
 
-DataSource::DataSource(GamedayData *gamesList, QObject *parent) : QObject(parent) {
+DataSource::DataSource(GameList *gamesList, QObject *parent) : QObject(parent) {
     mGamesList = gamesList;
 }

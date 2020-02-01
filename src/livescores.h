@@ -29,7 +29,7 @@
 #include <sailfishapp.h>
 
 #include "sihfdatasource.h"
-#include "gamedaydata.h"
+#include "gamelist.h"
 #include "notifier.h"
 
 class LiveScores : public QObject {
@@ -42,7 +42,7 @@ class LiveScores : public QObject {
         QString mAppVersion;
         QQuickView *mQmlViewer;
         Notifier *mNotifier;
-        GamedayData *mGamesList;
+        GameList *mGamesList;
         QSortFilterProxyModel *mLeagueFilter;
         SIHFDataSource *mDataSource;
         QTimer *mUpdateTimer;

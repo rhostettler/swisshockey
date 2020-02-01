@@ -19,10 +19,10 @@
 
 #include "notifier.h"
 #include "config.h"
-#include "gamedata.h"
+#include "game.h"
 #include "logger.h"
 
-Notifier::Notifier(GamedayData *games, QObject *parent) : QObject(parent) {
+Notifier::Notifier(GameList *games, QObject *parent) : QObject(parent) {
     mGames = games;
     mGame = NULL;
 #if 0
@@ -66,7 +66,7 @@ void Notifier::clearNotifications(void) {
     }
 }
 
-void Notifier::sendNotification(GameData *game) {
+void Notifier::sendNotification(Game *game) {
     if(mEnabled && mGame != NULL) {
         // Notification body
         // TODO: Should use team abbreviations in summary, otherwise the text is too long

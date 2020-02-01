@@ -17,11 +17,11 @@
  * swisshockey. If not, see http://www.gnu.org/licenses/.
  */
 
-#include "gamedata.h"
+#include "game.h"
 #include "logger.h"
 
 // The list of game status texts
-QStringList GameData::mGameStatusTexts = QStringList()
+QStringList Game::GameStatusTexts = QStringList()
     << QString("Not Started")    // 0
     << QString("First Period")
     << QString("End of First")
@@ -37,7 +37,7 @@ QStringList GameData::mGameStatusTexts = QStringList()
     << QString("Final");
 
 // Initialize the game
-GameData::GameData(QString gameId, QObject *parent) : QAbstractListModel(parent) {
+Game::Game(QString gameId, QObject *parent) : QAbstractListModel(parent) {
     // Store game ID
     mGameId = gameId;
 
@@ -52,7 +52,7 @@ GameData::GameData(QString gameId, QObject *parent) : QAbstractListModel(parent)
 }
 
 // Update the game score/summary
-void GameData::updateSummary(QVariantMap data) {
+void Game::updateSummary(QVariantMap data) {
     // Update the score and trigger a signal if it changed
     QMap<QString, QString> oldScore = mScore;
     QVariantMap newScore = data["score"].toMap();
@@ -75,30 +75,33 @@ void GameData::updateSummary(QVariantMap data) {
     }
 }
 
-void GameData::updateEvents(QList<GameEvent *> events) {
+// TODO: Remove once we have migrated everything.
+#if 0
+void Game::updateEvents(QList<Event *> events) {
     Logger& logger = Logger::getInstance();
     logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Updating game events."));
 
     // Clear all events
     beginResetModel();
-    mGameEvents.clear();
+    mEventList.clear();
     endResetModel();
 
     // Update the list of events (if there are any)
-    QListIterator<GameEvent *> iter(events);
+    QListIterator<Event *> iter(events);
     while(iter.hasNext()) {
         beginInsertRows(QModelIndex(), rowCount(), rowCount());
-        mGameEvents.append(iter.next());
+        mEventList.append(iter.next());
         endInsertRows();
     }
 
     // Sort the events
     // TODO: Consider sorting upside down when the game is in progress and increasing when the game is finished
     layoutAboutToBeChanged();
-    qSort(mGameEvents.begin(), mGameEvents.end(), GameEvent::greaterThan);
+    qSort(mEventList.begin(), mEventList.end(), Event::greaterThan);
     layoutChanged();
-    logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Added " + QString::number(mGameEvents.size()) + " events."));
+    logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Added " + QString::number(mEventList.size()) + " events."));
 }
+#endif
 
 #if 0
 // Parses the player list and adds them to the local list of players where we
@@ -118,49 +121,49 @@ void GameData::updateRosters(QList<Player *> players) {
 }
 #endif
 
-QString GameData::getGameId(void){
+QString Game::getGameId(void){
     return mGameId;
 }
 
-void GameData::setLeague(QString leagueId) {
+void Game::setLeague(QString leagueId) {
     mLeagueId = leagueId;
 }
 
-QString GameData::getLeague() {
+QString Game::getLeague() {
     return this->mLeagueId;
 }
 
-void GameData::setDateTime(QString time) {
+void Game::setDateTime(QString time) {
     mStartTime = time;
 }
 
-void GameData::setHometeam(QString id, QString name) {
+void Game::setHometeam(QString id, QString name) {
     mHometeamId = id.toLongLong();
     mHometeamName = name;
 }
 
-QString GameData::getHometeam() {
+QString Game::getHometeam() {
     return mHometeamName;
 }
 
-QString GameData::getHometeamId() {
+QString Game::getHometeamId() {
     return QString::number(this->mHometeamId);
 }
 
-void GameData::setAwayteam(QString id, QString name) {
+void Game::setAwayteam(QString id, QString name) {
     mAwayteamId = id.toLongLong();
     mAwayteamName = name;
 }
 
-QString GameData::getAwayteam() {
+QString Game::getAwayteam() {
     return this->mAwayteamName;
 }
 
-QString GameData::getAwayteamId() {
+QString Game::getAwayteamId() {
     return QString::number(this->mAwayteamId);
 }
 
-void GameData::setScore(QMap<QString, QString> score) {
+void Game::setScore(QMap<QString, QString> score) {
     // Update the score and trigger a signal if it changed
     QMap<QString, QString> oldScore = mScore;
     mScore = score;
@@ -169,11 +172,11 @@ void GameData::setScore(QMap<QString, QString> score) {
     }
 }
 
-QString GameData::getTotalScore() {
+QString Game::getTotalScore() {
     return this->mScore["total"];
 }
 
-QString GameData::getPeriodsScore() {
+QString Game::getPeriodsScore() {
     QString score = mScore.value("first") + ", " + mScore.value("second") + ", " + mScore.value("third");
 
     if(mScore.contains("overtime")) {
@@ -183,7 +186,7 @@ QString GameData::getPeriodsScore() {
     return score;
 }
 
-void GameData::setStatus(int status) {
+void Game::setStatus(int status) {
     // Update the game status and trigger a signal if it changed
     int oldStatus = mGameStatus;
     mGameStatus = status;
@@ -192,43 +195,54 @@ void GameData::setStatus(int status) {
     }
 }
 
-int GameData::getGameStatus() {
+int Game::getGameStatus() {
     return this->mGameStatus;
 }
 
-QString GameData::getGameStatusText() {
+QString Game::getGameStatusText() {
     QString text;
     if(this->mGameStatus == 0) {
         text = "Starts " + this->mStartTime;
     } else {
-        text = GameData::mGameStatusTexts.value(this->mGameStatus, "Unknown status");
+        text = Game::GameStatusTexts.value(this->mGameStatus, "Unknown status");
     }
 
     return text;
 }
 
-QMap<quint32, Player *> *GameData::getRoster() {
-    return &mRoster;
+EventList *Game::getEventList(void) {
+    return &mEventList;
 }
 
+PlayerList *Game::getHometeamRoster() {
+    return &mHometeamRoster;
+}
+
+PlayerList *Game::getAwayteamRoster() {
+    return &mAwayteamRoster;
+}
 
 // Implementation of the QAbstractListModel methods
 // Returns the number of rows in the list
-int GameData::rowCount(const QModelIndex &parent) const {
-    return this->mGameEvents.count();
+int Game::rowCount(const QModelIndex &parent) const {
+    //return this->mEventList.count();
+    return 0;
 }
 
 // Returns the data requested by the view
-QVariant GameData::data(const QModelIndex &index, int role) const {
+QVariant Game::data(const QModelIndex &index, int role) const {
     QVariant data;
     int key = index.row();
-    GameEvent *event = this->mGameEvents[key];
+#if 0
+    Event *event = this->mEventList[key];
 
     switch(role) {
+            // migration ok
         case TeamRole:
             data = event->getTeam();
             break;
 
+            // migration ok
         case TimeRole: {
                 float tmp = event->getTime();
                 quint32 minutes = (int)tmp/60;
@@ -239,6 +253,7 @@ QVariant GameData::data(const QModelIndex &index, int role) const {
             }
             break;
 
+        // migration ok
         case PlayerRole: {
                 quint32 id = event->getPlayer();
                 Player *player = mRoster.value(id, NULL);
@@ -251,16 +266,17 @@ QVariant GameData::data(const QModelIndex &index, int role) const {
             }
             break;
 
+        // migration ok
         case AdditionalInfoRole: {
                 int type = event->getType();
                 switch(type) {
-                    case GameEvent::GOAL: {
+                    case Event::GOAL: {
                             QString text = "";
-                            Player *player = mRoster.value(event->getPlayer(GameEvent::FIRST_ASSIST), NULL);
+                            Player *player = mRoster.value(event->getPlayer(Event::FIRST_ASSIST), NULL);
                             if(player != NULL) {
                                 text.append(player->getName());
                             }
-                            player = mRoster.value(event->getPlayer(GameEvent::SECOND_ASSIST), NULL);
+                            player = mRoster.value(event->getPlayer(Event::SECOND_ASSIST), NULL);
                             if(player != NULL) {
                                 text.append(", " + player->getName());
                             }
@@ -268,19 +284,19 @@ QVariant GameData::data(const QModelIndex &index, int role) const {
                         }
                         break;
 
-                    case GameEvent::PENALTY:
-                        data = GameEvent::getPenaltyText(event->getPenalty());
+                    case Event::PENALTY:
+                        data = Event::getPenaltyText(event->getPenalty());
                         break;
 
-                    case GameEvent::GOALKEEPER_IN:
+                    case Event::GOALKEEPER_IN:
                         data = "Goalkeeper in";
                         break;
 
-                    case GameEvent::GOALKEEPER_OUT:
+                    case Event::GOALKEEPER_OUT:
                         data = "Goalkeeper out";
                         break;
 
-                    case GameEvent::PENALTY_SHOT:
+                    case Event::PENALTY_SHOT:
                         data = "Goalkeeper: "; //+ this->players.value(event->getPlayer(GameEvent::GOALKEEPER), "");
                         break;
 
@@ -301,16 +317,17 @@ QVariant GameData::data(const QModelIndex &index, int role) const {
         default:
             break;
     }
+#endif
 
     return data;
 }
 
 // Returns the header
-QVariant GameData::headerData(int section, Qt::Orientation orientation, int role) const {
+QVariant Game::headerData(int section, Qt::Orientation orientation, int role) const {
     return QVariant();
 }
 
 // Role names for QML
-QHash<int, QByteArray> GameData::roleNames() const {
+QHash<int, QByteArray> Game::roleNames() const {
     return this->mDataRoleNames;
 }

@@ -69,7 +69,7 @@ bool Player::greaterThan(const Player *p1, const Player *p2) {
     quint8 p2Line = p2->getLineNumber();
     quint8 p2Position = p2->getPosition();
 
-    bool greater = (p1Line > p2Line) || (p1line == p2line && p1Position > p2Position);
+    bool greater = (p1Line > p2Line) || (p1Line == p2Line && p1Position > p2Position);
 
     return greater;
 }

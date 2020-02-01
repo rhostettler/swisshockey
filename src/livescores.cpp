@@ -39,13 +39,13 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
     mAppName.append(APP_NAME);
 
     // Create the data store and setup the data provider
-    mGamesList = new GamedayData(this);
+    mGamesList = new GameList(this);
     mDataSource = new SIHFDataSource(mGamesList, this);
 
     // Create a filter for the league, acts as a proxy between the view and the
     // data store
     mLeagueFilter = new QSortFilterProxyModel(this);
-    mLeagueFilter->setFilterRole(GamedayData::LeagueRole);
+    mLeagueFilter->setFilterRole(GameList::LeagueRole);
     mLeagueFilter->setDynamicSortFilter(true);
     mLeagueFilter->setFilterKeyColumn(0);  // We only have the 0-column
     mLeagueFilter->setFilterRegExp(".*");
@@ -122,19 +122,15 @@ void LiveScores::updateView(QString id) {
     mSelectedGameId = id;
     mNotifier->setGameId(id);
 
-    GameData *game = mGamesList->getGame(id);
+    Game *game = mGamesList->getGame(id);
     if(game != NULL) {
-        // Set the game id in the DataSource & force update
-        // TODO: These signal connections should be removed: Since we're providing the game id to DataSource,
-        // the data source should know which game the details belong to. In fact, the game details response should
-        // include the game id as well and we should be able to set the game details using that.
-        connect(mDataSource, SIGNAL(eventsUpdated(QList<GameEvent *>)), game, SLOT(updateEvents(QList<GameEvent *>)));
+        // Force a details update for the specified game
         mDataSource->getGameDetails(id);
 
         // Set the details data models
         QQmlContext *context = mQmlViewer->rootContext();
         context->setContextProperty("gameDetailsData", game);
-        context->setContextProperty("gameEventsData", game);
+        context->setContextProperty("gameEventsData", QVariant::fromValue(game->getEventList()));
 
         // TODO: Set home & away team rosters here
         // TODO: Now we have a freakin' map of players, we need this to be a QList or QVector to work out of the box. Meh.

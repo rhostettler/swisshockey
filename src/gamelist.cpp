@@ -19,10 +19,10 @@
 
 #include <QDate>
 
-#include "gamedaydata.h"
+#include "gamelist.h"
 #include "logger.h"
 
-GamedayData::GamedayData(QObject *parent) : QAbstractListModel(parent) {
+GameList::GameList(QObject *parent) : QAbstractListModel(parent) {
     // Initialize the different data roles that can be used by the ListView
     this->roles[HometeamRole] = "hometeam";
     this->roles[HometeamIdRole] = "hometeamId";
@@ -43,7 +43,8 @@ GamedayData::GamedayData(QObject *parent) : QAbstractListModel(parent) {
     connect(this->mSignalMapper, SIGNAL(mapped(const QString &)), this, SLOT(gamedataChanged(const QString &)));
 }
 
-void GamedayData::updateGames(QString date, QVariantMap data) {
+#if 0
+void GameList::updateGames(QString date, QVariantMap data) {
     // Check if we're updating the current game day or if we're given the
     // data for a new day, in order not to accumulate a lot of old games when
     // the app is kept open for over a day.
@@ -59,6 +60,7 @@ void GamedayData::updateGames(QString date, QVariantMap data) {
         // NOP.
     }
 }
+#endif
 
 // A re-implementation of the updateGames (?). Simply forward the request for now.
 /*void GamedayData::updateData(QVariantMap data) {
@@ -66,12 +68,12 @@ void GamedayData::updateGames(QString date, QVariantMap data) {
     this->updateGames(date, data);
 }*/
 
-void GamedayData::gamedataChanged(const QString & key) {
+void GameList::gamedataChanged(const QString & key) {
     QModelIndex index = createIndex(this->mGameIndices.indexOf(key.toLongLong()), 0);
     emit dataChanged(index, index);
 }
 
-void GamedayData::addGame(GameData *game) {
+void GameList::addGame(Game *game) {
     // TODO: Add debuggin information
 
     qulonglong key = game->getGameId().toULongLong();
@@ -97,9 +99,9 @@ void GamedayData::addGame(GameData *game) {
     }
 }
 
-GameData* GamedayData::getGame(QString gameId) {
+Game* GameList::getGame(QString gameId) {
     qulonglong key = gameId.toULongLong();
-    GameData *game;
+    Game *game;
     if(this->mGames.contains(key)) {
         game = mGames[key];
     } else {
@@ -111,12 +113,12 @@ GameData* GamedayData::getGame(QString gameId) {
 
 // Impelementation of QAbstractListModel follows below
 // Returns the number of rows in the list
-int GamedayData::rowCount(const QModelIndex &parent) const {
+int GameList::rowCount(const QModelIndex &parent) const {
     return this->mGames.count();
 }
 
 // Returns the data requested by the view
-QVariant GamedayData::data(const QModelIndex &index, int role) const {
+QVariant GameList::data(const QModelIndex &index, int role) const {
     QVariant data;
 
     // Map from the ListView index to the game key
@@ -167,12 +169,12 @@ QVariant GamedayData::data(const QModelIndex &index, int role) const {
 }
 
 // Returns the header
-QVariant GamedayData::headerData(int section, Qt::Orientation orientation, int role) const {
+QVariant GameList::headerData(int section, Qt::Orientation orientation, int role) const {
     return QVariant();
 }
 
 // Role names
-QHash<int, QByteArray> GamedayData::roleNames() const {
+QHash<int, QByteArray> GameList::roleNames() const {
     return this->roles;
 }
 

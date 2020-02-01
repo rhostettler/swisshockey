@@ -20,6 +20,13 @@
 #include <cmath>
 
 #include "sihfdatasource.h"
+
+#include "eventlist.h"
+#include "event.h"
+
+#include "playerlist.h"
+#include "player.h"
+
 #include "logger.h"
 #include "league.h"
 
@@ -27,7 +34,7 @@
 const QString SIHFDataSource::SCORES_URL = "http://data.sihf.ch/Statistic/api/cms/table?alias=today&size=today&searchQuery=1,2,8,10,11//1,2,8,81,90&filterQuery=&orderBy=gameLeague&orderByDescending=false&take=20&filterBy=League&skip=0&language=de";
 const QString SIHFDataSource::DETAILS_URL = "http://data.sihf.ch/statistic/api/cms/gameoverview?alias=gameDetail&language=de&searchQuery=";
 
-SIHFDataSource::SIHFDataSource(GamedayData *gamesList, QObject *parent) : DataSource(gamesList, parent) {
+SIHFDataSource::SIHFDataSource(GameList *gamesList, QObject *parent) : DataSource(gamesList, parent) {
     // Create the network access objects
     mNetworkManager = new QNetworkAccessManager(this);
     mJSONDecoder = new JsonDecoder(this);
@@ -92,11 +99,11 @@ void SIHFDataSource::parseGame(const QVariantList &data) {
         // Get game ID
         QVariantMap details = data[SIHFDataSource::GS_DETAILS].toMap();
         QString gameId = details.value("gameId").toString();
-        GameData *game = mGamesList->getGame(gameId);
+        Game *game = mGamesList->getGame(gameId);
 
         if(game == NULL) {
             // Create a new game
-            game = new GameData(gameId, mGamesList);
+            game = new Game(gameId, mGamesList);
 
             // Set game info; this is static info, so we only do it the first time
             QString league = data[SIHFDataSource::GS_LEAGUE_NAME].toString();
@@ -240,7 +247,7 @@ void SIHFDataSource::parseGameDetails(void) {
     // Convert from JSON to a map, then parse the game details
     QVariantMap data = mJSONDecoder->decode(rawdata);
     QString gameId = data["gameId"].toString();
-    GameData *game = mGamesList->getGame(gameId);
+    Game *game = mGamesList->getGame(gameId);
     if(game != NULL) {
         // Parse all the players; this is done before parsing the events to ensure
         // that the players can be found when the events are rendered in the UI
@@ -260,10 +267,9 @@ void SIHFDataSource::parseGameDetails(void) {
         } else {
             logger.log(Logger::ERROR, QString(Q_FUNC_INFO).append(": No player data found!"));
         }
-#endif
 
         // Parse all the game events
-        QList<GameEvent *> events;
+        QList<Event *> events;
         if(data.contains("summary")) {
             QVariantMap summary = data["summary"].toMap();
             QVariantList periods = summary["periods"].toList();
@@ -283,13 +289,34 @@ void SIHFDataSource::parseGameDetails(void) {
 
         // TODO: Instead of callung "eventsUpdated" here, we would simply add the events to the corresponding game.
         emit eventsUpdated(events);
+#endif
+        EventList *events = game->getEventList();
+        events->clear();
+        if(data.contains("summary")) {
+            QVariantMap summary = data["summary"].toMap();
+            QVariantList periods = summary["periods"].toList();
+            QListIterator<QVariant> iter(periods);
+            while(iter.hasNext()) {
+                QVariantMap period = iter.next().toMap();
+                parseGoals(game, period["goals"].toList());
+                parsePenalties(game, period["fouls"].toList());
+                parseGoalkeepers(game, period["goalkeepers"].toList());
+            }
+            QVariantMap shootout = summary["shootout"].toMap();
+            parseShootout(game, shootout["shoots"].toList());
+            events->sort();
+            logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Number of parsed events: "));// + QString::number(events->size())));
+        } else {
+            logger.log(Logger::ERROR, QString(Q_FUNC_INFO).append(": No game events data found!"));
+        }
     } else {
         logger.log(Logger::ERROR, QString(Q_FUNC_INFO).append(": Game with ID " + gameId + " not found, skipping update."));
     }
 }
 
 // Parse the players (legacy)
-// TODO: Remove
+// TODO: Old code, remove
+#if 0
 QList<Player *> SIHFDataSource::parsePlayers(QVariantList data) {
     QList<Player *> players;
     Logger& logger = Logger::getInstance();
@@ -322,18 +349,17 @@ QList<Player *> SIHFDataSource::parsePlayers(QVariantList data) {
     logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Found " + QString::number(players.size()) + " players."));
     return players;
 }
-
-// TODO: New code starts here
+#endif
 
 // Parse players
-void SIHFDataSource::parsePlayers(GameData *game, const QVariantMap &data) {
+void SIHFDataSource::parsePlayers(Game *game, const QVariantMap &data) {
     Logger& logger = Logger::getInstance();
     logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Parsing player data."));
 
     // Get/update the roster(s)
-    QMap<quint32, Player *> *players = game->getRoster();
-    QMap<quint8, quint32> homeJerseyNumberMapping;
-    QMap<quint8, quint32> awayJerseyNumberMapping;
+    // TODO: Split into hometeam/awayteam
+    PlayerList *hometeamPlayers = game->getHometeamRoster();
+    PlayerList *awayteamPlayers = game->getAwayteamRoster();
     QVariantList playersData = data["players"].toList();
     QListIterator<QVariant> iterator(playersData);
     Player *player;
@@ -359,31 +385,20 @@ void SIHFDataSource::parsePlayers(GameData *game, const QVariantMap &data) {
         player->setJerseyNumber(jerseyNumber);
 
         // Add the player to the list of players and to the number <=> license map
-        players->insert(playerId, player);
         if(teamId == game->getHometeamId().toULongLong()) {
-            homeJerseyNumberMapping.insert(jerseyNumber, playerId);
+            hometeamPlayers->insert(player);;
         } else {
-            awayJerseyNumberMapping.insert(jerseyNumber, playerId);
+            awayteamPlayers->insert(player);
         }
-
-#if 0
-        int playerIndex = players->indexOf(player);
-        if(playerIndex == -1) {
-            players->append(player);
-        } else {
-            players->replace(playerIndex, player);
-        }
-#endif
     }
-    logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Found " + QString::number(players->size()) + " players."));
+    logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Found a bunch of players.")); // + QString::number(players->size()) + " players."));
 
     // Line-ups
-    // TODO: "players" will be a hometeam and awayteam roster in the end. no big issue for now.
     // TODO: We should add some safeguards here as well; the lineups might not be set yet.
     QVariantMap tmp = data["lineUps"].toMap();
-    parseLineup(players, tmp["homeTeam"].toMap());
-    parseLineup(players, tmp["awayTeam"].toMap());
-    qSort(players->begin(), players->end(), Player::lessThan); // TODO: Add another row for hometeam/awayteam
+    parseLineup(hometeamPlayers, tmp["homeTeam"].toMap());
+    parseLineup(awayteamPlayers, tmp["awayTeam"].toMap());
+    //std::sort(players->begin(), players->end(), Player::lessThan); // TODO: Add another row for hometeam/awayteam
 
     // TODO: Parse player stats
 
@@ -391,7 +406,7 @@ void SIHFDataSource::parsePlayers(GameData *game, const QVariantMap &data) {
 
 // The lineup is quite nested in the JSON data, hence we need to "unfold" it.
 // The actual assignments are done in "parsePosition()" below.
-void SIHFDataSource::parseLineup(QMap<quint32, Player *> *players, const QVariantMap &data) {
+void SIHFDataSource::parseLineup(PlayerList *players, const QVariantMap &data) {
     // Goalkeepers
     QVariantList goalkeepers = data["goalkeepers"].toList();
     parsePosition(players, goalkeepers, Player::POSITION_GK);
@@ -414,14 +429,14 @@ void SIHFDataSource::parseLineup(QMap<quint32, Player *> *players, const QVarian
 }
 
 // Makes the assignment (position, line number) => player
-void SIHFDataSource::parsePosition(QMap<quint32, Player *> *players, const QVariantList &data, const quint8 position) {
+void SIHFDataSource::parsePosition(PlayerList *players, const QVariantList &data, const quint8 position) {
     quint32 playerId = 0;
     Player *player = NULL;
 
     quint8 nLines = data.size();
     for(int iLineNumber = 0; iLineNumber < nLines; iLineNumber++) {
         playerId = data.at(iLineNumber).toUInt();
-        player = players->value(playerId);
+        player = players->getPlayer(playerId);
         player->setPosition(position);
         if(position == Player::POSITION_GK) {
             player->setLineNumber(0);
@@ -431,17 +446,24 @@ void SIHFDataSource::parsePosition(QMap<quint32, Player *> *players, const QVari
     }
 }
 
-// TODO: New code ends here.
-
 // Parses the goals data and returns an unsorted QList<GameEvent>
-QList<GameEvent *> SIHFDataSource::parseGoals(QVariantList data) {
-    QList<GameEvent *> events;
+void SIHFDataSource::parseGoals(Game *game, QVariantList data) {
+    EventList *events = game->getEventList();
+    PlayerList *hometeamPlayers = game->getHometeamRoster();
+    PlayerList *awayteamPlayers = game->getAwayteamRoster();
+
     QListIterator<QVariant> iterator(data);
     while(iterator.hasNext()) {
         QVariantMap goal = iterator.next().toMap();
-        GameEvent *event = new GameEvent(GameEvent::GOAL);
+        qulonglong teamId = goal.value("teamId").toLongLong();
+        quint32 scorerId = goal.value("scorerLicenceNr").toUInt();
+        quint32 assist1Id = goal.value("assist1LicenceNr").toUInt();
+        quint32 assist2Id = goal.value("assist2LicenceNr").toUInt();
+
+
+        Event *event = new Event(Event::GOAL);
         event->setTime(goal.value("time").toString());
-        event->setTeam(goal.value("teamId").toUInt());
+        event->setTeam(teamId);
 
         // Parse the goal text to extract the score and play (PP1 / EQ / etc.).
         // The format is '**EQ,GWG** / **0:1** - <Player Names>'.
@@ -453,75 +475,110 @@ QList<GameEvent *> SIHFDataSource::parseGoals(QVariantList data) {
         scoreNeedle.indexIn(haystack);
         QString score = scoreNeedle.cap(1);
         event->setScore(score, type);
-        event->addPlayer(GameEvent::SCORER, goal.value("scorerLicenceNr").toUInt());
-        event->addPlayer(GameEvent::FIRST_ASSIST, goal.value("assist1LicenceNr").toUInt());
-        event->addPlayer(GameEvent::SECOND_ASSIST, goal.value("assist2LicenceNr").toUInt());
-        events.append(event);
+        if(teamId == game->getHometeamId().toULongLong()) {
+            event->addPlayer(Event::SCORER, hometeamPlayers->getPlayer(scorerId));
+            event->addPlayer(Event::FIRST_ASSIST, hometeamPlayers->getPlayer(assist1Id));
+            event->addPlayer(Event::SECOND_ASSIST, hometeamPlayers->getPlayer(assist2Id));
+        } else {
+            event->addPlayer(Event::SCORER, awayteamPlayers->getPlayer(scorerId));
+            event->addPlayer(Event::FIRST_ASSIST, awayteamPlayers->getPlayer(assist1Id));
+            event->addPlayer(Event::SECOND_ASSIST, awayteamPlayers->getPlayer(assist2Id));
+        }
+        events->insert(event);
     }
-
-    return events;
 }
 
 // Parses the penalties data and returns an unsorted QList<GameEvent>
-QList<GameEvent *> SIHFDataSource::parsePenalties(QVariantList data) {
-    QList<GameEvent *> events;
+void SIHFDataSource::parsePenalties(Game *game, QVariantList data) {
+    EventList *events = game->getEventList();
+    PlayerList *hometeamPlayers = game->getHometeamRoster();
+    PlayerList *awayteamPlayers = game->getAwayteamRoster();
+
     QListIterator<QVariant> iterator(data);
     while(iterator.hasNext()) {
         QVariantMap penalty = iterator.next().toMap();
-        GameEvent *event = new GameEvent(GameEvent::PENALTY);
-        event->setTime(penalty.value("time").toString());
-        event->setTeam(penalty.value("teamId").toLongLong());
-        event->addPlayer(GameEvent::PENALIZED, penalty.value("playerLicenceNr").toUInt());
-        event->setPenalty(penalty.value("id").toInt(), penalty.value("minutes").toString() + "'");
-        events.append(event);
-    }
+        qulonglong teamId = penalty.value("teamId").toLongLong();
+        quint32 playerId = penalty.value("playerLicenceNr").toUInt();
 
-    return events;
+        Event *event = new Event(Event::PENALTY);
+        event->setTime(penalty.value("time").toString());
+        event->setTeam(teamId);
+        if(teamId == game->getHometeamId().toULongLong()) {
+            event->addPlayer(Event::PENALIZED, hometeamPlayers->getPlayer(playerId));
+        } else {
+            event->addPlayer(Event::PENALIZED, awayteamPlayers->getPlayer(playerId));
+        }
+        event->setPenalty(penalty.value("id").toInt(), penalty.value("minutes").toString() + "'");
+        events->insert(event);
+    }
 }
 
 // Parses the GK events
-QList<GameEvent *> SIHFDataSource::parseGoalkeepers(QVariantList data) {
-    QList<GameEvent *> events;
+void SIHFDataSource::parseGoalkeepers(Game *game, QVariantList data) {
+    EventList *events = game->getEventList();
+    PlayerList *hometeamPlayers = game->getHometeamRoster();
+    PlayerList *awayteamPlayers = game->getAwayteamRoster();
+
     QListIterator<QVariant> iterator(data);
     while(iterator.hasNext()) {
         QVariantMap tmp = iterator.next().toMap();
+        qulonglong teamId = tmp.value("teamId").toLongLong();
+        quint32 playerId = tmp.value("playerLicenceNr").toUInt();
+
         // Parse the action from the human readable data since it isn't provided in the data
         // The format is '<Player Name> (ACTION)'. where ACTION is either IN or OUT
-        int type = GameEvent::GOALKEEPER_OUT;
+        int type = Event::GOALKEEPER_OUT;
         QString haystack = tmp.value("text").toString();
         QRegExp needle("\\(IN\\)");
         if(needle.indexIn(haystack) != -1) {
-            type = GameEvent::GOALKEEPER_IN;
+            type = Event::GOALKEEPER_IN;
         }
-        GameEvent *event = new GameEvent(type);
+        Event *event = new Event(type);
         event->setTime(tmp.value("time").toString());
-        event->setTeam(tmp.value("teamId").toLongLong());
-        event->addPlayer(GameEvent::GOALKEEPER, tmp.value("playerLicenceNr").toUInt());
-        events.append(event);
+        event->setTeam(teamId);
+        if(teamId == game->getHometeamId().toULongLong()) {
+            event->addPlayer(Event::GOALKEEPER, hometeamPlayers->getPlayer(playerId));
+        } else {
+            event->addPlayer(Event::GOALKEEPER, awayteamPlayers->getPlayer(playerId));
+        }
+        events->insert(event);
     }
-
-    return events;
 }
 
 // Parse shootout
-QList<GameEvent *> SIHFDataSource::parseShootout(QVariantList data) {
+void SIHFDataSource::parseShootout(Game *game, QVariantList data) {
     Logger& logger = Logger::getInstance();
     logger.log(Logger::DEBUG, "SIHFDataSource:parseShootout(): Parsing shootout, " + QString::number(data.size()) + " shots.");
 
-    QList<GameEvent *> events;
+    EventList *events = game->getEventList();
+    PlayerList *hometeamPlayers = game->getHometeamRoster();
+    PlayerList *awayteamPlayers = game->getAwayteamRoster();
+
     QListIterator<QVariant> iterator(data);
     while(iterator.hasNext()) {
         QVariantMap tmp = iterator.next().toMap();
-        GameEvent *event = new GameEvent(GameEvent::PENALTY_SHOT);
+        quint32 scorerId = tmp["scorerLicenceNr"].toUInt();
+        quint32 goalkeeperId = tmp["goalkeeperLiceneNr"].toUInt();
+
+        // Determine the team based on whether a player can be found in the
+        // hometeam's roster or not.
+        Player *scorer = hometeamPlayers->getPlayer(scorerId);
+        Player *goalkeeper = hometeamPlayers->getPlayer(goalkeeperId);
+        qulonglong teamId = game->getHometeamId().toULongLong();
+        if(scorer == nullptr) {
+            scorer = awayteamPlayers->getPlayer(scorerId);
+            goalkeeper = awayteamPlayers->getPlayer(goalkeeperId);
+            teamId = game->getAwayteamId().toULongLong();
+        }
+
+        Event *event = new Event(Event::PENALTY_SHOT);
         event->setTime("65:00." + tmp["number"].toString());
         event->setPenaltyShot(tmp["scored"].toBool());
-        //event->setTeam(); <- Team is not set here :(
-        event->addPlayer(GameEvent::SCORER, tmp["scorerLicenceNr"].toUInt());
-        event->addPlayer(GameEvent::GOALKEEPER, tmp["goalkeeperLiceneNr"].toUInt());
-        events.append(event);
+        event->setTeam(teamId);
+        event->addPlayer(Event::SCORER, scorer);
+        event->addPlayer(Event::GOALKEEPER, goalkeeper);
+        events->insert(event);
     }
-
-    return events;
 }
 
 // Update the data from this source

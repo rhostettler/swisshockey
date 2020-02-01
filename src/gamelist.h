@@ -17,32 +17,32 @@
  * swisshockey. If not, see http://www.gnu.org/licenses/.
  */
 
-#ifndef GAMEDAYDATA_H
-#define GAMEDAYDATA_H
+#ifndef GAMELIST_H
+#define GAMELIST_H
 
 #include <QAbstractListModel>
 #include <QSignalMapper>
 
-#include "gamedata.h"
+#include "game.h"
 
-class GamedayData : public QAbstractListModel {
+class GameList : public QAbstractListModel {
     Q_OBJECT
 
     private:
         QHash<int, QByteArray> roles;
-        QMap<qulonglong, GameData *> mGames;
+        QMap<qulonglong, Game *> mGames;
         QList<qulonglong> mGameIndices;
         QString mDate; // TODO: This should be part of the Games, then we wouldn't have to bother about keeping different games. Could also add filters for the games later on.
         QSignalMapper *mSignalMapper;
 
     public:
-        explicit GamedayData(QObject *parent = 0);
+        explicit GameList(QObject *parent = 0);
 
         // date: date of the gameday, data: the list of games
         void updateGames(QString date, QVariantMap data);
 
-        void addGame(GameData *game);
-        GameData * getGame(QString gameId);
+        void addGame(Game *game);
+        Game * getGame(QString gameId);
 
         // implementations of interface QAbstractListModel
         enum GameRoles {

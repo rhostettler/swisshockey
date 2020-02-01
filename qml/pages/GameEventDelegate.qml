@@ -20,7 +20,7 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 
-Item {
+ListItem {
     width: parent.width
     height: Theme.itemSizeLarge
 
@@ -39,7 +39,7 @@ Item {
             pixelSize: Theme.fontSizeMedium
         }
         color: Theme.highlightColor
-        text: eventtime
+        text: model.event.time
     }
 
     // Label containing the player
@@ -54,7 +54,7 @@ Item {
             pixelSize: Theme.fontSizeMedium
         }
         color: Theme.highlightColor
-        text: eventplayer
+        text: model.event.player
     }
 
     // Label containing the assist or penalty type
@@ -68,7 +68,7 @@ Item {
             pixelSize: Theme.fontSizeMedium
         }
         color: Theme.secondaryColor
-        text: eventinfo
+        text: model.event.info
     }
 
     // Label containing the score or the penalty
@@ -86,7 +86,7 @@ Item {
             pixelSize: Theme.fontSizeMedium
         }
         color: Theme.highlightColor
-        text: eventtext
+        text: model.event.value
     }
 
     // Additional text under the score/penalty
@@ -103,6 +103,6 @@ Item {
             pixelSize: Theme.fontSizeMedium
         }
         color: Theme.secondaryColor
-        text: eventsubtext
+        text: model.event.context
     }
 }

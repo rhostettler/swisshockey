@@ -17,8 +17,8 @@
  * swisshockey. If not, see http://www.gnu.org/licenses/.
  */
 
-#ifndef GAMEEVENT_H
-#define GAMEEVENT_H
+#ifndef EVENT_H
+#define EVENT_H
 
 #include <QObject>
 #include <QString>
@@ -29,11 +29,17 @@
  * * This class is quite a mess still, there's plenty of confusion and no separation of concerns between gamedata, gameevent and the details page
  */
 
-class GameEvent : public QObject {
+#include "player.h"
+
+class Event : public QObject {
     Q_OBJECT
 
-    //Q_PROPERTY(QString time READ getEventTime)
-    //Q_PROPERTY(QString player READ getPlayer)
+    Q_PROPERTY(qlonglong mTeam READ getTeam CONSTANT)
+    Q_PROPERTY(QString time READ getTimeString CONSTANT)
+    Q_PROPERTY(QString player READ getPlayerString CONSTANT) // TODO: Should be migrated to getPlayer
+    Q_PROPERTY(QString info READ getInfo CONSTANT)
+    Q_PROPERTY(QString value READ getValue CONSTANT)
+    Q_PROPERTY(QString context READ getContext CONSTANT)
 
     public:
         enum EventType {
@@ -55,41 +61,45 @@ class GameEvent : public QObject {
 
     private:
         // Stores the event type
-        int type;
+        int mType;
 
         // Stores the event time in seconds
-        float time;
+        float mTime;
 
         // List of players involved in this event
-        QMap<int, quint32> players;
+        QMap<int, Player *> mPlayers;
 
         // Stores the ID of the team this event belongs to
-        qlonglong team;
+        qlonglong mTeam;
 
         // For events of EVENT_TYPE::GOAL only: Stores the score
-        QString score;
-        QString scoreType;
+        QString mScore;
+        QString mScoreType;
 
         // For events of EVENT_TYPE::PENALTY only: Stores the penalty ID and type (minutes)
-        int penaltyId;
-        QString penaltyType;
+        int mPenaltyId;
+        QString mPenaltyType;
 
-        //
-        bool penaltyShot;
+        // TODO: Can this be handled through mPenaltyType or one of the other above?
+        bool mPenaltyShot;
 
         // List of human-readable penalty texts
         static QList<QString> penaltyTexts;
 
     public:
-        explicit GameEvent(int type);
+        explicit Event(int mType);
         int getType(void);
-        void setTime(QString time);
+
+        void setTime(QString mTime);
         float getTime(void) const;
-        void setTeam(qlonglong team);
+        QString getTimeString(void) const;
+
+        void setTeam(qlonglong mTeam);
         qlonglong getTeam(void);
-        void addPlayer(int role, quint32 playerId);
-        void setScore(QString score, QString type);
-        void setPenalty(int id, QString type);
+
+        void addPlayer(int role, Player *player);
+        void setScore(QString mScore, QString mType);
+        void setPenalty(int id, QString mType);
         int getPenalty(void);
         void setPenaltyShot(bool scored);
 
@@ -102,14 +112,19 @@ class GameEvent : public QObject {
 
         // TODO: These are convenience methods and are to disappear/change in
         // future versions
-        quint32 getPlayer(void) const;
-        quint32 getPlayer(int role) const;
-        QString getAdditionalInfo(void) const;
-        QString getEvent(void) const;
-        QString getEventSubtext(void) const;
+        Player *getPlayer(void) const;
+        Player *getPlayer(int role) const;
+        QString getPlayerString(void) const;
 
-        static bool greaterThan(const GameEvent *e1, const GameEvent *e2);
-        static bool lessThan(const GameEvent *e1, const GameEvent *e2);
+#if 0
+        QString getAdditionalInfo(void) const;
+#endif
+        QString getValue(void) const;
+        QString getInfo(void) const;
+        QString getContext(void) const;
+
+        static bool greaterThan(const Event *e1, const Event *e2);
+        static bool lessThan(const Event *e1, const Event *e2);
         static QString getPenaltyText(int id);
 };
 

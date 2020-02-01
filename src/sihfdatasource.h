@@ -27,7 +27,7 @@
 #include <QtNetwork/QNetworkReply>
 
 #include "datasource.h"
-#include "gamedaydata.h"
+#include "gamelist.h"
 #include "jsondecoder.h"
 #include "league.h"
 #include "player.h"
@@ -43,14 +43,18 @@ class SIHFDataSource : public DataSource {
 
         // Private helper functions
         void parseGame(const QVariantList &data);
-        QList<Player *> parsePlayers(QVariantList data);
-        void parsePlayers(GameData *game, const QVariantMap &data);
-        void parseLineup(QMap<quint32, Player *> *players, const QVariantMap &data);
-        void parsePosition(QMap<quint32, Player *> *players, const QVariantList &data, const quint8 position);
-        QList<GameEvent *> parseGoals(QVariantList data);
-        QList<GameEvent *> parsePenalties(QVariantList data);
-        QList<GameEvent *> parseGoalkeepers(QVariantList data);
-        QList<GameEvent *> parseShootout(QVariantList data);
+        QList<Player *> parsePlayers(QVariantList data); // Deprecated, will be removed
+
+        // Roster & player stats parsing functions
+        void parsePlayers(Game *game, const QVariantMap &data);
+        void parseLineup(PlayerList *players, const QVariantMap &data);
+        void parsePosition(PlayerList *players, const QVariantList &data, const quint8 position);
+
+        // Event parsing functions
+        void parseGoals(Game *game, QVariantList data);
+        void parsePenalties(Game *game, QVariantList data);
+        void parseGoalkeepers(Game *game, QVariantList data);
+        void parseShootout(Game *game, QVariantList data);
 
         static QMap<uint, League *> mLeaguesMap;
 
@@ -73,7 +77,7 @@ class SIHFDataSource : public DataSource {
         };
 
     public:
-        explicit SIHFDataSource(GamedayData *gamesList, QObject *parent = 0);
+        explicit SIHFDataSource(GameList *gamesList, QObject *parent = 0);
         void update(QString id);
         void getGameSummaries(void);
         void getGameDetails(QString gameId);

@@ -26,9 +26,9 @@
 class League : public QObject {
     Q_OBJECT
 
-    Q_PROPERTY(QString id READ getId)
-    Q_PROPERTY(QString abbreviation READ getAbbreviation)
-    Q_PROPERTY(QString name READ getName)
+    Q_PROPERTY(QString id READ getId CONSTANT)
+    Q_PROPERTY(QString abbreviation READ getAbbreviation CONSTANT)
+    Q_PROPERTY(QString name READ getName CONSTANT)
 
     private:
         uint mId;

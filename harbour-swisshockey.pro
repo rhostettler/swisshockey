@@ -23,14 +23,16 @@ DEFINES += "PLATFORM_SFOS"
 DEFINES += "APP_NAME='\"Swiss Ice Hockey\"'"
 
 SOURCES += \
+    src/event.cpp \
+    src/eventlist.cpp \
+    src/game.cpp \
+    src/gamelist.cpp \
     src/main.cpp \
     src/livescores.cpp \
     src/config.cpp \
     src/datasource.cpp \
-    src/gamedata.cpp \
-    src/gamedaydata.cpp \
-    src/gameevent.cpp \
     src/logger.cpp \
+    src/playerlist.cpp \
     src/sihfdatasource.cpp \
     src/jsondecoder.cpp \
     src/league.cpp \
@@ -69,13 +71,15 @@ SAILFISHAPP_ICONS = 86x86 108x108 128x128 256x256
 #TRANSLATIONS += translations/harbour-swisshockey-de.ts
 
 HEADERS += \
+    src/event.h \
+    src/eventlist.h \
+    src/game.h \
+    src/gamelist.h \
     src/livescores.h \
     src/config.h \
     src/datasource.h \
-    src/gamedata.h \
-    src/gamedaydata.h \
-    src/gameevent.h \
     src/logger.h \
+    src/playerlist.h \
     src/sihfdatasource.h \
     src/jsondecoder.h \
     src/league.h \
