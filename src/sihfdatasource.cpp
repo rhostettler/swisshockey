@@ -337,6 +337,11 @@ void SIHFDataSource::parsePlayers(Game *game, const QVariantMap &data) {
 
 // The lineup is quite nested in the JSON data, hence we need to "unfold" it.
 // The actual assignments are done in "parsePosition()" below.
+// TODO: There's a bug here: The player list above contains *all* players of
+// the team, but the lineup might not include all players. Hence, the roster
+// includes *all* players from above, but they're actually not playing in the
+// current game. Hence, we should actually only parse the lineup instead of
+// all the players (or invert the order).
 void SIHFDataSource::parseLineup(PlayerList *players, const QVariantMap &data) {
     // Goalkeepers
     QVariantList goalkeepers = data["goalkeepers"].toList();

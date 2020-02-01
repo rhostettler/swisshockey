@@ -20,7 +20,7 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 
-Item {
+ListItem {
     width: parent.width
     height: Theme.itemSizeLarge
 
@@ -39,14 +39,14 @@ Item {
             pixelSize: Theme.fontSizeMedium
         }
         color: Theme.highlightColor
-        text: model.jerseyNumber
+        text: model.player.jerseyNumber
     }
 
     // Label containing the player
     Label {
         id: player
         anchors {
-            left: time.right
+            left: jerseyNumber.right
             bottom: parent.verticalCenter
         }
         font {
@@ -54,7 +54,7 @@ Item {
             pixelSize: Theme.fontSizeMedium
         }
         color: Theme.highlightColor
-        text: model.name
+        text: model.player.name
     }
 
     // Label containing the assist or penalty type
@@ -89,7 +89,7 @@ Item {
             pixelSize: Theme.fontSizeMedium
         }
         color: Theme.highlightColor
-        text: model.position // TODO: Needs parsing
+        text: model.player.position // TODO: Needs parsing
     }
 
 /*

@@ -55,8 +55,8 @@ int main(int argc, char *argv[]) {
     }
     logger.setLogfile(datapath.canonicalPath() + "/debug.log");
     //logger.setLevel(config.getValue("loglevel", Logger::ERROR).toInt());  // TODO: Re-enable
-    //logger.setLevel(Logger::DEBUG);
-    logger.setLevel(Logger::ERROR);
+    logger.setLevel(Logger::DEBUG);
+    //logger.setLevel(Logger::ERROR);
 
     // Create a controller that generates the UI and connects all the necessary
     // signals, etc.

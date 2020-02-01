@@ -28,7 +28,7 @@ class Player : public QObject {
     Q_PROPERTY(quint8 jerseyNumber READ getJerseyNumber)
     Q_PROPERTY(quint8 lineNumber READ getLineNumber)
     Q_PROPERTY(QString name READ getName)
-    Q_PROPERTY(quint8 position READ getPosition)
+    Q_PROPERTY(QString position READ getPositionString)
 
     private:
         const qulonglong mTeamId;
@@ -40,8 +40,12 @@ class Player : public QObject {
         quint8 mPosition;
         //QVector<QString> mStats;
 
+        // List of human-readable position strings
+        static QList<QString> PositionStrings;
+
     public:
-        enum PLAYER_POSITION {
+        enum PLAYER_POSITION : quint8 {
+            POSITION_UNDEFINED = 0,
             POSITION_GK,
             POSITION_LD,
             POSITION_RD,
@@ -84,6 +88,7 @@ class Player : public QObject {
 
         void setPosition(quint8 position);
         quint8 getPosition(void) const;
+        QString getPositionString(void) const;
 
         static bool greaterThan(const Player *p1, const Player *p2);
         static bool lessThan(const Player *p1, const Player *p2);

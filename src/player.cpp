@@ -18,8 +18,10 @@
  */
 
 #include "player.h"
+#include "logger.h"
 
 Player::Player(qulonglong teamId, quint32 id, QObject *parent) : QObject(parent), mTeamId(teamId), mPlayerId(id) {
+    mPosition = POSITION_UNDEFINED;
 }
 
 quint32 Player::getPlayerId() const {
@@ -60,6 +62,12 @@ quint8 Player::getPosition(void) const {
     return mPosition;
 }
 
+QString Player::getPositionString(void) const {
+    Logger& logger = Logger::getInstance();
+    logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Position is " + QString::number(mPosition)));
+    return PositionStrings.at(mPosition);
+}
+
 // Compares if p1 > p2
 bool Player::greaterThan(const Player *p1, const Player *p2) {
     quint8 p1Line = p1->getLineNumber();
@@ -83,3 +91,12 @@ bool Player::operator ==(Player const &other) const {
 bool Player::operator !=(Player const &other) const {
     return !(*this == other);
 }
+
+QList<QString> Player::PositionStrings = QList<QString>()
+    << QString("")
+    << QString("GK")
+    << QString("LD")
+    << QString("RD")
+    << QString("LW")
+    << QString("RW")
+    << QString("C");

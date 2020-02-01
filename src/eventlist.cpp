@@ -24,13 +24,6 @@
 EventList::EventList(QObject *parent) : QAbstractListModel(parent) {
 }
 
-#if 0
-QVariant EventList::headerData(int section, Qt::Orientation orientation, int role) const
-{
-    // FIXME: Implement me!
-}
-#endif
-
 int EventList::rowCount(const QModelIndex &parent) const {
 #if 0
     // For list models only the root node (an invalid parent) should return the list's size. For all
@@ -54,19 +47,6 @@ void EventList::insert(Event *event) {
     mEvents.append(event);
     endInsertRows();
 }
-
-#if 0
-void EventList::remove(Event *event) {
-    for (int i = 0; i < mEvents.size(); ++i) {
-    if (mEvents.at(i) == item) {
-        beginRemoveRows(QModelIndex(), i, i);
-        mEvents.remove(i);
-        endRemoveRows();
-        break;
-        }
-    }
-}
-#endif
 
 void EventList::sort(int column, Qt::SortOrder order) {
     layoutAboutToBeChanged();

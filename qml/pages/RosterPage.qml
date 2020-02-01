@@ -26,10 +26,24 @@ Page {
     property bool hometeam: true
 
     SilicaListView {
-        id: gameRoster
+        id: hometeamRosterView
+        visible: hometeam
         width: parent.width
         anchors.fill: parent
-        model: hometeam ? hometeamRoster : awayteamRoster
+        model: hometeamRoster
+        header: GameDetailsHeader {}
+        delegate: RosterDelegate {}
+        //section: bla bla
+        //sectionDelegate: bla bla
+        VerticalScrollDecorator {}
+    }
+
+    SilicaListView {
+        id: awayteamRosterView
+        visible: !hometeam
+        width: parent.width
+        anchors.fill: parent
+        model: awayteamRoster
         header: GameDetailsHeader {}
         delegate: RosterDelegate {}
         //section: bla bla
