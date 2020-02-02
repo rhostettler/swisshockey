@@ -291,6 +291,15 @@ void SIHFDataSource::parsePlayers(Game *game, const QVariantMap &data) {
     // TODO: Split into hometeam/awayteam
     PlayerList *hometeamPlayers = game->getHometeamRoster();
     PlayerList *awayteamPlayers = game->getAwayteamRoster();
+
+    // Parse the lineups first to make sure to not include any players that are
+    // not actually playing in the current game.
+    // TODO: We have to add some safeguards here as well; the lineups might not be set yet.
+    QVariantMap tmp = data["lineUps"].toMap();
+    parseLineup(hometeamPlayers, game->getHometeamId().toULongLong(), tmp["homeTeam"].toMap());
+    parseLineup(awayteamPlayers, game->getAwayteamId().toULongLong(), tmp["awayTeam"].toMap());
+
+    // Parse the player names
     QVariantList playersData = data["players"].toList();
     QListIterator<QVariant> iterator(playersData);
     Player *player;
@@ -311,74 +320,65 @@ void SIHFDataSource::parsePlayers(Game *game, const QVariantMap &data) {
         quint8 jerseyNumber = tmp.value("jerseyNumber").toUInt();
 
         // Create the player
-        player = new Player(teamId, playerId, game);
-        player->setName(firstName, lastName);
-        player->setJerseyNumber(jerseyNumber);
-
-        // Add the player to the list of players and to the number <=> license map
         if(teamId == game->getHometeamId().toULongLong()) {
-            hometeamPlayers->insert(player);;
+            player = hometeamPlayers->getPlayer(playerId);
         } else {
-            awayteamPlayers->insert(player);
+            player = awayteamPlayers->getPlayer(playerId);
+        }
+
+        // Update the player name and jersey number
+        if(player != nullptr) {
+            player->setName(firstName, lastName);
+            player->setJerseyNumber(jerseyNumber);
         }
     }
     logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Found a bunch of players.")); // + QString::number(players->size()) + " players."));
 
-    // Line-ups
-    // TODO: We should add some safeguards here as well; the lineups might not be set yet.
-    QVariantMap tmp = data["lineUps"].toMap();
-    parseLineup(hometeamPlayers, tmp["homeTeam"].toMap());
-    parseLineup(awayteamPlayers, tmp["awayTeam"].toMap());
     //std::sort(players->begin(), players->end(), Player::lessThan); // TODO: Add another row for hometeam/awayteam
-
     // TODO: Parse player stats
 
 }
 
 // The lineup is quite nested in the JSON data, hence we need to "unfold" it.
 // The actual assignments are done in "parsePosition()" below.
-// TODO: There's a bug here: The player list above contains *all* players of
-// the team, but the lineup might not include all players. Hence, the roster
-// includes *all* players from above, but they're actually not playing in the
-// current game. Hence, we should actually only parse the lineup instead of
-// all the players (or invert the order).
-void SIHFDataSource::parseLineup(PlayerList *players, const QVariantMap &data) {
+void SIHFDataSource::parseLineup(PlayerList *players, qulonglong teamId, const QVariantMap &data) {
     // Goalkeepers
     QVariantList goalkeepers = data["goalkeepers"].toList();
-    parsePosition(players, goalkeepers, Player::POSITION_GK);
+    parsePosition(players, goalkeepers, teamId, Player::POSITION_GK);
 
     // Defencemen
     QVariantMap defencemen = data["defenders"].toMap();
     QVariantList leftDefencemen = defencemen["left"].toList();
-    parsePosition(players, leftDefencemen, Player::POSITION_LD);
+    parsePosition(players, leftDefencemen, teamId, Player::POSITION_LD);
     QVariantList rightDefencemen = defencemen["right"].toList();
-    parsePosition(players, rightDefencemen, Player::POSITION_RD);
+    parsePosition(players, rightDefencemen, teamId, Player::POSITION_RD);
 
     // Forwards
     QVariantMap forwards = data["forwarders"].toMap();
     QVariantList leftWings = forwards["left"].toList();
-    parsePosition(players, leftWings, Player::POSITION_LW);
+    parsePosition(players, leftWings, teamId, Player::POSITION_LW);
     QVariantList center = forwards["center"].toList();
-    parsePosition(players, center, Player::POSITION_C);
+    parsePosition(players, center, teamId, Player::POSITION_C);
     QVariantList rightWings = forwards["right"].toList();
-    parsePosition(players, rightWings, Player::POSITION_RW);
+    parsePosition(players, rightWings, teamId, Player::POSITION_RW);
 }
 
 // Makes the assignment (position, line number) => player
-void SIHFDataSource::parsePosition(PlayerList *players, const QVariantList &data, const quint8 position) {
+void SIHFDataSource::parsePosition(PlayerList *players, const QVariantList &data, qulonglong teamId, const quint8 position) {
     quint32 playerId = 0;
     Player *player = NULL;
 
     quint8 nLines = data.size();
     for(int iLineNumber = 0; iLineNumber < nLines; iLineNumber++) {
         playerId = data.at(iLineNumber).toUInt();
-        player = players->getPlayer(playerId);
+        player = new Player(teamId, playerId, players);
         player->setPosition(position);
         if(position == Player::POSITION_GK) {
             player->setLineNumber(0);
         } else {
             player->setLineNumber(iLineNumber+1);
         }
+        players->insert(player);
     }
 }
 

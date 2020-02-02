@@ -25,10 +25,10 @@
 class Player : public QObject {
     Q_OBJECT
 
-    Q_PROPERTY(quint8 jerseyNumber READ getJerseyNumber)
-    Q_PROPERTY(quint8 lineNumber READ getLineNumber)
-    Q_PROPERTY(QString name READ getName)
-    Q_PROPERTY(QString position READ getPositionString)
+    Q_PROPERTY(quint8 jerseyNumber READ getJerseyNumber CONSTANT)
+    Q_PROPERTY(quint8 lineNumber READ getLineNumber CONSTANT)
+    Q_PROPERTY(QString name READ getName CONSTANT)
+    Q_PROPERTY(QString position READ getPositionString CONSTANT)
 
     private:
         const qulonglong mTeamId;

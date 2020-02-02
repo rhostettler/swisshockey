@@ -30,9 +30,7 @@ class PlayerList : public QAbstractListModel {
     Q_OBJECT
 
     private:
-        QMap<quint32, Player *> mPlayers;
-        QMap<quint8, quint32> mJerseyNumbers;   // Jersey number <-> player ID
-        QVector<quint32> mPlayerIndices;        // Linear index <-> player ID
+        QVector<Player *> mPlayers;
 
     protected:
         QHash<int, QByteArray> roleNames() const override;
@@ -56,6 +54,7 @@ class PlayerList : public QAbstractListModel {
 
     public slots:
         void insert(Player *player);
+        void remove(Player *player);
 };
 
 #endif // PLAYERLIST_H

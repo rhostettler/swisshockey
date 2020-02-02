@@ -26,12 +26,26 @@ PlayerList::PlayerList(QObject *parent) : QAbstractListModel(parent) {
 }
 
 Player *PlayerList::getPlayer(quint32 playerId) {
-    return mPlayers.value(playerId, nullptr);
+    Player *player = nullptr;
+    bool found = false;
+    QVectorIterator<Player *> iterator(mPlayers);
+    while(!found && iterator.hasNext()) {
+        Player *candidate = iterator.next();
+        if(candidate->getPlayerId() == playerId) {
+            player = candidate;
+            found = true;
+        }
+    }
+    return player;
 }
 
 Player *PlayerList::getPlayerByJerseyNumber(quint8 jerseyNumber){
+#if 0
     quint32 playerId = mJerseyNumbers.value(jerseyNumber);
     return mPlayers.value(playerId, nullptr);
+#endif
+    // TODO: Re-implement this.
+    return nullptr;
 }
 
 int PlayerList::rowCount(const QModelIndex &parent) const {
@@ -52,20 +66,26 @@ QVariant PlayerList::data(const QModelIndex &index, int /* role */) const {
     Logger& logger = Logger::getInstance();
     logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Item requested, item number is " + QString::number(index.row())) + ", list size is " + QString::number(mPlayers.size()));
 
-    quint32 playerId = mPlayerIndices[index.row()];
-    Player *player = mPlayers.value(playerId);
+    Player *player = mPlayers.at(index.row());
     return QVariant::fromValue(player);
 }
 
 void PlayerList::insert(Player *player) {
-    quint32 playerId = player->getPlayerId();
-    if(!mPlayers.contains(playerId)) {
+    //quint32 playerId = player->getPlayerId();
+    if(!mPlayers.contains(player)) {
         beginInsertRows(QModelIndex(), 0, 0);
-        mPlayers.insert(playerId, player);
-        mJerseyNumbers.insert(player->getJerseyNumber(), playerId);
-        mPlayerIndices.append(playerId);
+        mPlayers.append(player);
         endInsertRows();
     }
+}
+
+void PlayerList::remove(Player *player) {
+    beginRemoveRows(QModelIndex(), 0, 0);
+#if 0
+    quint32 playerId = player->getPlayerId();
+    mPlayers.remove(playerId);
+#endif
+    endRemoveRows();
 }
 
 #if 0
@@ -83,8 +103,6 @@ void PlayerList::sort(int column, Qt::SortOrder order) {
 void PlayerList::clear(void) {
     beginResetModel();
     mPlayers.clear();
-    mJerseyNumbers.clear();
-    mPlayerIndices.clear();
     endResetModel();
 }
 

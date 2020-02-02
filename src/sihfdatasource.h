@@ -43,12 +43,11 @@ class SIHFDataSource : public DataSource {
 
         // Private helper functions
         void parseGame(const QVariantList &data);
-        QList<Player *> parsePlayers(QVariantList data); // Deprecated, will be removed
 
         // Roster & player stats parsing functions
         void parsePlayers(Game *game, const QVariantMap &data);
-        void parseLineup(PlayerList *players, const QVariantMap &data);
-        void parsePosition(PlayerList *players, const QVariantList &data, const quint8 position);
+        void parseLineup(PlayerList *players, qulonglong teamId, const QVariantMap &data);
+        void parsePosition(PlayerList *players, const QVariantList &data, qulonglong teamId, const quint8 position);
 
         // Event parsing functions
         void parseGoals(Game *game, QVariantList data);

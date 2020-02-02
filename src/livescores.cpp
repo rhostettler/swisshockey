@@ -67,7 +67,7 @@ LiveScores::LiveScores(QObject *parent) : QObject(parent) {
 
     // Connect the QML and the C++ bits, and add an event filter to catch
     // switches between foreground and background.
-    mQmlViewer->rootContext()->setContextProperty("listData", this->mLeagueFilter);
+    mQmlViewer->rootContext()->setContextProperty("listData", mLeagueFilter);
     mQmlViewer->rootContext()->setContextProperty("leagueList", QVariant::fromValue(mLeaguesList));
     QObject *rootObject = mQmlViewer->rootObject();
     connect(rootObject, SIGNAL(viewChanged(QString)), this, SLOT(updateView(QString)));
