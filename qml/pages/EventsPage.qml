@@ -40,13 +40,12 @@ Page {
         VerticalScrollDecorator {}
 
         PullDownMenu {
-            // TODO:
-            // * Each item should only be visible if the corresponding view is not selected.
             id: detailsPulleyMenu
 
             MenuItem {
                 text: qsTr("Statistics")
-                //onClicked: dostuff
+                visible: false
+                //onClicked: do stuff
             }
 
             MenuItem {
@@ -63,14 +62,6 @@ Page {
                     rosterPage.hometeam = true
                     pageStack.push(rosterPage)
                 }
-
-                //visible: detailsView == STUFF_FROM_ENUM
-            }
-
-            MenuItem {
-                text: qsTr("Play by play")
-                //onClicked: appWindow.updateTriggered()
-                //visible: detailsView == STUFF_FROM_ENUM
             }
         }
     }
