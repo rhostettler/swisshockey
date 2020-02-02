@@ -29,6 +29,7 @@ class Player : public QObject {
     Q_PROPERTY(quint8 lineNumber READ getLineNumber CONSTANT)
     Q_PROPERTY(QString name READ getName CONSTANT)
     Q_PROPERTY(QString position READ getPositionString CONSTANT)
+    Q_PROPERTY(QString stats READ getStatsString NOTIFY statsChanged)
 
     private:
         const qulonglong mTeamId;
@@ -38,7 +39,7 @@ class Player : public QObject {
         quint8 mJerseyNumber;
         quint8 mLineNumber;
         quint8 mPosition;
-        //QVector<QString> mStats;
+        QStringList mStats;
 
         // List of human-readable position strings
         static QList<QString> PositionStrings;
@@ -62,6 +63,7 @@ class Player : public QObject {
             STATS_SOG,
             STATS_FO,
             STATS_TOI,
+            STATS_LEN
         };
 
         enum GK_STATS {
@@ -69,7 +71,8 @@ class Player : public QObject {
             STATS_GK_SVS,
             STATS_GK_SVSP,
             STATS_GK_PIM,
-            STATS_GK_TOI
+            STATS_GK_TOI,
+            STATS_GK_LEN
         };
 
     public:
@@ -90,6 +93,9 @@ class Player : public QObject {
         quint8 getPosition(void) const;
         QString getPositionString(void) const;
 
+        void setStat(int statId, QString value);
+        QString getStatsString(void) const;
+
         static bool greaterThan(const Player *p1, const Player *p2);
         static bool lessThan(const Player *p1, const Player *p2);
 
@@ -99,6 +105,9 @@ class Player : public QObject {
         // However, that does not solve the problem of finding players by their jersey number
         bool operator ==(Player const &other) const;
         bool operator !=(Player const &other) const;
+
+    signals:
+        void statsChanged(void);
 };
 
 #endif // PLAYER_H

@@ -22,9 +22,10 @@ import Sailfish.Silica 1.0
 
 ListItem {
     width: parent.width
-    height: Theme.itemSizeLarge
+    //height: Theme.itemSizeLarge
+    height: Theme.itemSizeSmall
 
-    // The time to the very left
+    // Jersey number
     Label {
         id: jerseyNumber
         width: 96
@@ -42,7 +43,7 @@ ListItem {
         text: model.player.jerseyNumber
     }
 
-    // Label containing the player
+    // Name
     Label {
         id: player
         anchors {
@@ -57,24 +58,23 @@ ListItem {
         text: model.player.name
     }
 
-    // Label containing the assist or penalty type
-    // TODO: Stats go here.
-/*
+    // Stats
+    /*
     Label {
-        id: position
+        id: stats
         anchors {
-            left: time.right
+            left: jerseyNumber.right
             top: parent.verticalCenter
         }
         font {
             pixelSize: Theme.fontSizeMedium
         }
         color: Theme.secondaryColor
-        text: model.position
+        text: model.player.stats
     }
     */
 
-    // Label containing the position
+    // Position
     Label {
         id: position
         horizontalAlignment: Text.Right
@@ -89,25 +89,6 @@ ListItem {
             pixelSize: Theme.fontSizeMedium
         }
         color: Theme.highlightColor
-        text: model.player.position // TODO: Needs parsing
+        text: model.player.position
     }
-
-/*
-    // Additional text under the score/penalty
-    Label {
-        id: eventSubtext
-        horizontalAlignment: Text.Center
-        anchors {
-            horizontalCenter: eventText.horizontalCenter
-            rightMargin: Theme.horizontalPageMargin
-            top: parent.verticalCenter
-        }
-
-        font {
-            pixelSize: Theme.fontSizeMedium
-        }
-        color: Theme.secondaryColor
-        text: eventsubtext
-    }
-*/
 }

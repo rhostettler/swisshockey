@@ -334,9 +334,13 @@ void SIHFDataSource::parsePlayers(Game *game, const QVariantMap &data) {
     }
     logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Found a bunch of players.")); // + QString::number(players->size()) + " players."));
 
-    //std::sort(players->begin(), players->end(), Player::lessThan); // TODO: Add another row for hometeam/awayteam
-    // TODO: Parse player stats
-
+    // Parse player stats
+#if 0
+    parseStats(hometeamPlayers, game->getHometeam(), data["stats"].toList());
+    parseStats(awayteamPlayers, game->getAwayteam(), data["stats"].toList());
+#endif
+    // TODO: Add another row for hometeam/awayteam
+    //std::sort(players->begin(), players->end(), Player::lessThan);
 }
 
 // The lineup is quite nested in the JSON data, hence we need to "unfold" it.
@@ -344,27 +348,27 @@ void SIHFDataSource::parsePlayers(Game *game, const QVariantMap &data) {
 void SIHFDataSource::parseLineup(PlayerList *players, qulonglong teamId, const QVariantMap &data) {
     // Goalkeepers
     QVariantList goalkeepers = data["goalkeepers"].toList();
-    parsePosition(players, goalkeepers, teamId, Player::POSITION_GK);
+    parsePosition(players, teamId, goalkeepers, Player::POSITION_GK);
 
     // Defencemen
     QVariantMap defencemen = data["defenders"].toMap();
     QVariantList leftDefencemen = defencemen["left"].toList();
-    parsePosition(players, leftDefencemen, teamId, Player::POSITION_LD);
+    parsePosition(players, teamId, leftDefencemen, Player::POSITION_LD);
     QVariantList rightDefencemen = defencemen["right"].toList();
-    parsePosition(players, rightDefencemen, teamId, Player::POSITION_RD);
+    parsePosition(players, teamId, rightDefencemen, Player::POSITION_RD);
 
     // Forwards
     QVariantMap forwards = data["forwarders"].toMap();
     QVariantList leftWings = forwards["left"].toList();
-    parsePosition(players, leftWings, teamId, Player::POSITION_LW);
+    parsePosition(players, teamId, leftWings, Player::POSITION_LW);
     QVariantList center = forwards["center"].toList();
-    parsePosition(players, center, teamId, Player::POSITION_C);
+    parsePosition(players, teamId, center, Player::POSITION_C);
     QVariantList rightWings = forwards["right"].toList();
-    parsePosition(players, rightWings, teamId, Player::POSITION_RW);
+    parsePosition(players, teamId, rightWings, Player::POSITION_RW);
 }
 
 // Makes the assignment (position, line number) => player
-void SIHFDataSource::parsePosition(PlayerList *players, const QVariantList &data, qulonglong teamId, const quint8 position) {
+void SIHFDataSource::parsePosition(PlayerList *players, qulonglong teamId, const QVariantList &data, const quint8 position) {
     quint32 playerId = 0;
     Player *player = NULL;
 
@@ -380,6 +384,11 @@ void SIHFDataSource::parsePosition(PlayerList *players, const QVariantList &data
         }
         players->insert(player);
     }
+}
+
+// Parse the stats
+void SIHFDataSource::parseStats(PlayerList *players, QString const teamName, const QVariantList &data) {
+
 }
 
 // Parses the goals data and returns an unsorted QList<GameEvent>
@@ -514,6 +523,8 @@ void SIHFDataSource::parseShootout(Game *game, QVariantList data) {
         event->addPlayer(Event::GOALKEEPER, goalkeeper);
         events->insert(event);
     }
+
+    logger.log(Logger::DEBUG, "SIHFDataSource:parseShootout(): Shootout successfully parsed.");
 }
 
 // Update the data from this source

@@ -71,7 +71,6 @@ QVariant PlayerList::data(const QModelIndex &index, int /* role */) const {
 }
 
 void PlayerList::insert(Player *player) {
-    //quint32 playerId = player->getPlayerId();
     if(!mPlayers.contains(player)) {
         beginInsertRows(QModelIndex(), 0, 0);
         mPlayers.append(player);

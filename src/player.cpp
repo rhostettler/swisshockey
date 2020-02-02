@@ -22,6 +22,9 @@
 
 Player::Player(qulonglong teamId, quint32 id, QObject *parent) : QObject(parent), mTeamId(teamId), mPlayerId(id) {
     mPosition = POSITION_UNDEFINED;
+    for(int iStat = 0; iStat < STATS_LEN; iStat++) {
+        mStats.append("0");
+    }
 }
 
 quint32 Player::getPlayerId() const {
@@ -66,6 +69,32 @@ QString Player::getPositionString(void) const {
     Logger& logger = Logger::getInstance();
     logger.log(Logger::DEBUG, QString(Q_FUNC_INFO).append(": Position is " + QString::number(mPosition)));
     return PositionStrings.at(mPosition);
+}
+
+void Player::setStat(int statId, QString value) {
+    mStats[statId] = value;
+    emit statsChanged();
+}
+
+QString Player::getStatsString(void) const {
+    QString text;
+    if(mPosition == POSITION_GK) {
+        text.append(
+            "GA: " + mStats[STATS_GK_GA]
+            + ", SVS: " + mStats[STATS_GK_SVS]
+            + ", SVS%: " + mStats[STATS_GK_SVSP]
+        );
+    } else {
+        text.append(
+            "G: " + mStats[STATS_GOALS]
+            + ", A: " + mStats[STATS_ASSISTS]
+            + ", SOG: " + mStats[STATS_SOG]
+            + ", PIM: " + mStats[STATS_PIM]
+//            + ", FO%: " + mStats[STATS_FO]
+        );
+    }
+
+    return text;
 }
 
 // Compares if p1 > p2

@@ -47,7 +47,8 @@ class SIHFDataSource : public DataSource {
         // Roster & player stats parsing functions
         void parsePlayers(Game *game, const QVariantMap &data);
         void parseLineup(PlayerList *players, qulonglong teamId, const QVariantMap &data);
-        void parsePosition(PlayerList *players, const QVariantList &data, qulonglong teamId, const quint8 position);
+        void parsePosition(PlayerList *players, qulonglong teamId, const QVariantList &data, const quint8 position);
+        void parseStats(PlayerList *players, QString const teamName, const QVariantList &data);
 
         // Event parsing functions
         void parseGoals(Game *game, QVariantList data);
@@ -73,6 +74,19 @@ class SIHFDataSource : public DataSource {
             GS_DETAILS,
             GS_BROADCASTS,
             GS_LENGTH
+        };
+
+        enum PLAYER_STATS_FIELDS {
+            PS_JERSEYNUMBER = 0,
+            PS_NAME,
+            PS_POSITION,
+            PS_GOALS,
+            PS_ASSISTS,
+            PS_POINTS = 7,
+            PS_PIM,
+            PS_SOG,
+            PS_FO = 15,
+
         };
 
     public:
