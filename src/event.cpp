@@ -110,7 +110,7 @@ Player *Event::getPlayer(void) const {
             role = -1;
             break;
     }
-    return this->mPlayers[role];
+    return mPlayers.value(role, nullptr);
 }
 
 Player *Event::getPlayer(int role) const {
@@ -118,8 +118,12 @@ Player *Event::getPlayer(int role) const {
 }
 
 QString Event::getPlayerString(void) const {
+    QString name;
     Player *player = getPlayer();
-    return player->getName();
+    if(player != nullptr) {
+        name = player->getName();
+    }
+    return name;
 }
 
 QString Event::getValue(void) const {
