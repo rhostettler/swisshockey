@@ -371,18 +371,27 @@ void SIHFDataSource::parseLineup(PlayerList *players, qulonglong teamId, const Q
 void SIHFDataSource::parsePosition(PlayerList *players, qulonglong teamId, const QVariantList &data, const quint8 position) {
     quint32 playerId = 0;
     Player *player = NULL;
+    bool newPlayer = false;
 
     quint8 nLines = data.size();
     for(int iLineNumber = 0; iLineNumber < nLines; iLineNumber++) {
         playerId = data.at(iLineNumber).toUInt();
-        player = new Player(teamId, playerId, players);
+        player = players->getPlayer(playerId);
+        if(player == nullptr) {
+            player = new Player(teamId, playerId, players);
+            newPlayer = true;
+        } else {
+            newPlayer = false;
+        }
         player->setPosition(position);
         if(position == Player::POSITION_GK) {
             player->setLineNumber(0);
         } else {
             player->setLineNumber(iLineNumber+1);
         }
-        players->insert(player);
+        if(newPlayer) {
+            players->insert(player);
+        }
     }
 }
 
