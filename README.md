@@ -1,52 +1,59 @@
-Swiss Ice Hockey
-================
-An app for Meego Harmattan (Nokia N9) and Sailfish OS that provides live scores
-from the Swiss men's national ice hockey leagues, National League A and B.
+# Swiss Ice Hockey
+A native Sailfish OS app that provides live scores from the Swiss men's national ice hockey leagues, National League and Swiss League.
 
-[![Flattr this](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?fid=nw6llg&url=https://github.com/rhostettler/swisshockey)
+Current features include:
+* Live scores for the National and Swiss Leagues, and the Swiss Ice Hockey Cup.
+* Basic goal notification (currently for a selected game only).
+* Team rosters.
 
-Roadmap
--------
-Version 0.4.0:
-* Automatically fetch the results from the last game day if there are no games
-  today.
 
-Future plans
-------------
-Features:
-* Standings
-* Roster
-* Last / next
-* Browseable calendar
+## TODO / Desirable Features
+This is a list of desirable features, mainly for keeping track of some ideas. Since this is a spare-time project, these features might be implemented tomorrow, in one month, two years from now, or not at all and in no particular order. 
 
-UI:
-* [All] Team logos in game details list
-* [SailfishOS] Tablet UI
-
-Backend:
-* Code cleanup (yes, it's a mess)
-* Implement the GameEvent type system / game event data model
+General:
+* [ ] Add support for MySports League
+* [ ] Add support for standings
+* [ ] Add support for past / future games
+* [ ] Preferences page with the option to select teams for notifications, etc.
 
 Notifications:
-* [Harmattan] Notification callback actions (tap opens app)
-* [Harmattan] Implement a notification-beep when app is in foreground
-* [Harmattan] Notifications are not cleared on application shutdown (implement
-  in Notifier destructor.)
-* [Harmattan] Consider notification groups
-* [SailfishOS] Implement some kind of notifications
+* [ ] Callback actions
+* [ ] Banner notification when in foreground
+* [ ] Notification grouping
+* [ ] Event details (Player name, time, etc.)
 
-Settings:
-* [All] Implement a custom in-app settings window should be easier to manage
+Data handling:
+* [ ] Player stats parsing
+* [ ] Game stats parsing
+* [ ] Only use summaries to find all the games, then use individual game detail calls for each game
 
-Known Issues
-------------
-* [SailfishOS] Update is sometimes not triggered when minimized.
-* [All] GK & shootout events are not implemented.
+Code cleanup:
+* [ ] Simplify `GameList`
+* [ ] Use Q_FUNC_INFO everywhere in `Logger`. Add more logging where needed.
+* [ ] Get rid of all compiler warnings
+* [ ] Get rid of all QML warnings
 
-License
--------
+Backend:
+* [ ] Implement focus and view change signals (for notifications mainly)
+* [ ] Check if JSONDecoder can be simplified for Qt 5
+
+User interface:
+* [ ] Rework cover with an overview instead of the selected game
+* [ ] Add update cover action
+* [ ] Game start times should be shown according to locale
+* [ ] Move to ViewType-struct for view-transitions (see 
+    https://stackoverflow.com/questions/20089196/how-to-access-c-enum-from-qml#20108038)
+* [ ] Check if we can use the same "Delegate"/"Item" to draw the game info in the game list page as well as in the header in the details page
+* [ ] Make the UI scale to tablets
+
+
+## Known Issues
+* [ ] Updates are sometimes not triggered automatically.
+* [ ] In details view, score does not update at the same time as the details.
+
+
+## License
 This software is free software and licensed under the GNU GPL version 3. The 
 teams' logos included are trademarks of the respective team and used on a 
 fair-use basis.
-
 
